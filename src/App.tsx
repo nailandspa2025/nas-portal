@@ -6,10 +6,19 @@ import "./assets/css/app.scss";
 import "./assets/css/layout.scss";
 import routes from "./routes/router";
 import NotFound from "./pages/NotFound";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Loading from "./components/common/Loading";
+import { useSelector } from "react-redux";
+import { RootState } from "./redux/reducers";
+import { STORAGE_KEY } from "./constants/application.constant";
 function App() {
-  const isAuthorized = "xs";
+  const collapsed = useSelector((state: RootState) => state.global.status);
+  const isAuthorized = localStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
   return (
     <BrowserRouter>
+      <Loading isLoading={collapsed} />
+      <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         {isAuthorized ? (
           <Route element={<Layout />}>

@@ -7,12 +7,11 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/reducers";
 import { useState, useEffect } from "react";
+import { STORAGE_KEY } from "../../constants/application.constant";
 const { Text } = Typography;
 const Header = () => {
   const dispatch = useDispatch();
-  const collapsed = useSelector(
-    (state: RootState) => state.globalLoading.collapsed
-  );
+  const collapsed = useSelector((state: RootState) => state.global.collapsed);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
     const handleResize = () => {
@@ -32,7 +31,15 @@ const Header = () => {
       dispatch({ type: "setDrawerVisible", drawerVisible: true });
     }
   };
-  const handleClickMenu = () => {};
+  const onSignOut = async () => {
+    localStorage.removeItem(STORAGE_KEY.ACCESS_TOKEN);
+    window.location.replace("/sign-in");
+  };
+  const handleClickMenu = (e: { key: string }) => {
+    if (e.key === "SignOut") {
+      onSignOut();
+    }
+  };
   const profileList = (
     <Menu onClick={handleClickMenu} className="profile-menu">
       <Menu.Item key="Profile">Hồ sơ</Menu.Item>

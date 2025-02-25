@@ -1,3 +1,23 @@
 .ant-menu-dark .ant-menu-item-selected {
     background: linear-gradient(45deg, #f54266, #3858f9) !important;
 }
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f0f2f5;
+
+    .login-card {
+        width: 100%;
+        max-width: 400px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+    .login-title {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+}

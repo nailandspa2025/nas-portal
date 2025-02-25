@@ -7,11 +7,7 @@ interface GlobalState {
 }
 
 interface GlobalAction {
-  type:
-    | typeof GLOBAL_TOGGLE_LOADING
-    | "CONTROL_LOADING"
-    | "setCollapsed"
-    | "setDrawerVisible";
+  type: typeof GLOBAL_TOGGLE_LOADING | "setCollapsed" | "setDrawerVisible";
   status?: boolean;
   collapsed?: boolean;
   drawerVisible?: boolean;
@@ -26,12 +22,6 @@ const initialState: GlobalState = {
 const globalReducer = (state = initialState, action: GlobalAction) => {
   switch (action.type) {
     case GLOBAL_TOGGLE_LOADING:
-      return {
-        ...state,
-        status: action.status ?? false,
-      };
-
-    case "CONTROL_LOADING":
       return {
         ...state,
         status: action.status ?? false,

@@ -1,19 +1,8 @@
-export const USER_LOGGED_IN = "USER_LOGGED_IN";
-export const USER_LOGGED_OUT = "USER_LOGGED_OUT";
-export const USER_LOADED = "USER_LOADED";
+import { LoginResponse, UserInfo } from "../../apis/auth/interface";
 
-interface UserInfo {
-  id: string;
-  email: string;
-  name?: string;
-  userName: string;
-  fullName: string;
-}
-
-interface LoginResponse {
-  token: string;
-  user: UserInfo;
-}
+export const USER_LOGGED_IN = "USER_LOGGED_IN" as const;
+export const USER_LOGGED_OUT = "USER_LOGGED_OUT" as const;
+export const USER_LOADED = "USER_LOADED" as const;
 
 export const userLoggedIn = (loginResponse: LoginResponse) => {
   return {

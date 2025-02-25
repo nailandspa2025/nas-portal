@@ -7,9 +7,7 @@ import { RootState } from "../../redux/reducers";
 
 const SiderBarLeft = () => {
   const dispatch = useDispatch();
-  const collapsed = useSelector(
-    (state: RootState) => state.globalLoading.collapsed
-  );
+  const collapsed = useSelector((state: RootState) => state.global.collapsed);
   const handleMenuClick = () => {
     dispatch({ type: "setDrawerVisible", drawerVisible: false });
   };
