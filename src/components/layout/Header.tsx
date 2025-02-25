@@ -1,0 +1,78 @@
+import { Layout, Menu, Avatar, Dropdown, Typography } from "antd";
+import {
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../../redux/reducers";
+import { useState, useEffect } from "react";
+const { Text } = Typography;
+const Header = () => {
+  const dispatch = useDispatch();
+  const collapsed = useSelector(
+    (state: RootState) => state.globalLoading.collapsed
+  );
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+  const onCollapseChange = () => {
+    if (!isMobile) {
+      dispatch({ type: "setCollapsed", collapsed: !collapsed });
+    } else {
+      dispatch({ type: "setCollapsed", collapsed: false });
+      dispatch({ type: "setDrawerVisible", drawerVisible: true });
+    }
+  };
+  const handleClickMenu = () => {};
+  const profileList = (
+    <Menu onClick={handleClickMenu} className="profile-menu">
+      <Menu.Item key="Profile">Hồ sơ</Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="ChangePassword">Đổi mật khẩu</Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="SignOut" style={{ color: "red" }}>
+        Đăng xuất
+      </Menu.Item>
+    </Menu>
+  );
+
+  return (
+    <Layout.Header
+      className={`header fixed ${isMobile ? "mobile-full" : ""} ${
+        collapsed ? "collapsed" : ""
+      }`}
+      id="layoutHeader"
+    >
+      <div className="button" onClick={onCollapseChange}>
+        {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+      </div>
+      <div className="header-right" style={{ paddingRight: 10 }}>
+        <Dropdown
+          overlay={profileList}
+          trigger={["click"]}
+          placement="bottomRight"
+        >
+          <div className="profile-dropdown">
+            <Text type="secondary" className="username">
+              canhlv
+            </Text>
+            <Avatar
+              icon={<UserOutlined />}
+              style={{ marginLeft: 8, cursor: "pointer" }}
+            />
+          </div>
+        </Dropdown>
+      </div>
+    </Layout.Header>
+  );
+};
+export default Header;
