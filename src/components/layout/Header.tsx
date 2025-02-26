@@ -6,23 +6,13 @@ import {
 } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/reducers";
-import { useState, useEffect } from "react";
 import { STORAGE_KEY } from "../../constants/application.constant";
+import useIsMobile from "../../utils/useIsMobile";
 const { Text } = Typography;
 const Header = () => {
   const dispatch = useDispatch();
+  const isMobile = useIsMobile();
   const collapsed = useSelector((state: RootState) => state.global.collapsed);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
   const onCollapseChange = () => {
     if (!isMobile) {
       dispatch({ type: "setCollapsed", collapsed: !collapsed });

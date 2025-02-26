@@ -1,26 +1,19 @@
 import { Layout, Drawer } from "antd";
 import SiderBarLeft from "../components/layout/SiderBarLeft";
-import { useState, useEffect } from "react";
 import Header from "../components/layout/Header";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../redux/reducers";
 import Footer from "../components/layout/Footer";
 import { Outlet } from "react-router-dom";
+import useIsMobile from "../utils/useIsMobile";
 const LayoutDefault = () => {
   const dispatch = useDispatch();
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
   const drawerVisible = useSelector(
     (state: RootState) => state.global.drawerVisible
   );
   const collapsed = useSelector((state: RootState) => state.global.collapsed);
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+
   const onClicDrawerVisible = () => {
     dispatch({ type: "setDrawerVisible", drawerVisible: false });
   };

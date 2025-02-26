@@ -21,3 +21,26 @@
         margin-bottom: 20px;
     }
 }
+.ant-btn,
+.ant-input,
+.ant-select,
+.ant-table,
+.ant-table-thead > tr > th,
+.ant-table-tbody > tr > td,
+.ant-pagination,
+.ant-card,
+.ant-modal,
+.ant-form,
+.ant-menu,
+.ant-tabs,
+.ant-checkbox-wrapper,
+.ant-radio-wrapper,
+.ant-typography {
+  font-size: 13px !important;
+}
+
+.ant-card-custom {
+    .ant-card-body {
+        padding-bottom: 0px !important;
+    }
+}
