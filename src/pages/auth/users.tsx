@@ -238,7 +238,7 @@ const Users = () => {
   ];
   console.log(pageNumber, keywordSearch);
   return (
-    <Card className="ant-card-custom">
+    <Card className="ant-custom-pagination">
       <div ref={divRef}>
         <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
           <SearchText
@@ -254,7 +254,7 @@ const Users = () => {
       <DataTable
         columns={columns}
         dataSource={dataSource}
-        total={100}
+        total={50}
         pageSize={pageSize}
         heightTable={heightElement}
         onChange={(page, pageSize) => {

@@ -39,8 +39,10 @@
   font-size: 13px !important;
 }
 
-.ant-card-custom {
-    .ant-card-body {
-        padding-bottom: 0px !important;
+.ant-custom-pagination {
+    
+    .ant-table-wrapper .ant-table-pagination.ant-pagination {
+        margin-bottom: -10px !important;
     }
 }
+

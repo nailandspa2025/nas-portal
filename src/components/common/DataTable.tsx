@@ -38,6 +38,7 @@ const DataTable = <T extends Record<string, unknown>>({
         emptyText: <Empty description={<span>Không có dữ liệu</span>} />,
       }}
       pagination={{
+        showSizeChanger: true,
         locale: { items_per_page: "/ trang" },
         pageSize: pageSize,
         total: total,
