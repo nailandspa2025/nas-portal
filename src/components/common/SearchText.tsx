@@ -3,13 +3,13 @@ import { Col, Space, Button, Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 type SearchTextProps = {
   placeholder?: string;
-  onChange?: () => void;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   value?: string;
   submit?: () => void;
 };
 
 const SearchText: React.FC<SearchTextProps> = ({
-  placeholder = "",
+  placeholder = "Nhập...",
   onChange = () => {},
   value = "",
   submit = () => {},

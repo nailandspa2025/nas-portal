@@ -6,9 +6,13 @@ import DataTable from "../../components/common/DataTable";
 const Users = () => {
   const divRef = useRef<HTMLDivElement>(null);
   const heightElement = useElementHeight(divRef);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
-
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(20);
+  const [strSearch, setStrSearch] = useState<string>("");
+  const [keywordSearch, setKeywordSearch] = useState<string>("");
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setStrSearch(event.target.value);
+  };
   const dataSource = [
     {
       key: "1",
@@ -232,12 +236,19 @@ const Users = () => {
       ),
     },
   ];
-  console.log(pageNumber);
+  console.log(pageNumber, keywordSearch);
   return (
     <Card className="ant-card-custom">
       <div ref={divRef}>
         <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
-          <SearchText />
+          <SearchText
+            value={strSearch}
+            placeholder="Nhập từ khoá tìm...."
+            onChange={handleSearch}
+            submit={() => {
+              setKeywordSearch(strSearch);
+            }}
+          />
         </Row>
       </div>
       <DataTable
