@@ -1,7 +1,7 @@
 export type TypeFilter = {
   key?: string;
   name: string;
-  field: string | string[];
+  field: string;
   type: string;
   popup: boolean;
   isActive: boolean;

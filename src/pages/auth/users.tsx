@@ -217,8 +217,8 @@ const Users = () => {
 
   const fetchUsers = async (appliedFilters: TypeFilter[]) => {
     const params = appliedFilters.reduce((acc, filter) => {
-      if (filter.key !== undefined) {
-        acc[filter.key] = filter.value;
+      if (filter.field !== undefined) {
+        acc[filter.field] = filter.value;
       }
       return acc;
     }, {} as Record<string, unknown>);

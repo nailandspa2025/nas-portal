@@ -25,10 +25,6 @@ type FilterDataProps = {
 };
 
 const FilterData: React.FC<FilterDataProps> = ({
-  placeholder = "Nhập...",
-  onChange = () => {},
-  value = "",
-  submit = () => {},
   filters = [],
   onFilterChange = () => {},
 }) => {
@@ -41,6 +37,7 @@ const FilterData: React.FC<FilterDataProps> = ({
     { value: string; label: string }[]
   >([]);
   const [filterValues, setFilterValues] = useState<TypeFilter | null>(null);
+  const [dataFilter, setDataFilter] = useState<TypeFilter[]>([]);
   const openDrawer = async (filter: TypeFilter) => {
     setVisible(true);
     if (filter.actionName) {
@@ -54,12 +51,13 @@ const FilterData: React.FC<FilterDataProps> = ({
       (f) => f.key !== filterToRemove.key
     );
     setSelectedFilters(updatedFilters);
-    onFilterChange(updatedFilters);
+    const data = [...dataFilter, ...updatedFilters];
+    onFilterChange(data);
   };
 
   const resetFilters = () => {
     setSelectedFilters([]);
-    onFilterChange([]);
+    onFilterChange(dataFilter);
   };
   const handleApply = () => {
     if (!activeFilter || !filterValues) return;
@@ -71,7 +69,8 @@ const FilterData: React.FC<FilterDataProps> = ({
     setActiveFilter(null);
     setFilterValues(null);
     setVisible(false);
-    onFilterChange(updatedFilters);
+    const data = [...dataFilter, ...updatedFilters];
+    onFilterChange(data);
   };
   const closeDrawer = () => {
     setVisible(false);
@@ -134,6 +133,15 @@ const FilterData: React.FC<FilterDataProps> = ({
         ? [menuItem, { type: "divider" } as const]
         : [menuItem];
     });
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.value;
+    setDataFilter(newValue ? [{ ...filters[0], value: newValue }] : []);
+  };
+
+  const searchText = () => {
+    const data = [...dataFilter, ...selectedFilters];
+    onFilterChange(data);
+  };
 
   return (
     <>
@@ -147,16 +155,20 @@ const FilterData: React.FC<FilterDataProps> = ({
         >
           <Space.Compact block>
             <Input
-              placeholder={placeholder}
-              onChange={onChange}
-              value={value}
+              placeholder={filters[0].name}
+              onChange={handleInputChange}
+              value={dataFilter[0]?.value}
               onKeyPress={(event: { key: string }) => {
                 if (event.key === "Enter") {
-                  submit();
+                  searchText();
                 }
               }}
             />
-            <Button type="primary" onClick={submit} icon={<SearchOutlined />}>
+            <Button
+              type="primary"
+              onClick={searchText}
+              icon={<SearchOutlined />}
+            >
               Tìm
             </Button>
           </Space.Compact>

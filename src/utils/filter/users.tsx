@@ -28,7 +28,7 @@ export const columns = [
 export const filters: TypeFilter[] = [
   {
     name: "Tiêu đề, mô tả",
-    field: ["title", "description"],
+    field: "searhText",
     type: "text",
     popup: false,
     isActive: true,
