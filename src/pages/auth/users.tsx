@@ -1,8 +1,11 @@
 import useElementHeight from "../../utils/useElementHeight";
 import { useRef, useState } from "react";
 import { Row, Card } from "antd";
-import SearchText from "../../components/common/SearchText";
+//import SearchText from "../../components/common/SearchText";
 import DataTable from "../../components/common/DataTable";
+import * as utils from "../../utils/filter/users";
+import FilterData from "../../components/common/FilterData";
+import { TypeFilter } from "../../utils/common/typeFilter";
 const Users = () => {
   const divRef = useRef<HTMLDivElement>(null);
   const heightElement = useElementHeight(divRef);
@@ -209,50 +212,43 @@ const Users = () => {
   ];
 
   // Cấu hình cột của bảng
-  const columns = [
-    {
-      title: "Họ và Tên",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Số điện thoại",
-      dataIndex: "phone",
-      key: "phone",
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (text: string) => (
-        <span style={{ color: text === "Active" ? "green" : "red" }}>
-          {text}
-        </span>
-      ),
-    },
-  ];
+
   console.log(pageNumber, keywordSearch);
+
+  const fetchUsers = async (appliedFilters: TypeFilter[]) => {
+    const params = appliedFilters.reduce((acc, filter) => {
+      if (filter.key !== undefined) {
+        acc[filter.key] = filter.value;
+      }
+      return acc;
+    }, {} as Record<string, unknown>);
+
+    try {
+      console.log("canhlv", params);
+      // const response = await axios.get("/api/users", { params });
+      // setUsers(response.data);
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách người dùng:", error);
+    }
+  };
   return (
     <Card className="ant-custom-pagination">
       <div ref={divRef}>
         <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
-          <SearchText
+          <FilterData
             value={strSearch}
             placeholder="Nhập từ khoá tìm...."
             onChange={handleSearch}
             submit={() => {
               setKeywordSearch(strSearch);
             }}
+            filters={utils.filters}
+            onFilterChange={fetchUsers}
           />
         </Row>
       </div>
       <DataTable
-        columns={columns}
+        columns={utils.columns}
         dataSource={dataSource}
         total={50}
         pageSize={pageSize}

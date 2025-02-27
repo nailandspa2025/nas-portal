@@ -1,8 +1,10 @@
-import { Layout, Menu, Avatar, Dropdown, Typography } from "antd";
+import { Layout, Avatar, Dropdown, Typography } from "antd";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UserOutlined,
+  LockOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/reducers";
@@ -30,18 +32,6 @@ const Header = () => {
       onSignOut();
     }
   };
-  const profileList = (
-    <Menu onClick={handleClickMenu} className="profile-menu">
-      <Menu.Item key="Profile">Hồ sơ</Menu.Item>
-      <Menu.Divider />
-      <Menu.Item key="ChangePassword">Đổi mật khẩu</Menu.Item>
-      <Menu.Divider />
-      <Menu.Item key="SignOut" style={{ color: "red" }}>
-        Đăng xuất
-      </Menu.Item>
-    </Menu>
-  );
-
   return (
     <Layout.Header
       className={`header fixed ${isMobile ? "mobile-full" : ""} ${
@@ -54,7 +44,28 @@ const Header = () => {
       </div>
       <div className="header-right" style={{ paddingRight: 10 }}>
         <Dropdown
-          overlay={profileList}
+          menu={{
+            items: [
+              {
+                key: "Profile",
+                icon: <UserOutlined />,
+                label: "Thông tin tài khoản",
+              },
+              { type: "divider" },
+              {
+                key: "ChangePassword",
+                icon: <LockOutlined />,
+                label: "Đỏi mật khẩu",
+              },
+              { type: "divider" },
+              {
+                key: "SignOut",
+                icon: <LogoutOutlined />,
+                label: <span style={{ color: "red" }}> Đăng xuất </span>,
+              },
+            ],
+            onClick: handleClickMenu,
+          }}
           trigger={["click"]}
           placement="bottomRight"
         >
