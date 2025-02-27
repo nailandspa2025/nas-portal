@@ -54,7 +54,6 @@ const FilterData: React.FC<FilterDataProps> = ({
     const data = [...dataFilter, ...updatedFilters];
     onFilterChange(data);
   };
-
   const resetFilters = () => {
     setSelectedFilters([]);
     onFilterChange(dataFilter);
@@ -137,20 +136,18 @@ const FilterData: React.FC<FilterDataProps> = ({
     const newValue = event.target.value;
     setDataFilter(newValue ? [{ ...filters[0], value: newValue }] : []);
   };
-
   const searchText = () => {
     const data = [...dataFilter, ...selectedFilters];
     onFilterChange(data);
   };
-
   return (
     <>
       {filters && filters.length > 0 && (
         <Col
           xs={24}
           sm={24}
+          md={24}
           lg={12}
-          md={12}
           style={{ display: "flex", alignItems: "center" }}
         >
           <Space.Compact block>
@@ -190,11 +187,11 @@ const FilterData: React.FC<FilterDataProps> = ({
       {selectedFilters && selectedFilters.length > 0 && (
         <Col md={24}>
           <Space size={[0, 8]} wrap>
-            {selectedFilters.map((filter) => (
+            {selectedFilters.map((filter, index) => (
               <Tag
                 closable
                 onClose={() => removeFilter(filter)}
-                key={filter.key}
+                key={index}
                 color="blue"
                 style={{ cursor: "pointer" }}
                 onClick={() => openDrawer(filter)}

@@ -11,11 +11,7 @@ const Users = () => {
   const heightElement = useElementHeight(divRef);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
-  const [strSearch, setStrSearch] = useState<string>("");
-  const [keywordSearch, setKeywordSearch] = useState<string>("");
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setStrSearch(event.target.value);
-  };
+
   const dataSource = [
     {
       key: "1",
@@ -32,188 +28,21 @@ const Users = () => {
       status: "Inactive",
     },
     {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "1",
+      key: "3",
       name: "Nguyễn Văn A",
       email: "nguyenvana@example.com",
       phone: "0123 456 789",
       status: "Active",
     },
     {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "1",
-      name: "Nguyễn Văn A",
-      email: "nguyenvana@example.com",
-      phone: "0123 456 789",
-      status: "Active",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987 654 321",
-      status: "Inactive",
-    },
-    {
-      key: "2",
+      key: "4",
       name: "Trần Thị B",
       email: "tranthib@example.com",
       phone: "0987 654 321",
       status: "Inactive",
     },
   ];
-
-  // Cấu hình cột của bảng
-
-  console.log(pageNumber, keywordSearch);
+  console.log(pageNumber);
 
   const fetchUsers = async (appliedFilters: TypeFilter[]) => {
     const params = appliedFilters.reduce((acc, filter) => {
@@ -235,22 +64,13 @@ const Users = () => {
     <Card className="ant-custom-pagination">
       <div ref={divRef}>
         <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
-          <FilterData
-            value={strSearch}
-            placeholder="Nhập từ khoá tìm...."
-            onChange={handleSearch}
-            submit={() => {
-              setKeywordSearch(strSearch);
-            }}
-            filters={utils.filters}
-            onFilterChange={fetchUsers}
-          />
+          <FilterData filters={utils.filters} onFilterChange={fetchUsers} />
         </Row>
       </div>
       <DataTable
         columns={utils.columns}
         dataSource={dataSource}
-        total={50}
+        total={4}
         pageSize={pageSize}
         heightTable={heightElement}
         onChange={(page, pageSize) => {
