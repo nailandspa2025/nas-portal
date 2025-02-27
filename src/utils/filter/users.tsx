@@ -68,7 +68,7 @@ export const filters: TypeFilter[] = [
     field: "isAssigned",
     type: "select",
     popup: true,
-    isActive: false,
+    isActive: true,
     value: "false",
     selected: { label: "Chưa phân bổ" },
     actionName: "assignmentStatuses",

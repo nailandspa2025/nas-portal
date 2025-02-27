@@ -38,6 +38,8 @@ const FilterData: React.FC<FilterDataProps> = ({
   >([]);
   const [filterValues, setFilterValues] = useState<TypeFilter | null>(null);
   const [dataFilter, setDataFilter] = useState<TypeFilter[]>([]);
+  const [activeMenuFilters, setActiveMenuFilters] =
+    useState<TypeFilter[]>(filters);
   const openDrawer = async (filter: TypeFilter) => {
     setVisible(true);
     if (filter.actionName) {
@@ -50,12 +52,23 @@ const FilterData: React.FC<FilterDataProps> = ({
     const updatedFilters = selectedFilters.filter(
       (f) => f.key !== filterToRemove.key
     );
+    const updatedMenuFiltes = activeMenuFilters.map((filter) =>
+      filter.key === filterToRemove.key
+        ? { ...filter, isActive: false }
+        : filter
+    );
+    setActiveMenuFilters(updatedMenuFiltes);
     setSelectedFilters(updatedFilters);
     const data = [...dataFilter, ...updatedFilters];
     onFilterChange(data);
   };
   const resetFilters = () => {
+    const resetFilterState = activeMenuFilters.map((filter) => ({
+      ...filter,
+      isActive: false,
+    }));
     setSelectedFilters([]);
+    setActiveMenuFilters(resetFilterState);
     onFilterChange(dataFilter);
   };
   const handleApply = () => {
@@ -120,7 +133,7 @@ const FilterData: React.FC<FilterDataProps> = ({
       popup: activeFilter.popup !== undefined ? activeFilter.popup : false,
     }));
   };
-  const menuFilterList = filters.filter(
+  const menuFilterList = activeMenuFilters.filter(
     (filter) =>
       filter.popup &&
       !filter.isActive &&
