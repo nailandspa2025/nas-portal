@@ -120,7 +120,13 @@ const FilterData: React.FC<FilterDataProps> = ({
       popup: activeFilter.popup !== undefined ? activeFilter.popup : false,
     }));
   };
-  const menuFilters: MenuProps["items"] = filters
+  const menuFilterList = filters.filter(
+    (filter) =>
+      filter.popup &&
+      !filter.isActive &&
+      !selectedFilters.some((selected) => selected.key === filter.key)
+  );
+  const menuFilters: MenuProps["items"] = menuFilterList
     .filter((f) => !f.isActive && f.popup)
     .flatMap((f, index, array) => {
       const menuItem = {
@@ -169,19 +175,21 @@ const FilterData: React.FC<FilterDataProps> = ({
               Tìm
             </Button>
           </Space.Compact>
-          <Dropdown
-            menu={{
-              items: menuFilters,
-            }}
-          >
-            <Button
-              type="default"
-              icon={<FilterOutlined />}
-              style={{ marginLeft: 8 }}
+          {menuFilterList && menuFilterList.length > 0 && (
+            <Dropdown
+              menu={{
+                items: menuFilters,
+              }}
             >
-              Bộ lọc
-            </Button>
-          </Dropdown>
+              <Button
+                type="default"
+                icon={<FilterOutlined />}
+                style={{ marginLeft: 8 }}
+              >
+                Bộ lọc
+              </Button>
+            </Dropdown>
+          )}
         </Col>
       )}
       {selectedFilters && selectedFilters.length > 0 && (
