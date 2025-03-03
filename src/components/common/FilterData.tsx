@@ -208,7 +208,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                 onClick={() => openDrawer(filter)}
               >
                 {filters.find((f) => f.field === filter.field)?.name}:{" "}
-                {(filter.selected as { label?: string })?.label || filter.name}
+                {(filter.selected as { label?: string })?.label || ""}
               </Tag>
             ))}
             <Tag
