@@ -407,13 +407,15 @@ const FilterData: React.FC<FilterDataProps> = ({
                   {(filter.selected as { label?: string })?.label || ""}
                 </Tag>
               ))}
-              <Tag
-                color="red"
-                style={{ cursor: "pointer" }}
-                onClick={resetFilters}
-              >
-                Xóa tất cả
-              </Tag>
+              {dialogFilterLabel.length > 1 && (
+                <Tag
+                  color="red"
+                  style={{ cursor: "pointer" }}
+                  onClick={resetFilters}
+                >
+                  Xóa tất cả
+                </Tag>
+              )}
             </Space>
           </Col>
         )}
