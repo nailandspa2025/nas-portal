@@ -11,6 +11,7 @@ interface DataTableProps<T> {
   rowSelection?: TableProps<T>["rowSelection"] | null;
   bordered?: boolean;
   rowClassName?: boolean;
+  current?: number;
 }
 
 const DataTable = <T extends Record<string, unknown>>({
@@ -24,10 +25,11 @@ const DataTable = <T extends Record<string, unknown>>({
   rowSelection = null,
   bordered = true,
   rowClassName = false,
+  current = 1,
 }: DataTableProps<T>) => {
   return (
     <Table<T>
-      columns={columns}
+      columns={columns.filter((col) => !col.hidden)}
       dataSource={dataSource}
       rowKey="id"
       scroll={{
@@ -38,6 +40,7 @@ const DataTable = <T extends Record<string, unknown>>({
         emptyText: <Empty description={<span>Không có dữ liệu</span>} />,
       }}
       pagination={{
+        defaultCurrent: current,
         showSizeChanger: true,
         locale: { items_per_page: "/ trang" },
         pageSize: pageSize,

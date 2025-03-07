@@ -1,19 +1,19 @@
 import useElementHeight from "../../utils/useElementHeight";
 import { useRef, useState } from "react";
 import { Row, Card } from "antd";
-//import SearchText from "../../components/common/SearchText";
 import DataTable from "../../components/common/DataTable";
 import * as utils from "../../utils/filter/users";
 import FilterData from "../../components/common/FilterData";
-import { TypeFilter } from "../../utils/common/typeFilter";
 const Users = () => {
   const divRef = useRef<HTMLDivElement>(null);
   const heightElement = useElementHeight(divRef);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
+  const [filteredColumns, setFilteredColumns] = useState(utils.columns);
 
   const dataSource = [
     {
+      id: 1,
       key: "1",
       name: "Nguyễn Văn A",
       email: "nguyenvana@example.com",
@@ -21,6 +21,7 @@ const Users = () => {
       status: "Active",
     },
     {
+      id: 2,
       key: "2",
       name: "Trần Thị B",
       email: "tranthib@example.com",
@@ -28,6 +29,7 @@ const Users = () => {
       status: "Inactive",
     },
     {
+      id: 3,
       key: "3",
       name: "Nguyễn Văn A",
       email: "nguyenvana@example.com",
@@ -35,6 +37,7 @@ const Users = () => {
       status: "Active",
     },
     {
+      id: 4,
       key: "4",
       name: "Trần Thị B",
       email: "tranthib@example.com",
@@ -42,33 +45,47 @@ const Users = () => {
       status: "Inactive",
     },
   ];
-  console.log(pageNumber);
-
-  const fetchUsers = async (appliedFilters: TypeFilter[]) => {
-    const params = appliedFilters.reduce((acc, filter) => {
-      if (filter.field !== undefined) {
-        acc[filter.field] = filter.value;
-      }
-      return acc;
-    }, {} as Record<string, unknown>);
-
+  const fetchUsers = async (params: Record<string, string>) => {
     try {
-      console.log("canhlv", params);
+      console.log("params", params);
       // const response = await axios.get("/api/users", { params });
       // setUsers(response.data);
     } catch (error) {
       console.error("Lỗi khi tải danh sách người dùng:", error);
     }
   };
+  const handleActions = {
+    createNew: () => {
+      console.log("Tạo mới người dùng");
+      // Logic mở modal hoặc gọi API tạo mới
+    },
+    deleteUser: () => {
+      console.log("Xóa người dùng");
+      // Logic xóa user
+    },
+    exportData: () => {
+      console.log("Xuất dữ liệu");
+      // Logic xuất file CSV/Excel
+    },
+  };
   return (
     <Card className="ant-custom-pagination">
       <div ref={divRef}>
         <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
-          <FilterData filters={utils.filters} onFilterChange={fetchUsers} />
+          <FilterData
+            filters={utils.filters}
+            columns={filteredColumns}
+            onColumnChange={setFilteredColumns}
+            onFilterChange={fetchUsers}
+            buttons={utils.buttons}
+            actions={utils.actions}
+            handlers={handleActions}
+          />
         </Row>
       </div>
       <DataTable
-        columns={utils.columns}
+        current={pageNumber}
+        columns={filteredColumns}
         dataSource={dataSource}
         total={4}
         pageSize={pageSize}

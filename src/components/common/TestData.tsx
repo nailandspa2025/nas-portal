@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState, useRef } from "react";
 import {
   Col,
   Space,
@@ -11,10 +12,18 @@ import {
   Radio,
   MenuProps,
   RadioChangeEvent,
+  Row,
+  Checkbox,
 } from "antd";
-import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DownOutlined,
+  FilterOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { TypeFilter } from "../../utils/common/typeFilter";
 import { getDataForFilter } from "../../utils/common/getDataForFilter";
+import { useLocation } from "react-router-dom";
+
 type FilterDataProps = {
   placeholder?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -22,125 +31,164 @@ type FilterDataProps = {
   submit?: () => void;
   filters?: TypeFilter[];
   onFilterChange?: (filters: TypeFilter[]) => void;
+  columns?: any;
+  onColumnChange?: (columns: any) => void;
+  buttons?: any;
+  handlers?: Record<string, () => void>;
+  actions?: any;
 };
 
 const FilterData: React.FC<FilterDataProps> = ({
   filters = [],
   onFilterChange = () => {},
+  columns = [],
+  onColumnChange,
+  buttons = [],
+  handlers,
+  actions = [],
 }) => {
-  const [visible, setVisible] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<TypeFilter | null>(null);
-  const [selectedFilters, setSelectedFilters] = useState<TypeFilter[]>(
-    filters.filter((f) => f.isActive && f.popup)
-  );
-  const [filterOptions, setFilterOptions] = useState<
+  const location = useLocation();
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const storageKey = `${location.pathname}_columns`;
+  const [dialogFilterVisible, setDialogFilterVisible] =
+    useState<boolean>(false);
+  const [filterTextData, setFilterTextData] = useState<any>({});
+  const [keywordSearch, setKeywordSearch] = useState({});
+  const [dialogFilterValue, setDialogFilterValue] = useState<any>({});
+  const [dialogFilterSelected, setDialogFilterSelected] = useState<any>(null);
+  const [dialogFilterOptions, setDialogFilterOptions] = useState<
     { value: string; label: string }[]
   >([]);
-  const [filterValues, setFilterValues] = useState<TypeFilter | null>(null);
-  const [dataFilter, setDataFilter] = useState<TypeFilter[]>([]);
-  const [activeMenuFilters, setActiveMenuFilters] =
-    useState<TypeFilter[]>(filters);
-  const openDrawer = async (filter: TypeFilter) => {
-    setVisible(true);
-    if (filter.actionName) {
-      const data = await getDataForFilter(filter.actionName);
-      setFilterOptions(data);
+
+  const [dialogFilterLabel, setDialogFilterLabel] = useState(
+    filters.filter((f) => f.isActive && f.popup)
+  );
+
+  const [columnVisible, setColumnVisible] = useState<boolean>(false);
+  const [currentColumns, setCurrentColumns] = useState<any>(columns);
+  const [initialLoad, setInitialLoad] = useState(false);
+  useEffect(() => {
+    const getData = () => {
+      const filterData: any = [keywordSearch, ...dialogFilterLabel].filter(
+        Boolean
+      );
+      onFilterChange(filterData);
+    };
+    getData();
+  }, [dialogFilterLabel, keywordSearch, onFilterChange]);
+
+  useEffect(() => {
+    const savedHiddenColumns = JSON.parse(
+      localStorage.getItem(storageKey) || "{}"
+    );
+    setCurrentColumns((prevColumns: any) =>
+      prevColumns.map((col: any) => ({
+        ...col,
+        hidden: savedHiddenColumns[col.key] ?? col.hidden,
+      }))
+    );
+  }, [storageKey]);
+  useEffect(() => {
+    if (!onColumnChange) return;
+    const hiddenColumns = Object.fromEntries(
+      currentColumns.map((col: any) => [col.key, col.hidden])
+    );
+    if (initialLoad) {
+      localStorage.setItem(storageKey, JSON.stringify(hiddenColumns));
     }
-    setActiveFilter(filter);
+    onColumnChange(currentColumns);
+  }, [currentColumns, storageKey, onColumnChange, initialLoad]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilterTextData((prev: any) => ({
+      ...prev,
+      field: filters[0].field,
+      value: e.target.value,
+    }));
   };
-  const removeFilter = (filterToRemove: TypeFilter) => {
-    const updatedFilters = selectedFilters.filter(
-      (f) => f.key !== filterToRemove.key
+  const searchText = () => {
+    setKeywordSearch(filterTextData);
+  };
+  const openDrawer = async (f: any) => {
+    setDialogFilterVisible(true);
+    setDialogFilterSelected(f);
+    if (f.actionName) {
+      const data = await getDataForFilter(f.actionName);
+      setDialogFilterOptions(data);
+    }
+    setDialogFilterValue({
+      actionName: f.actionName,
+      field: f.field,
+      value: f.value ?? null,
+      name: f.name,
+      type: f.type,
+      selected: f.selected ?? { label: "" },
+    });
+  };
+  const removeFilter = (filter: any) => {
+    const updatedFilters = dialogFilterLabel.filter(
+      (f) => f.field !== filter.field
     );
-    const updatedMenuFiltes = activeMenuFilters.map((filter) =>
-      filter.key === filterToRemove.key
-        ? { ...filter, isActive: false }
-        : filter
-    );
-    setActiveMenuFilters(updatedMenuFiltes);
-    setSelectedFilters(updatedFilters);
-    const data = [...dataFilter, ...updatedFilters];
-    onFilterChange(data);
+    setDialogFilterLabel(updatedFilters);
   };
   const resetFilters = () => {
-    const resetFilterState = activeMenuFilters.map((filter) => ({
-      ...filter,
-      isActive: false,
-    }));
-    setSelectedFilters([]);
-    setActiveMenuFilters(resetFilterState);
-    onFilterChange(dataFilter);
+    setDialogFilterLabel([]);
   };
-  const handleApply = () => {
-    if (!activeFilter || !filterValues) return;
-    const updatedFilters = [
-      ...selectedFilters.filter((f) => f.key !== activeFilter.key),
-      filterValues,
-    ];
-    setSelectedFilters(updatedFilters);
-    setActiveFilter(null);
-    setFilterValues(null);
-    setVisible(false);
-    const data = [...dataFilter, ...updatedFilters];
-    onFilterChange(data);
-  };
-  const closeDrawer = () => {
-    setVisible(false);
-    setSelectedFilters([...selectedFilters]);
-  };
-  const handleSelect = (values: string | string[], options: any) => {
-    if (!values) return;
+  const handleSelectChange = (
+    values: string | string[],
+    options?: { label: string } | { label: string }[]
+  ) => {
     const isMultiple = Array.isArray(values);
-    const selectedLabels = isMultiple
-      ? options?.map((opt: { label: string }) => opt.label).join(", ")
-      : options.label;
-    setFilterValues((prev) => ({
+    const label = isMultiple
+      ? Array.isArray(options)
+        ? options.map((opt) => opt.label).join(", ")
+        : ""
+      : (options as { label: string })?.label || "";
+
+    setDialogFilterValue((prev: any) => ({
       ...prev,
-      actionName: activeFilter.actionName,
-      key: activeFilter?.key,
-      name: activeFilter?.name,
-      type: activeFilter?.type,
+      actionName: dialogFilterSelected?.actionName,
+      field: dialogFilterSelected?.field,
       value: values,
-      selected: { label: selectedLabels },
-      field: Array.isArray(activeFilter?.field)
-        ? activeFilter.field
-        : [activeFilter?.field ?? ""],
-      popup: activeFilter?.popup !== undefined ? activeFilter.popup : false,
+      name: dialogFilterSelected?.name,
+      type: dialogFilterSelected?.type,
+      selected: { label },
     }));
   };
   const handleRadioChange = (e: RadioChangeEvent) => {
-    if (!activeFilter) return;
-    const value = e.target.value;
     const label =
-      activeFilter.type === "radioActive"
-        ? value
+      dialogFilterSelected?.type === "radioActive"
+        ? e.target.value
           ? "Hoạt động"
           : "Không hoạt động"
-        : value
+        : e.target.value
         ? "Yes"
         : "No";
-
-    setFilterValues((prev) => ({
+    setDialogFilterValue((prev: any) => ({
       ...prev,
-      key: activeFilter?.key,
-      name: activeFilter.name,
-      type: activeFilter.type,
-      value: value,
+      actionName: dialogFilterSelected?.actionName,
+      field: dialogFilterSelected?.field,
+      value: e.target.value,
+      name: dialogFilterSelected?.name,
+      type: dialogFilterSelected?.type,
       selected: { label },
-      field: Array.isArray(activeFilter?.field)
-        ? activeFilter.field
-        : [activeFilter?.field ?? ""],
-      popup: activeFilter.popup !== undefined ? activeFilter.popup : false,
     }));
   };
-  const menuFilterList = activeMenuFilters.filter(
-    (filter) =>
-      filter.popup &&
-      !filter.isActive &&
-      !selectedFilters.some((selected) => selected.key === filter.key)
-  );
-  const menuFilters: MenuProps["items"] = menuFilterList
-    .filter((f) => !f.isActive && f.popup)
+  const applyFilter = () => {
+    if (!dialogFilterSelected || !dialogFilterValue) return;
+    setDialogFilterVisible(false);
+    const updatedFilters: any = [
+      ...dialogFilterLabel.filter(
+        (f) => f.field !== dialogFilterSelected?.field
+      ),
+      dialogFilterValue,
+    ];
+    setDialogFilterLabel(updatedFilters);
+  };
+  const menuFilters: MenuProps["items"] = filters
+    .filter(
+      (f) => f.popup && !dialogFilterLabel.some((df) => df.field === f.field)
+    )
     .flatMap((f, index, array) => {
       const menuItem = {
         key: f.key!,
@@ -151,109 +199,233 @@ const FilterData: React.FC<FilterDataProps> = ({
         ? [menuItem, { type: "divider" } as const]
         : [menuItem];
     });
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = event.target.value;
-    setDataFilter(newValue ? [{ ...filters[0], value: newValue }] : []);
+
+  const handleColumn = (key: string) => {
+    setCurrentColumns((prev: any) =>
+      prev.map((col: any) =>
+        col.key === key ? { ...col, hidden: !col.hidden } : col
+      )
+    );
+    setInitialLoad(true);
   };
-  const searchText = () => {
-    const data = [...dataFilter, ...selectedFilters];
-    onFilterChange(data);
+  const handleAction = (funcName: string) => {
+    if (handlers && handlers[funcName]) {
+      handlers[funcName]();
+    } else {
+      console.warn(`Hàm xử lý cho "${funcName}" chưa được định nghĩa.`);
+    }
   };
   return (
     <>
-      {filters && filters.length > 0 && (
-        <Col
-          xs={24}
-          sm={24}
-          md={24}
-          lg={12}
-          style={{ display: "flex", alignItems: "center" }}
-        >
-          <Space.Compact block>
-            <Input
-              placeholder={filters[0].name}
-              onChange={handleInputChange}
-              value={dataFilter[0]?.value}
-              onKeyPress={(event: { key: string }) => {
-                if (event.key === "Enter") {
-                  searchText();
-                }
-              }}
-            />
-            <Button
-              type="primary"
-              onClick={searchText}
-              icon={<SearchOutlined />}
-            >
-              Tìm
-            </Button>
-          </Space.Compact>
-          {menuFilterList && menuFilterList.length > 0 && (
-            <Dropdown
-              menu={{
-                items: menuFilters,
-              }}
-            >
+      <Row gutter={[8, 8]} style={{ width: "100%" }}>
+        {filters && filters.length > 0 && (
+          <Col
+            xs={24}
+            sm={24}
+            md={24}
+            lg={12}
+            style={{ display: "flex", alignItems: "center" }}
+          >
+            <Space.Compact block>
+              <Input
+                placeholder={filters[0].name}
+                onChange={handleInputChange}
+                value={filterTextData?.value}
+                onKeyPress={(event: { key: string }) => {
+                  if (event.key === "Enter") {
+                    searchText();
+                  }
+                }}
+              />
               <Button
-                type="default"
-                icon={<FilterOutlined />}
-                style={{ marginLeft: 8 }}
+                type="primary"
+                onClick={searchText}
+                icon={<SearchOutlined />}
               >
-                Bộ lọc
+                Tìm
               </Button>
-            </Dropdown>
-          )}
-        </Col>
-      )}
-      {selectedFilters && selectedFilters.length > 0 && (
-        <Col md={24}>
-          <Space size={[0, 8]} wrap>
-            {selectedFilters.map((filter, index) => (
-              <Tag
-                closable
-                onClose={() => removeFilter(filter)}
-                key={index}
-                color="blue"
-                style={{ cursor: "pointer" }}
-                onClick={() => openDrawer(filter)}
+            </Space.Compact>
+            {menuFilters.length > 0 && (
+              <Dropdown
+                trigger={["click"]}
+                menu={{ items: menuFilters, selectable: true }}
               >
-                {filters.find((f) => f.key === filter.key)?.name}:{" "}
-                {(filter.selected as { label?: string })?.label || filter.name}
+                <Button
+                  type="default"
+                  icon={<FilterOutlined />}
+                  style={{ marginLeft: 8 }}
+                >
+                  Bộ lọc
+                </Button>
+              </Dropdown>
+            )}
+          </Col>
+        )}
+        {columns && columns.length > 0 && (
+          <Col
+            xs={24}
+            sm={24}
+            md={24}
+            lg={12}
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+            }}
+          >
+            <Space size={[5, 8]} wrap>
+              <div>
+                {buttons
+                  ?.filter((f: any) => f.position === "left")
+                  .map((item: any) => (
+                    <Button
+                      color={item.color}
+                      variant="solid"
+                      key={item.funcName}
+                      onClick={() => handleAction(item.funcName)}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+              </div>
+              <div>
+                <Dropdown
+                  trigger={["click"]}
+                  menu={{
+                    items: actions.flatMap((item: any, index: number) => [
+                      {
+                        key: item.key,
+                        label: (
+                          <span onClick={() => handleAction(item.funcName)}>
+                            {item.icon}
+                            <span style={{ marginLeft: 8 }}>{item.label}</span>
+                          </span>
+                        ),
+                      },
+                      ...(index < actions.length - 1
+                        ? [{ type: "divider" }]
+                        : []),
+                    ]),
+                    selectable: true,
+                  }}
+                >
+                  <Button color="cyan" variant="outlined">
+                    Thao tác <DownOutlined />
+                  </Button>
+                </Dropdown>
+              </div>
+              <div ref={dropdownRef}>
+                <Dropdown
+                  menu={{
+                    items: currentColumns.flatMap(
+                      (item: any, index: number) => [
+                        {
+                          key: item.key,
+                          label: (
+                            <Checkbox
+                              checked={!item.hidden}
+                              onChange={(e) => {
+                                e.preventDefault();
+                                handleColumn(item.key);
+                              }}
+                            >
+                              {item.title}
+                            </Checkbox>
+                          ),
+                        },
+                        ...(index < currentColumns.length - 1
+                          ? [{ type: "divider" }]
+                          : []),
+                      ]
+                    ),
+                  }}
+                  trigger={["click"]}
+                  open={columnVisible}
+                  onOpenChange={(event: any) => {
+                    if (
+                      dropdownRef.current &&
+                      !dropdownRef.current.contains(event.target)
+                    ) {
+                      setColumnVisible(false);
+                    }
+                  }}
+                >
+                  <Button
+                    color="cyan"
+                    variant="outlined"
+                    onClick={() => setColumnVisible(!columnVisible)}
+                  >
+                    Ẩn hiện cột <DownOutlined />
+                  </Button>
+                </Dropdown>
+              </div>
+              <div>
+                {buttons
+                  ?.filter((f: any) => f.position === "right")
+                  .map((item: any) => (
+                    <Button
+                      key={item.funcName}
+                      color={item.color}
+                      variant="solid"
+                      onClick={() => handleAction(item.funcName)}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+              </div>
+            </Space>
+          </Col>
+        )}
+        {dialogFilterLabel && dialogFilterLabel.length > 0 && (
+          <Col md={24}>
+            <Space size={[0, 8]} wrap>
+              {dialogFilterLabel.map((filter) => (
+                <Tag
+                  closable
+                  onClose={() => removeFilter(filter)}
+                  key={filter.field}
+                  color="blue"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => openDrawer(filter)}
+                >
+                  {filters.find((f) => f.field === filter.field)?.name}:{" "}
+                  {(filter.selected as { label?: string })?.label || ""}
+                </Tag>
+              ))}
+              <Tag
+                color="red"
+                style={{ cursor: "pointer" }}
+                onClick={resetFilters}
+              >
+                Xóa tất cả
               </Tag>
-            ))}
-            <Tag
-              color="red"
-              style={{ cursor: "pointer" }}
-              onClick={resetFilters}
-            >
-              Xóa tất cả
-            </Tag>
-          </Space>
-        </Col>
-      )}
+            </Space>
+          </Col>
+        )}
+      </Row>
       <Drawer
         title="Bộ lọc"
         placement="right"
-        onClose={closeDrawer}
-        open={visible}
+        onClose={() => setDialogFilterVisible(false)}
+        open={dialogFilterVisible}
         width={450}
       >
-        {activeFilter && (
+        {dialogFilterSelected && (
           <div style={{ marginBottom: 15 }}>
             <label
               style={{ fontWeight: 600, display: "block", marginBottom: 8 }}
             >
-              {activeFilter.name}
+              {dialogFilterSelected.name}
             </label>
 
-            {activeFilter.type === "select" && (
+            {dialogFilterSelected.type === "select" && (
               <Select
                 style={{ width: "100%" }}
-                placeholder={`Chọn ${activeFilter.name}`}
-                value={filterValues?.value ?? activeFilter?.value}
-                onChange={(value, option) => handleSelect(value, option)}
+                placeholder={`Chọn ${dialogFilterSelected.name}`}
+                value={dialogFilterValue.value ?? dialogFilterSelected.value}
+                onChange={handleSelectChange}
               >
-                {filterOptions?.map((item) => (
+                {dialogFilterOptions?.map((item) => (
                   <Select.Option
                     key={item?.value}
                     value={item.value}
@@ -264,16 +436,15 @@ const FilterData: React.FC<FilterDataProps> = ({
                 ))}
               </Select>
             )}
-
-            {activeFilter.type === "multiSelect" && (
+            {dialogFilterSelected.type === "multiSelect" && (
               <Select
                 mode="multiple"
                 style={{ width: "100%" }}
-                placeholder={`Chọn ${activeFilter.name}`}
-                value={filterValues?.value ?? activeFilter?.value}
-                onChange={(value, option) => handleSelect(value, option)}
+                placeholder={`Chọn ${dialogFilterSelected.name}`}
+                value={dialogFilterValue.value ?? dialogFilterSelected.value}
+                onChange={handleSelectChange}
               >
-                {filterOptions?.map((item) => (
+                {dialogFilterOptions?.map((item) => (
                   <Select.Option
                     key={item?.value}
                     value={item.value}
@@ -285,10 +456,10 @@ const FilterData: React.FC<FilterDataProps> = ({
               </Select>
             )}
 
-            {activeFilter.type === "radioActive" && (
+            {dialogFilterSelected.type === "radioActive" && (
               <Radio.Group
                 onChange={handleRadioChange}
-                value={filterValues?.value ?? activeFilter?.value}
+                value={dialogFilterValue.value ?? dialogFilterSelected.value}
                 style={{
                   display: "flex",
                   gap: 10,
@@ -300,10 +471,10 @@ const FilterData: React.FC<FilterDataProps> = ({
                 <Radio value={false}>Không hoạt động</Radio>
               </Radio.Group>
             )}
-            {activeFilter.type === "radioYesNo" && (
+            {dialogFilterSelected.type === "radioYesNo" && (
               <Radio.Group
                 onChange={handleRadioChange}
-                value={filterValues?.value ?? activeFilter?.value}
+                value={dialogFilterValue.value ?? dialogFilterSelected.value}
                 style={{
                   display: "flex",
                   gap: 10,
@@ -317,7 +488,6 @@ const FilterData: React.FC<FilterDataProps> = ({
             )}
           </div>
         )}
-
         <Button
           type="primary"
           style={{
@@ -327,14 +497,14 @@ const FilterData: React.FC<FilterDataProps> = ({
             marginBottom: 10,
           }}
           onClick={() => {
-            handleApply();
+            applyFilter();
           }}
         >
           Áp dụng
         </Button>
         <Button
           danger
-          onClick={closeDrawer}
+          onClick={() => setDialogFilterVisible(false)}
           style={{ width: "100%", borderRadius: 5, height: 40 }}
         >
           Huỷ
@@ -343,5 +513,4 @@ const FilterData: React.FC<FilterDataProps> = ({
     </>
   );
 };
-
 export default FilterData;
