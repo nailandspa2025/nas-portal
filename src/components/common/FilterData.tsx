@@ -18,32 +18,24 @@ import {
   DownOutlined,
   FilterOutlined,
   SearchOutlined,
+  CloseCircleOutlined,
 } from "@ant-design/icons";
 import { getDataForFilter } from "../../utils/common/getDataForFilter";
 import { useLocation } from "react-router-dom";
 
 type FilterDataProps = {
   placeholder?: string;
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  value?: string;
-  submit?: () => void;
-  filters?: any;
   onFilterChange?: (filters: any) => void;
-  columns?: any;
   onColumnChange?: (columns: any) => void;
-  buttons?: any;
   handlers?: Record<string, () => void>;
-  actions?: any;
+  utils?: any;
 };
 
 const FilterData: React.FC<FilterDataProps> = ({
-  filters = [],
   onFilterChange = () => {},
-  columns = [],
   onColumnChange,
-  buttons = [],
   handlers,
-  actions = [],
+  utils = [],
 }) => {
   const location = useLocation();
   const dropdownRef = useRef<any>(null);
@@ -59,13 +51,14 @@ const FilterData: React.FC<FilterDataProps> = ({
   >([]);
 
   const [dialogFilterLabel, setDialogFilterLabel] = useState(
-    filters.filter((f: any) => f.isActive && f.popup)
+    utils?.filters.filter((f: any) => f.isActive && f.popup)
   );
   const [columnVisible, setColumnVisible] = useState<boolean>(false);
-  const [currentColumns, setCurrentColumns] = useState<any>(columns);
+  const [currentColumns, setCurrentColumns] = useState<any>(utils?.columns);
   const [initialLoad, setInitialLoad] = useState(false);
-  const addFilter = useCallback((filters: any) => {
-    const params = filters.reduce((acc: any, f: any) => {
+
+  const addFilter = useCallback((f: any) => {
+    const params = f.reduce((acc: any, f: any) => {
       if (f.field !== undefined) {
         acc[f.field] = f.value;
       }
@@ -112,7 +105,7 @@ const FilterData: React.FC<FilterDataProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilterTextData((prev: any) => ({
       ...prev,
-      field: filters[0].field,
+      field: utils?.filters[0].field,
       value: e.target.value,
     }));
   };
@@ -196,7 +189,7 @@ const FilterData: React.FC<FilterDataProps> = ({
     setDialogFilterLabel(updatedFilters);
   };
 
-  const filerMenus = filters.filter(
+  const filerMenus = utils?.filters.filter(
     (f: any) =>
       f.popup && !dialogFilterLabel.some((df: any) => df.field === f.field)
   );
@@ -229,7 +222,7 @@ const FilterData: React.FC<FilterDataProps> = ({
   return (
     <>
       <Row gutter={[8, 8]} style={{ width: "100%" }}>
-        {filters && filters.length > 0 && (
+        {utils?.filters && utils.filters.length > 0 && (
           <Col
             xs={24}
             sm={24}
@@ -239,7 +232,7 @@ const FilterData: React.FC<FilterDataProps> = ({
           >
             <Space.Compact block>
               <Input
-                placeholder={filters[0].name}
+                placeholder={utils?.filters[0].name}
                 onChange={handleInputChange}
                 value={filterTextData?.value}
                 onKeyPress={(event: { key: string }) => {
@@ -247,6 +240,16 @@ const FilterData: React.FC<FilterDataProps> = ({
                     searchText();
                   }
                 }}
+                suffix={
+                  <CloseCircleOutlined
+                    onClick={() => setFilterTextData({})}
+                    style={{
+                      cursor: "pointer",
+                      color: "rgba(0,0,0,0.45)",
+                      visibility: filterTextData?.value ? "visible" : "hidden",
+                    }}
+                  />
+                }
               />
               <Button
                 type="primary"
@@ -266,7 +269,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                       label: item.name,
                       onClick: () => openDrawer(item),
                     },
-                    ...(index < actions.length - 1
+                    ...(index < filerMenus.length - 1
                       ? [{ type: "divider" }]
                       : []),
                   ]),
@@ -284,7 +287,7 @@ const FilterData: React.FC<FilterDataProps> = ({
             )}
           </Col>
         )}
-        {columns && columns.length > 0 && (
+        {utils?.columns && utils?.columns.length > 0 && (
           <Col
             xs={24}
             sm={24}
@@ -298,7 +301,7 @@ const FilterData: React.FC<FilterDataProps> = ({
           >
             <Space size={[5, 8]} wrap>
               <div>
-                {buttons
+                {utils?.buttons
                   ?.filter((f: any) => f.position === "left")
                   .map((item: any) => (
                     <Button
@@ -315,20 +318,24 @@ const FilterData: React.FC<FilterDataProps> = ({
                 <Dropdown
                   trigger={["click"]}
                   menu={{
-                    items: actions.flatMap((item: any, index: number) => [
-                      {
-                        key: item.key,
-                        label: (
-                          <span onClick={() => handleAction(item.funcName)}>
-                            {item.icon}
-                            <span style={{ marginLeft: 8 }}>{item.label}</span>
-                          </span>
-                        ),
-                      },
-                      ...(index < actions.length - 1
-                        ? [{ type: "divider" }]
-                        : []),
-                    ]),
+                    items: utils?.actions.flatMap(
+                      (item: any, index: number) => [
+                        {
+                          key: item.key,
+                          label: (
+                            <span onClick={() => handleAction(item.funcName)}>
+                              {item.icon}
+                              <span style={{ marginLeft: 8 }}>
+                                {item.label}
+                              </span>
+                            </span>
+                          ),
+                        },
+                        ...(index < utils?.actions.length - 1
+                          ? [{ type: "divider" }]
+                          : []),
+                      ]
+                    ),
                     selectable: true,
                   }}
                 >
@@ -375,7 +382,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                 </Dropdown>
               </div>
               <div>
-                {buttons
+                {utils?.buttons
                   ?.filter((f: any) => f.position === "right")
                   .map((item: any) => (
                     <Button
@@ -403,8 +410,11 @@ const FilterData: React.FC<FilterDataProps> = ({
                   style={{ cursor: "pointer" }}
                   onClick={() => openDrawer(filter)}
                 >
-                  {filters.find((f: any) => f.field === filter.field)?.name}:{" "}
-                  {(filter.selected as { label?: string })?.label || ""}
+                  {
+                    utils?.filters.find((f: any) => f.field === filter.field)
+                      ?.name
+                  }
+                  : {(filter.selected as { label?: string })?.label || ""}
                 </Tag>
               ))}
               {dialogFilterLabel.length > 1 && (

@@ -73,13 +73,10 @@ const Users = () => {
       <div ref={divRef}>
         <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
           <FilterData
-            filters={utils.filters}
-            columns={filteredColumns}
             onColumnChange={setFilteredColumns}
             onFilterChange={fetchUsers}
-            buttons={utils.buttons}
-            actions={utils.actions}
             handlers={handleActions}
+            utils={utils}
           />
         </Row>
       </div>
