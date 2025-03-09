@@ -1,31 +1,86 @@
-import { UploadOutlined, DownloadOutlined } from "@ant-design/icons";
+import {
+  UploadOutlined,
+  DownloadOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { Avatar } from "antd";
 
 export const columns = [
   {
+    title: "Hình ảnh",
+    key: "avatar",
+    width: 80,
+    render: (row: { avatar?: string }) => (
+      <Avatar
+        size={50}
+        icon={!row?.avatar ? <UserOutlined /> : undefined}
+        src={row?.avatar || undefined}
+      />
+    ),
+  },
+
+  {
     title: "Họ và Tên",
-    dataIndex: "name",
-    key: "name",
-    hidden: false,
+    dataIndex: "fullName",
+    key: "fullName",
+    width: 180,
   },
   {
     title: "Email",
     dataIndex: "email",
     key: "email",
-    hidden: false,
+    width: 220,
   },
   {
     title: "Số điện thoại",
-    dataIndex: "phone",
-    key: "phone",
-    hidden: false,
+    dataIndex: "phoneNumber",
+    key: "phoneNumber",
+    width: 140,
+  },
+  {
+    title: "Loại",
+    dataIndex: "userType",
+    key: "userType",
+    width: 80,
+    render: (userType: number) => (
+      <span>{userType === 1 ? "Admin" : "User"}</span>
+    ),
+  },
+
+  {
+    title: "Địa chỉ",
+    dataIndex: "street",
+    key: "street",
+    width: 250,
+  },
+  {
+    title: "Tỉnh/thành",
+    dataIndex: "cityName",
+    key: "cityName",
+    width: 150,
+  },
+  {
+    title: "Quận/huyện",
+    dataIndex: "districtName",
+    key: "districtName",
+    width: 150,
+  },
+  {
+    title: "Phường/xã",
+    dataIndex: "wardName",
+    key: "wardName",
+    width: 150,
   },
   {
     title: "Trạng thái",
-    dataIndex: "status",
-    key: "status",
-    render: (text: string) => (
-      <span style={{ color: text === "Active" ? "green" : "red" }}>{text}</span>
+    dataIndex: "isActive",
+    key: "isActive",
+    render: (isActive: boolean) => (
+      <span style={{ color: isActive ? "green" : "red" }}>
+        {isActive ? "Active" : "Inactive"}
+      </span>
     ),
+    width: 100,
     hidden: true,
   },
 ];
@@ -33,7 +88,7 @@ export const columns = [
 export const filters = [
   {
     name: "Nhập số điện thoại, email...",
-    field: "searhText",
+    field: "searchText",
     type: "text",
     popup: false,
     isActive: true,
@@ -49,27 +104,26 @@ export const filters = [
     //selected: { label: "Không hoạt động" },
     value: "false",
   },
-
-  {
-    key: "createdBy",
-    name: "Tạo bởi",
-    field: "createdBy",
-    type: "select",
-    popup: true,
-    isActive: false,
-    actionName: "username",
-    remoteServer: true,
-  },
-  {
-    key: "updatedBy",
-    name: "Cập nhật bởi",
-    field: "updatedBy",
-    type: "select",
-    popup: true,
-    isActive: false,
-    actionName: "username",
-    remoteServer: true,
-  },
+  // {
+  //   key: "createdBy",
+  //   name: "Tạo bởi",
+  //   field: "createdBy",
+  //   type: "select",
+  //   popup: true,
+  //   isActive: false,
+  //   actionName: "username",
+  //   remoteServer: true,
+  // },
+  // {
+  //   key: "updatedBy",
+  //   name: "Cập nhật bởi",
+  //   field: "updatedBy",
+  //   type: "select",
+  //   popup: true,
+  //   isActive: false,
+  //   actionName: "username",
+  //   remoteServer: true,
+  // },
   // {
   //   key: "category",
   //   name: "Loại tin tức",

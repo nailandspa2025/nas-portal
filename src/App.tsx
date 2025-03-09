@@ -11,10 +11,11 @@ import "react-toastify/dist/ReactToastify.css";
 import Loading from "./components/common/Loading";
 import { useSelector } from "react-redux";
 import { RootState } from "./redux/reducers";
-import { STORAGE_KEY } from "./constants/application.constant";
 function App() {
   const collapsed = useSelector((state: RootState) => state.global.status);
-  const isAuthorized = localStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
+  const { isAuthorized } = useSelector((state: RootState) => ({
+    isAuthorized: state.auth.authToken != null,
+  }));
   return (
     <BrowserRouter>
       <Loading isLoading={collapsed} />

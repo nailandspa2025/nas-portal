@@ -5,29 +5,32 @@ import { toast } from "react-toastify";
 import { AuthApi } from "../../apis/auth/auth";
 import { useMutation } from "@tanstack/react-query";
 import { LoginPayload, LoginResponse } from "../../apis/auth/interface";
-//import { userLoggedIn } from "../../redux/actions/user.actions";
-import { STORAGE_KEY } from "../../constants/application.constant";
-//import { useDispatch } from "react-redux";
+import { userLoggedIn } from "../../redux/actions/user.actions";
+//import { STORAGE_KEY } from "../../constants/application.constant";
+import { useDispatch } from "react-redux";
 const { Title } = Typography;
 const SignIn = () => {
-  //const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const signInMutation = useMutation<LoginResponse, Error, LoginPayload>({
     mutationFn: (request: LoginPayload) => AuthApi.login(request),
   });
   const onFinish = (values: LoginPayload) => {
-    toast.success("Đăng nhập thành công!");
-    localStorage.setItem(STORAGE_KEY.ACCESS_TOKEN, "0000-00-00 00:00:00");
-    //navigate("/dashboard");
-    window.location.replace("/");
-    // signInMutation.mutate(values, {
-    //   onSuccess: () => {
-    //     toast.success("Đăng nhập thành công!");
-    //     localStorage.setItem(STORAGE_KEY.ACCESS_TOKEN, "0000-00-00 00:00:00");
-    //     navigate("/dashboard");
-    //   },
-    //   onError: () => toast.error("Tên đăng nhập và mật khẩu không đúng!"),
-    // });
+    //window.location.replace("/");
+    signInMutation.mutate(values, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onSuccess: (res: any) => {
+        if (res.succeeded) {
+          dispatch(userLoggedIn(res));
+          toast.success("Đăng nhập thành công!");
+          navigate("/dashboard");
+          return;
+        } else {
+          toast.error(res.message);
+        }
+      },
+      onError: () => toast.error("Tên đăng nhập và mật khẩu không đúng!"),
+    });
   };
   return (
     <div className="login-container">
@@ -37,10 +40,18 @@ const SignIn = () => {
         </Title>
         <Form name="login-form" onFinish={onFinish} layout="vertical">
           <Form.Item
-            name="username"
-            rules={[{ required: true, message: "Vui lòng nhập tài khoản!" }]}
+            name="email"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập email hoặc tài khoản!",
+              },
+            ]}
           >
-            <Input prefix={<UserOutlined />} placeholder="Tài khoản" />
+            <Input
+              prefix={<UserOutlined />}
+              placeholder="Email hoặc Tài khoản"
+            />
           </Form.Item>
 
           <Form.Item
