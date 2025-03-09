@@ -6,7 +6,7 @@ import {
 } from "../actions/user.actions";
 
 interface UserState {
-  user: unknown;
+  user: object;
   authToken: string | null;
 }
 
@@ -14,31 +14,30 @@ type UserAction = {
   type: typeof USER_LOGGED_IN | typeof USER_LOGGED_OUT | typeof USER_LOADED;
   payload: {
     data: {
-      access_token?: string;
-      user?: unknown;
+      jwToken?: string;
+      user?: object;
     };
   };
 };
 
 const initialAuthState: UserState = {
-  user: undefined,
+  user: {},
   authToken: localStorage.getItem(STORAGE_KEY.ACCESS_TOKEN),
 };
 
 const userReducer = (state = initialAuthState, action: UserAction) => {
   switch (action.type) {
     case USER_LOGGED_IN: {
-      const accessToken = action.payload.data.access_token;
+      const accessToken = action.payload.data.jwToken;
       if (accessToken) {
         localStorage.setItem(STORAGE_KEY.ACCESS_TOKEN, accessToken);
       }
 
-      return { authToken: accessToken, user: undefined };
+      return { authToken: accessToken, user: action.payload.data };
     }
 
     case USER_LOGGED_OUT: {
       localStorage.removeItem(STORAGE_KEY.ACCESS_TOKEN);
-
       return initialAuthState;
     }
 

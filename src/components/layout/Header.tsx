@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Layout, Avatar, Dropdown, Typography } from "antd";
 import {
   MenuFoldOutlined,
@@ -15,6 +16,8 @@ const Header = () => {
   const dispatch = useDispatch();
   const isMobile = useIsMobile();
   const collapsed = useSelector((state: RootState) => state.global.collapsed);
+  const auth: any = useSelector((state: RootState) => state.auth.user);
+  console.log("canhlv", auth);
   const onCollapseChange = () => {
     if (!isMobile) {
       dispatch({ type: "setCollapsed", collapsed: !collapsed });
@@ -71,11 +74,12 @@ const Header = () => {
         >
           <div className="profile-dropdown">
             <Text type="secondary" className="username">
-              canhlv
+              {auth?.email ?? auth.userName}
             </Text>
             <Avatar
               icon={<UserOutlined />}
               style={{ marginLeft: 8, cursor: "pointer" }}
+              src={auth?.avatar}
             />
           </div>
         </Dropdown>
