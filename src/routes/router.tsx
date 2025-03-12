@@ -1,7 +1,8 @@
-import Dashboard from "../pages/dashboard/dashboard";
-import Users from "../pages/auth/users";
-
 import { ReactElement } from "react";
+
+import Dashboard from "../pages/dashboard/dashboard";
+import Users from "../pages/user/user";
+import UserAction from "../pages/user/action";
 
 interface RouteType {
   path: string;
@@ -10,9 +11,14 @@ interface RouteType {
 }
 
 const routes: RouteType[] = [
-  //   { path: "/dashboard", name: "Trang chủ", element: <Users /> },
   { path: "/", name: "Trang chủ", element: <Dashboard /> },
-  { path: "/users", name: "Trang chủ", element: <Users /> },
+  { path: "/users", name: "Danh sách người dùng", element: <Users /> },
+  { path: "/users/none", name: "Thêm mới người dùng", element: <UserAction /> },
+  {
+    path: "/users/:id",
+    name: "Chỉnh sửa người dùng",
+    element: <UserAction />,
+  },
 ];
 
 export default routes;

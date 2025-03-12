@@ -4,6 +4,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Avatar } from "antd";
+import { Link } from "react-router-dom";
 
 export const columns = [
   {
@@ -24,6 +25,9 @@ export const columns = [
     dataIndex: "fullName",
     key: "fullName",
     width: 180,
+    render: (text: string, record: { id: string }) => (
+      <Link to={`/users/${record.id}`}>{text}</Link>
+    ),
   },
   {
     title: "Email",
@@ -101,8 +105,16 @@ export const filters = [
     type: "radioActive",
     popup: true,
     isActive: false,
-    //selected: { label: "Không hoạt động" },
     value: "false",
+  },
+  {
+    key: "userType",
+    name: "Loại người dùng",
+    field: "userType",
+    type: "select",
+    popup: true,
+    isActive: false,
+    actionName: "userType",
   },
   // {
   //   key: "createdBy",

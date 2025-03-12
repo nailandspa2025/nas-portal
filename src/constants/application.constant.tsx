@@ -3,7 +3,7 @@ const API_METHOD = {
   POST: "POST",
   PUT: "PUT",
   DELETE: "DELETE",
-};
+} as const;
 const STORAGE_KEY = {
   ACCESS_TOKEN: "ACCESS_TOKEN",
 };

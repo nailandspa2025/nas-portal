@@ -8,8 +8,11 @@ import FilterData from "../../components/common/FilterData";
 import { AuthApi } from "../../apis/auth/auth";
 import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Users = () => {
+  const navigate = useNavigate();
   const divRef = useRef<HTMLDivElement>(null);
   const heightElement = useElementHeight(divRef);
   const [pageNumber, setPageNumber] = useState<number>(1);
@@ -33,13 +36,13 @@ const Users = () => {
   };
   const handleActions = {
     createNew: () => {
-      console.log("Tạo mới người dùng");
+      navigate("/users/none");
     },
-    deleteUser: () => {
-      console.log("Xóa người dùng");
+    importExcel: () => {
+      toast.success("Đang phát triển");
     },
-    exportData: () => {
-      console.log("Xuất dữ liệu");
+    exportExcel: () => {
+      toast.success("Đang phát triển");
     },
   };
   return (
