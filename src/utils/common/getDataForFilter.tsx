@@ -1,40 +1,16 @@
 export const getDataForFilter = async (actionName: string) => {
   switch (actionName) {
-    case "articleType":
-      return [
-        { value: "approve", label: "Đã duyệt" },
-        { value: "decline", label: "Từ chối" },
-        { value: "pending", label: "Đang chờ" },
-      ];
-
-    case "username":
+    case "userType":
       return [
         {
-          value: "canhlv",
-          label: "Lâm Văn Cảnh",
+          value: 0,
+          label: "User",
         },
         {
-          value: "vilhp",
-          label: "Lâm Huỳnh Phượng Vi",
-        },
-        {
-          value: "linhlv",
-          label: "Lê Vi Linh",
+          value: 1,
+          label: "Admin",
         },
       ];
-
-    case "assignmentStatuses":
-      return [
-        {
-          value: "true",
-          label: "Đã phân bổ",
-        },
-        {
-          value: "false",
-          label: "Chưa phân bổ",
-        },
-      ];
-
     default:
       return [];
   }

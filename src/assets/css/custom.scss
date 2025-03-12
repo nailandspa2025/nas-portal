@@ -36,13 +36,20 @@
 .ant-checkbox-wrapper,
 .ant-radio-wrapper,
 .ant-typography {
-  font-size: 13px !important;
+  font-size: 12px !important;
 }
 
 .ant-custom-pagination {
-    
     .ant-table-wrapper .ant-table-pagination.ant-pagination {
         margin-bottom: -10px !important;
     }
+}
+
+.ant-form-item {
+  margin-bottom: 9px !important; 
+}
+
+.ant-form-item-label {
+  padding-bottom: 2px !important; /* Giảm khoảng cách giữa label và input */
 }
 

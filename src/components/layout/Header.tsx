@@ -11,13 +11,22 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/reducers";
 import { STORAGE_KEY } from "../../constants/application.constant";
 import useIsMobile from "../../utils/useIsMobile";
+import { AuthApi } from "../../apis/auth/auth";
+import { useQuery } from "@tanstack/react-query";
+
 const { Text } = Typography;
+
 const Header = () => {
   const dispatch = useDispatch();
   const isMobile = useIsMobile();
   const collapsed = useSelector((state: RootState) => state.global.collapsed);
-  const auth: any = useSelector((state: RootState) => state.auth.user);
-  console.log("canhlv", auth);
+  const { data } = useQuery({
+    queryKey: ["userInfo"],
+    queryFn: async () => {
+      const response: any = await AuthApi.userInfo();
+      return response.data;
+    },
+  });
   const onCollapseChange = () => {
     if (!isMobile) {
       dispatch({ type: "setCollapsed", collapsed: !collapsed });
@@ -74,12 +83,12 @@ const Header = () => {
         >
           <div className="profile-dropdown">
             <Text type="secondary" className="username">
-              {auth?.email ?? auth.userName}
+              {data?.email ?? data?.userName}
             </Text>
             <Avatar
               icon={<UserOutlined />}
               style={{ marginLeft: 8, cursor: "pointer" }}
-              src={auth?.avatar}
+              src={data?.avatar}
             />
           </div>
         </Dropdown>

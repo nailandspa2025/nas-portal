@@ -16,14 +16,13 @@ const SignIn = () => {
     mutationFn: (request: LoginPayload) => AuthApi.login(request),
   });
   const onFinish = (values: LoginPayload) => {
-    //window.location.replace("/");
     signInMutation.mutate(values, {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onSuccess: (res: any) => {
         if (res.succeeded) {
           dispatch(userLoggedIn(res));
           toast.success("Đăng nhập thành công!");
-          navigate("/dashboard");
+          navigate("/");
           return;
         } else {
           toast.error(res.message);
