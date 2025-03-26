@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const validatePhoneNumber = (value: any) => {
+const validatePhoneNumber = (_: any, value: any) => {
   const phoneRegex = /^[0-9]{10}$/;
   if (value) {
     if (!value.startsWith("0")) {
@@ -14,7 +14,7 @@ const validatePhoneNumber = (value: any) => {
   return Promise.resolve();
 };
 
-const validateLongitude = (value: any) => {
+const validateLongitude = (_: any, value: any) => {
   const longitudeRegex =
     /^-?((\d|[1-9]\d|1[0-7]\d)(\.\d{1,14})?|180(\.0{1,14})?)$/;
   if (value) {
@@ -29,7 +29,7 @@ const validateLongitude = (value: any) => {
   return Promise.resolve();
 };
 
-const validateLatitude = (value: any) => {
+const validateLatitude = (_: any, value: any) => {
   const latitudeRegex = /^-?((\d|[1-8]\d)(\.\d{1,15})?|90(\.0{1,15})?)$/;
   if (value) {
     if (!latitudeRegex.test(value)) {
