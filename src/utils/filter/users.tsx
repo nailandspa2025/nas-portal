@@ -1,97 +1,141 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   UploadOutlined,
   DownloadOutlined,
   UserOutlined,
+  FormOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
-import { Avatar } from "antd";
+import { Avatar, Space, Tooltip } from "antd";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import dayjs from "dayjs";
+export const columns = (items: any) => {
+  const { t } = useTranslation();
+  return [
+    {
+      title: t("Avatar"),
+      key: "avatar",
+      width: 80,
+      render: (row: { avatar?: string }) => (
+        <Avatar
+          size={50}
+          icon={!row?.avatar ? <UserOutlined /> : undefined}
+          src={row?.avatar || undefined}
+        />
+      ),
+    },
 
-export const columns = [
-  {
-    title: "Hình ảnh",
-    key: "avatar",
-    width: 80,
-    render: (row: { avatar?: string }) => (
-      <Avatar
-        size={50}
-        icon={!row?.avatar ? <UserOutlined /> : undefined}
-        src={row?.avatar || undefined}
-      />
-    ),
-  },
-
-  {
-    title: "Họ và Tên",
-    dataIndex: "fullName",
-    key: "fullName",
-    width: 180,
-    render: (text: string, record: { id: string }) => (
-      <Link to={`/users/${record.id}`}>{text}</Link>
-    ),
-  },
-  {
-    title: "Email",
-    dataIndex: "email",
-    key: "email",
-    width: 220,
-  },
-  {
-    title: "Số điện thoại",
-    dataIndex: "phoneNumber",
-    key: "phoneNumber",
-    width: 140,
-  },
-  {
-    title: "Loại",
-    dataIndex: "userType",
-    key: "userType",
-    width: 80,
-    render: (userType: number) => (
-      <span>{userType === 1 ? "Admin" : "User"}</span>
-    ),
-  },
-
-  {
-    title: "Địa chỉ",
-    dataIndex: "street",
-    key: "street",
-    width: 250,
-  },
-  {
-    title: "Tỉnh/thành",
-    dataIndex: "cityName",
-    key: "cityName",
-    width: 150,
-  },
-  {
-    title: "Quận/huyện",
-    dataIndex: "districtName",
-    key: "districtName",
-    width: 150,
-  },
-  {
-    title: "Phường/xã",
-    dataIndex: "wardName",
-    key: "wardName",
-    width: 150,
-  },
-  {
-    title: "Trạng thái",
-    dataIndex: "isActive",
-    key: "isActive",
-    render: (isActive: boolean) => (
-      <span style={{ color: isActive ? "green" : "red" }}>
-        {isActive ? "Active" : "Inactive"}
-      </span>
-    ),
-    width: 100,
-    hidden: true,
-  },
-];
+    {
+      title: t("Full name"),
+      dataIndex: "fullName",
+      key: "fullName",
+      width: 180,
+      render: (text: string, record: { id: string }) => (
+        <Link to={`/user/${record.id}`}>{text}</Link>
+      ),
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      width: 220,
+    },
+    {
+      title: t("Phone number"),
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+      width: 140,
+    },
+    {
+      title: t("Gender"),
+      dataIndex: "gender",
+      key: "gender",
+      width: 80,
+      render: (gender: number) =>
+        ({ 1: "Male", 2: "Female", 3: "Other" }[gender] || "Unknown"),
+    },
+    {
+      title: t("Birthday"),
+      dataIndex: "dateOfBirth",
+      key: "dateOfBirth",
+      width: 120,
+      render: (created: string) => dayjs(created).format("DD/MM/YYYY"),
+    },
+    {
+      title: t("Status"),
+      dataIndex: "isActive",
+      key: "isActive",
+      render: (isActive: boolean) => (
+        <span style={{ color: isActive ? "green" : "red" }}>
+          {isActive ? t("Active") : t("Inactive")}
+        </span>
+      ),
+      width: 100,
+      hidden: false,
+    },
+    {
+      title: t("Address"),
+      dataIndex: "street",
+      key: "street",
+      width: 250,
+    },
+    {
+      title: t("City"),
+      dataIndex: "cityName",
+      key: "cityName",
+      width: 150,
+      hidden: true,
+    },
+    {
+      title: t("District"),
+      dataIndex: "districtName",
+      key: "districtName",
+      width: 150,
+      hidden: true,
+    },
+    {
+      title: t("Ward"),
+      dataIndex: "wardName",
+      key: "wardName",
+      width: 150,
+      hidden: true,
+    },
+    {
+      fixed: "right",
+      align: "center",
+      title: t("Action"),
+      dataIndex: "action",
+      key: "action",
+      width: 60,
+      render: (_: any, record: any) => (
+        <Space>
+          <Tooltip title={t("Edit")}>
+            <a
+              onClick={() => items.handleEdit(record)}
+              style={{ color: "#1890ff" }}
+            >
+              <FormOutlined style={{ fontSize: 16 }} />
+            </a>
+          </Tooltip>
+          <Tooltip title={t("Delete")}>
+            <a
+              onClick={() => items.handleDelete(record)}
+              style={{ color: "#ff4d4f" }}
+            >
+              <DeleteOutlined style={{ fontSize: 16 }} />
+            </a>
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
+};
 
 export const filters = [
   {
-    name: "Nhập số điện thoại, email...",
+    name: "Enter name, email, phone ...",
     field: "searchText",
     type: "text",
     popup: false,
@@ -100,7 +144,7 @@ export const filters = [
 
   {
     key: "status",
-    name: "Trạng thái",
+    name: "Status",
     field: "isActive",
     type: "radioActive",
     popup: true,
@@ -109,7 +153,7 @@ export const filters = [
   },
   {
     key: "userType",
-    name: "Loại người dùng",
+    name: "User type",
     field: "userType",
     type: "select",
     popup: true,
@@ -169,7 +213,7 @@ export const filters = [
 export const buttons = [
   {
     position: "right",
-    label: "Thêm mới",
+    label: "Create",
     funcName: "createNew",
     color: "primary",
     accessRight: ["customer.insert", "customer.admin", "admin"],
@@ -185,13 +229,13 @@ export const buttons = [
 export const actions = [
   {
     icon: <UploadOutlined />,
-    label: "Nhập liệu",
+    label: "Import data",
     funcName: "importExcel",
     accessRight: ["users.import", "users.admin", "admin"],
   },
   {
     icon: <DownloadOutlined />,
-    label: "Xuất dũ liệu",
+    label: "Export data",
     funcName: "exportExcel",
     accessRight: ["users.import", "users.admin", "admin"],
   },

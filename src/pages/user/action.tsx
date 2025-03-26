@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Button,
   Card,
   Col,
   DatePicker,
@@ -9,16 +8,9 @@ import {
   Row,
   Select,
   Space,
-  Image,
   Switch,
-  Upload,
 } from "antd";
-import {
-  CheckOutlined,
-  CloseOutlined,
-  PlusOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
+import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -27,7 +19,12 @@ import { AuthApi } from "../../apis/auth/auth";
 import { buildFormData } from "../../utils/common/buildFormData";
 import { validatePhoneNumber } from "../../utils/common/validate";
 import dayjs from "dayjs";
+import AvatarUploader from "../../components/AvatarUploader";
+import TopActionButtons from "../../components/common/TopActionButtons";
+import BottomActionButtons from "../../components/common/BottomActionButtons";
+import { useTranslation } from "react-i18next";
 const UserAction = () => {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const params = useParams();
@@ -35,7 +32,7 @@ const UserAction = () => {
 
   const { data = { data: {} }, isLoading } = useQuery({
     queryKey: ["userDetail", params.id],
-    queryFn: () => AuthApi.detail(params.id as string),
+    queryFn: () => AuthApi.getById(params.id as string),
     enabled: !!params.id,
   });
   useEffect(() => {
@@ -43,22 +40,6 @@ const UserAction = () => {
       setImageUrl((data as Record<string, any>)?.data?.avatar);
     }
   }, [data]);
-  const handleUpload = (info: any) => {
-    const file = info.file;
-    if (!file) return;
-    const isImage = file.type.startsWith("image/");
-    if (!isImage) {
-      toast.error("Chỉ được chọn file ảnh!");
-      return;
-    }
-    form.setFieldsValue({ avatar: file });
-    const localUrl = URL.createObjectURL(file);
-    setImageUrl(localUrl);
-  };
-  const handleRemoveImage = () => {
-    setImageUrl(null);
-    form.setFieldsValue({ avatar: undefined });
-  };
   const mutation = useMutation({
     mutationFn: async (values) => {
       const formD = new FormData();
@@ -69,12 +50,12 @@ const UserAction = () => {
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
-        toast.success("Lưu thành công");
-        navigate("/users");
+        toast.success("Save successfully");
+        navigate("/user");
       } else toast.error(res.message);
     },
     onError: () => {
-      toast.error("Xảy ra lỗi");
+      toast.error("An error occurred");
     },
   });
   const onFinish = (values: any) => {
@@ -98,7 +79,7 @@ const UserAction = () => {
     districtId: (data as Record<string, any>)?.data?.districtId || null,
     cityId: (data as Record<string, any>)?.data?.cityId || null,
   };
-  console.log("Gender from API:", (data as Record<string, any>)?.data?.gender);
+
   return (
     <>
       {!isLoading && (
@@ -109,22 +90,7 @@ const UserAction = () => {
             initialValues={initialValues}
             onFinish={onFinish}
           >
-            <Row>
-              <Space
-                wrap
-                style={{
-                  width: "100%",
-                  justifyContent: "right",
-                }}
-              >
-                <Button type="default" onClick={() => navigate("/users")}>
-                  Quay lại
-                </Button>
-                <Button type="primary" htmlType="submit">
-                  Lưu
-                </Button>
-              </Space>
-            </Row>
+            <TopActionButtons backUrl="/user" />
             <Row gutter={32}>
               <Col xs={24} sm={24} md={12} lg={12}>
                 <Form.Item
@@ -133,171 +99,114 @@ const UserAction = () => {
                   rules={[
                     {
                       required: true,
-                      message: "Vui lòng nhập email!",
+                      message: t("Pease enter email!"),
                       type: "email",
                     },
                   ]}
                 >
-                  <Input placeholder="Nhập email" disabled={!!params.id} />
+                  <Input
+                    placeholder={t("Enter email")}
+                    disabled={!!params.id}
+                  />
                 </Form.Item>
                 {!params.id && (
                   <Form.Item
-                    label="Mật khẩu"
+                    label={t("Password")}
                     name="password"
                     rules={[
-                      { required: true, message: "Vui lòng nhập tài khoản!" },
+                      { required: true, message: t("Please enter password") },
                     ]}
                   >
                     <Input.Password
-                      placeholder="Nhập mật khẩu"
+                      placeholder={t("Enter password")}
                       disabled={!!params.id}
                     />
                   </Form.Item>
                 )}
                 <Form.Item
-                  label="Tên đầy đủ"
+                  label={t("Full name")}
                   name="fullName"
                   rules={[
-                    { required: true, message: "Vui lòng nhập tên đầy đủ!" },
+                    { required: true, message: t("Please enter full name!") },
                   ]}
                 >
-                  <Input placeholder="Nhập tên đầy đủ" />
+                  <Input placeholder={t("Enter full name")} />
                 </Form.Item>
                 <Form.Item
-                  label="Số điện thoại"
+                  label={t("Phone number")}
                   name="phoneNumber"
                   rules={[
-                    { required: true, message: "Vui lòng nhập số điện thoại!" },
+                    { required: true, message: t("Please enter phone number") },
                     {
                       validator: validatePhoneNumber,
                     },
                   ]}
                 >
-                  <Input placeholder="Nhập số điện thoại" />
+                  <Input placeholder={t("Enter phone number")} />
                 </Form.Item>
                 <Form.Item
-                  label="Ngày sinh"
+                  label={t("Birthday")}
                   name="dateOfBirth"
-                  rules={[{ required: true, message: "Vui chọn ngày sinh!" }]}
+                  rules={[
+                    { required: true, message: t("Please enter birthday!") },
+                  ]}
                 >
                   <DatePicker
                     style={{ width: "100%" }}
-                    placeholder="Ngày sinh"
+                    placeholder={t("Enter birthday")}
                     format="DD/MM/YYYY"
                   />
                 </Form.Item>
                 <Form.Item
-                  label="Giới tính"
+                  label={t("Gender")}
                   name="gender"
-                  rules={[{ required: true, message: "Vui chọn giới tính!" }]}
+                  rules={[
+                    { required: true, message: t("Please enter gender!") },
+                  ]}
                 >
                   <Select
                     style={{ width: "100%" }}
                     showSearch
-                    placeholder="Giới tính"
+                    placeholder={t("Choose gender")}
                   >
-                    <Select.Option value={0}>Nam</Select.Option>
-                    <Select.Option value={1}>Nữ</Select.Option>
-                    <Select.Option value={2}>Khác</Select.Option>
+                    <Select.Option value={1}>{t("Male")}</Select.Option>
+                    <Select.Option value={2}>{t("Female")}</Select.Option>
+                    <Select.Option value={3}>{t("Other")}</Select.Option>
                   </Select>
                 </Form.Item>
               </Col>
               <Col xs={24} sm={24} md={12} lg={12}>
-                <Form.Item label="Ảnh đại diện" name="avatar">
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "12px",
-                    }}
-                  >
-                    {imageUrl ? (
-                      <Image
-                        src={imageUrl}
-                        alt="Logo doanh nghiệp"
-                        width={"100%"}
-                        height={150}
-                        style={{
-                          borderRadius: "8px",
-                          objectFit: "cover",
-                          border: "1px solid #ddd",
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: "100%",
-                          height: 150,
-                          borderRadius: "8px",
-                          backgroundColor: "#f5f5f5",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          border: "1px dashed #ccc",
-                          color: "#888",
-                        }}
-                      >
-                        Ảnh đại diện
-                      </div>
-                    )}
-
-                    <Space
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: "10px",
-                      }}
-                    >
-                      <Upload
-                        name="logo"
-                        showUploadList={false}
-                        beforeUpload={() => false}
-                        onChange={handleUpload}
-                        accept="image/png, image/jpeg, image/gif"
-                      >
-                        <Button type="primary" ghost icon={<PlusOutlined />}>
-                          Chọn ảnh
-                        </Button>
-                      </Upload>
-                      {imageUrl && (
-                        <Button
-                          type="primary"
-                          danger
-                          ghost
-                          icon={<DeleteOutlined />}
-                          onClick={handleRemoveImage}
-                        >
-                          Xóa ảnh
-                        </Button>
-                      )}
-                    </Space>
-                  </div>
+                <Form.Item label={t("Avatar")} name="avatar">
+                  <AvatarUploader
+                    placeholder={t("Avatar")}
+                    data={imageUrl || undefined}
+                  />
                 </Form.Item>
-                <Form.Item label="Tỉnh/thành phố" name="cityId">
+                <Form.Item label={t("City")} name="cityId">
                   <Select
                     style={{ width: "100%" }}
                     showSearch
-                    placeholder="Tỉnh/thành phố"
+                    placeholder={t("Choose city")}
                   ></Select>
                 </Form.Item>
-                <Form.Item label="Quận/huyện" name="districtId">
+                <Form.Item label={t("District")} name="districtId">
                   <Select
                     style={{ width: "100%" }}
                     showSearch
-                    placeholder="Quận/huyện"
+                    placeholder={t("Choose district")}
                   ></Select>
                 </Form.Item>
-                <Form.Item label="Phường/xã" name="wardId">
+                <Form.Item label={t("Ward")} name="wardId">
                   <Select
                     style={{ width: "100%" }}
                     showSearch
-                    placeholder="Phường/xã"
+                    placeholder={t("Choose ward")}
                   ></Select>
                 </Form.Item>
               </Col>
               <Col span={24}>
-                <Form.Item label="Địa chỉ" name="street">
-                  <Input.TextArea rows={4} placeholder="Nhập địa chỉ" />
+                <Form.Item label={t("Address")} name="street">
+                  <Input.TextArea rows={4} placeholder={t("Enter address")} />
                 </Form.Item>
                 <Space align="center">
                   <Form.Item name="isActive" valuePropName="checked" noStyle>
@@ -307,26 +216,11 @@ const UserAction = () => {
                       defaultChecked={true}
                     />
                   </Form.Item>
-                  <span>Hoạt động</span>
+                  <span>{t("Active")}</span>
                 </Space>
               </Col>
             </Row>
-            <Space
-              wrap
-              style={{
-                width: "100%",
-                justifyContent: "right",
-                marginTop: "3.5rem",
-                paddingBottom: "1rem",
-              }}
-            >
-              <Button type="default" onClick={() => navigate("/users")}>
-                Quay lại
-              </Button>
-              <Button type="primary" htmlType="submit">
-                Luu
-              </Button>
-            </Space>
+            <BottomActionButtons backUrl="/user" />
           </Form>
         </Card>
       )}

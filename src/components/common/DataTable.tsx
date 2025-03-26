@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table, Empty, TableProps } from "antd";
-
+import { useTranslation } from "react-i18next";
 interface DataTableProps<T> {
   dataSource?: T[];
-  columns?: TableProps<T>["columns"];
+  columns?: any;
   total?: number;
   pageSize?: number;
   onChange?: (page: number, pageSize: number) => void;
@@ -27,25 +28,29 @@ const DataTable = <T extends Record<string, unknown>>({
   rowClassName = false,
   current = 1,
 }: DataTableProps<T>) => {
+  const { t } = useTranslation();
+
   return (
     <Table<T>
-      columns={columns.filter((col) => !col.hidden)}
+      columns={columns.filter((col: any) => !col.hidden)}
       dataSource={dataSource}
+      tableLayout="fixed"
       rowKey="id"
       scroll={{
         y: `calc(65vh - ${heightTable}px)`,
-        x: "100%",
+        x: "max-content",
       }}
       locale={{
-        emptyText: <Empty description={<span>Không có dữ liệu</span>} />,
+        emptyText: <Empty description={<span>{t("No data")}</span>} />,
       }}
       pagination={{
         defaultCurrent: current,
         showSizeChanger: true,
-        locale: { items_per_page: "/ trang" },
+        locale: { items_per_page: t("/ pages") },
+
         pageSize: pageSize,
         total: total,
-        showTotal: (total) => `Tổng ${total}`,
+        showTotal: (total) => `${t("Total")} ${total}`,
         pageSizeOptions: pageSizeOptions,
         onChange: (page, pageSize) => onChange(page, pageSize),
       }}

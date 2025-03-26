@@ -17,9 +17,23 @@ const Users = () => {
   const heightElement = useElementHeight(divRef);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
-  const [filteredColumns, setFilteredColumns] = useState(utils.columns);
   const [filters, setFilters] = useState<Record<string, string>>({});
 
+  const handleItemTable = {
+    handleEdit: (record: any) => {
+      navigate(`/user/${record.id}`);
+      console.log("Sửa người dùng:", record);
+    },
+    handleDelete: (record: any) => {
+      console.log("Xóa người dùng:", record);
+    },
+    handleView: (record: any) => {
+      console.log("Xem chi tiết người dùng:", record);
+    },
+  };
+  const [filteredColumns, setFilteredColumns] = useState(
+    utils.columns(handleItemTable)
+  );
   const { data } = useQuery({
     queryKey: ["userList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
@@ -36,7 +50,7 @@ const Users = () => {
   };
   const handleActions = {
     createNew: () => {
-      navigate("/users/none");
+      navigate("/user/none");
     },
     importExcel: () => {
       toast.success("Đang phát triển");
@@ -54,6 +68,7 @@ const Users = () => {
             onFilterChange={handleFilterChange}
             handlers={handleActions}
             utils={utils}
+            handleItemTable={handleItemTable}
           />
         </Row>
       </div>

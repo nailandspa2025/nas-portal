@@ -22,13 +22,13 @@ import {
 } from "@ant-design/icons";
 import { getDataForFilter } from "../../utils/common/getDataForFilter";
 import { useLocation } from "react-router-dom";
-
+import { useTranslation } from "react-i18next";
 type FilterDataProps = {
-  placeholder?: string;
   onFilterChange?: (filters: any) => void;
   onColumnChange?: (columns: any) => void;
   handlers?: Record<string, () => void>;
   utils?: any;
+  handleItemTable?: any;
 };
 
 const FilterData: React.FC<FilterDataProps> = ({
@@ -36,7 +36,9 @@ const FilterData: React.FC<FilterDataProps> = ({
   onColumnChange,
   handlers,
   utils = [],
+  handleItemTable,
 }) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const dropdownRef = useRef<any>(null);
   const storageKey = `${location.pathname}_columns`;
@@ -51,10 +53,12 @@ const FilterData: React.FC<FilterDataProps> = ({
   >([]);
 
   const [dialogFilterLabel, setDialogFilterLabel] = useState(
-    utils?.filters.filter((f: any) => f.isActive && f.popup)
+    utils?.filters?.filter((f: any) => f.isActive && f.popup)
   );
   const [columnVisible, setColumnVisible] = useState<boolean>(false);
-  const [currentColumns, setCurrentColumns] = useState<any>(utils?.columns);
+  const [currentColumns, setCurrentColumns] = useState<any>(
+    utils?.columns(handleItemTable)
+  );
   const [initialLoad, setInitialLoad] = useState(false);
 
   const addFilter = useCallback((f: any) => {
@@ -73,7 +77,7 @@ const FilterData: React.FC<FilterDataProps> = ({
       if (keywordSearch) {
         filterData.push(keywordSearch);
       }
-      filterData.push(...dialogFilterLabel);
+      filterData.push(...(dialogFilterLabel ?? []));
       addFilter(filterData);
     };
     getData();
@@ -117,7 +121,9 @@ const FilterData: React.FC<FilterDataProps> = ({
     setDialogFilterSelected(f);
     if (f.actionName) {
       const data = await getDataForFilter(f.actionName);
-      setDialogFilterOptions(data);
+      setDialogFilterOptions(
+        data.map((item) => ({ ...item, value: item.value.toString() }))
+      );
     }
     setDialogFilterValue({
       actionName: f.actionName,
@@ -162,11 +168,11 @@ const FilterData: React.FC<FilterDataProps> = ({
     const label =
       dialogFilterSelected?.type === "radioActive"
         ? e.target.value
-          ? "Hoạt động"
-          : "Không hoạt động"
+          ? t("Active")
+          : t("InActive")
         : e.target.value
-        ? "Yes"
-        : "No";
+        ? t("Yes")
+        : t("No");
     setDialogFilterValue((prev: any) => ({
       ...prev,
       actionName: dialogFilterSelected?.actionName,
@@ -189,7 +195,7 @@ const FilterData: React.FC<FilterDataProps> = ({
     setDialogFilterLabel(updatedFilters);
   };
 
-  const filerMenus = utils?.filters.filter(
+  const filerMenus = utils?.filters?.filter(
     (f: any) =>
       f.popup && !dialogFilterLabel.some((df: any) => df.field === f.field)
   );
@@ -222,14 +228,14 @@ const FilterData: React.FC<FilterDataProps> = ({
   return (
     <>
       <Row gutter={[8, 8]} style={{ width: "100%" }}>
-        {utils?.filters && utils.filters.length > 0 && (
-          <Col
-            xs={24}
-            sm={24}
-            md={24}
-            lg={12}
-            style={{ display: "flex", alignItems: "center" }}
-          >
+        <Col
+          xs={24}
+          sm={24}
+          md={24}
+          lg={12}
+          style={{ display: "flex", alignItems: "center" }}
+        >
+          {utils?.filters && utils.filters.length > 0 && (
             <Space.Compact block>
               <Input
                 placeholder={utils?.filters[0].name}
@@ -256,37 +262,37 @@ const FilterData: React.FC<FilterDataProps> = ({
                 onClick={searchText}
                 icon={<SearchOutlined />}
               >
-                Tìm
+                {t("Search")}
               </Button>
             </Space.Compact>
-            {filerMenus && filerMenus.length > 0 && (
-              <Dropdown
-                trigger={["click"]}
-                menu={{
-                  items: filerMenus.flatMap((item: any, index: number) => [
-                    {
-                      key: item.key,
-                      label: item.name,
-                      onClick: () => openDrawer(item),
-                    },
-                    ...(index < filerMenus.length - 1
-                      ? [{ type: "divider" }]
-                      : []),
-                  ]),
-                  selectable: true,
-                }}
+          )}
+          {filerMenus && filerMenus.length > 0 && (
+            <Dropdown
+              trigger={["click"]}
+              menu={{
+                items: filerMenus.flatMap((item: any, index: number) => [
+                  {
+                    key: item.key,
+                    label: item.name,
+                    onClick: () => openDrawer(item),
+                  },
+                  ...(index < filerMenus.length - 1
+                    ? [{ type: "divider" }]
+                    : []),
+                ]),
+                selectable: true,
+              }}
+            >
+              <Button
+                type="default"
+                icon={<FilterOutlined />}
+                style={{ marginLeft: 8 }}
               >
-                <Button
-                  type="default"
-                  icon={<FilterOutlined />}
-                  style={{ marginLeft: 8 }}
-                >
-                  Bộ lọc
-                </Button>
-              </Dropdown>
-            )}
-          </Col>
-        )}
+                {t("Filter")}
+              </Button>
+            </Dropdown>
+          )}
+        </Col>
         {utils?.columns && utils?.columns.length > 0 && (
           <Col
             xs={24}
@@ -310,39 +316,41 @@ const FilterData: React.FC<FilterDataProps> = ({
                       key={item.funcName}
                       onClick={() => handleAction(item.funcName)}
                     >
-                      {item.label}
+                      {t(item.label)}
                     </Button>
                   ))}
               </div>
               <div>
-                <Dropdown
-                  trigger={["click"]}
-                  menu={{
-                    items: utils?.actions.flatMap(
-                      (item: any, index: number) => [
-                        {
-                          key: item.key,
-                          label: (
-                            <span onClick={() => handleAction(item.funcName)}>
-                              {item.icon}
-                              <span style={{ marginLeft: 8 }}>
-                                {item.label}
+                {utils?.actions && utils?.actions.length > 0 && (
+                  <Dropdown
+                    trigger={["click"]}
+                    menu={{
+                      items: utils?.actions?.flatMap(
+                        (item: any, index: number) => [
+                          {
+                            key: item.key,
+                            label: (
+                              <span onClick={() => handleAction(item.funcName)}>
+                                {item.icon}
+                                <span style={{ marginLeft: 8 }}>
+                                  {t(item.label)}
+                                </span>
                               </span>
-                            </span>
-                          ),
-                        },
-                        ...(index < utils?.actions.length - 1
-                          ? [{ type: "divider" }]
-                          : []),
-                      ]
-                    ),
-                    selectable: true,
-                  }}
-                >
-                  <Button color="cyan" variant="outlined">
-                    Thao tác <DownOutlined />
-                  </Button>
-                </Dropdown>
+                            ),
+                          },
+                          ...(index < utils?.actions.length - 1
+                            ? [{ type: "divider" }]
+                            : []),
+                        ]
+                      ),
+                      selectable: true,
+                    }}
+                  >
+                    <Button color="cyan" variant="outlined">
+                      {t("Action")} <DownOutlined />
+                    </Button>
+                  </Dropdown>
+                )}
               </div>
               <div ref={dropdownRef}>
                 <Dropdown
@@ -357,7 +365,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                                 checked={!item.hidden}
                                 onChange={() => handleColumn(item.key)}
                               >
-                                {item.title}
+                                {t(item.title)}
                               </Checkbox>
                             </div>
                           ),
@@ -377,7 +385,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                     variant="outlined"
                     onClick={() => setColumnVisible(!columnVisible)}
                   >
-                    Ẩn hiện cột <DownOutlined />
+                    {t("Show/hide columns")} <DownOutlined />
                   </Button>
                 </Dropdown>
               </div>
@@ -387,11 +395,11 @@ const FilterData: React.FC<FilterDataProps> = ({
                   .map((item: any) => (
                     <Button
                       key={item.funcName}
-                      color={item.color}
+                      type={item.color ?? "primary"}
                       variant="solid"
                       onClick={() => handleAction(item.funcName)}
                     >
-                      {item.label}
+                      {t(item.label)}
                     </Button>
                   ))}
               </div>
@@ -423,7 +431,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                   style={{ cursor: "pointer" }}
                   onClick={resetFilters}
                 >
-                  Xóa tất cả
+                  {t("Delete all")}
                 </Tag>
               )}
             </Space>
@@ -458,7 +466,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                     value={item.value}
                     label={item.label}
                   >
-                    {item.label}
+                    {t(item.label)}
                   </Select.Option>
                 ))}
               </Select>
@@ -477,7 +485,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                     value={item.value}
                     label={item.label}
                   >
-                    {item.label}
+                    {t(item.label)}
                   </Select.Option>
                 ))}
               </Select>
@@ -494,8 +502,8 @@ const FilterData: React.FC<FilterDataProps> = ({
                   justifyContent: "center",
                 }}
               >
-                <Radio value={true}>Hoạt động</Radio>
-                <Radio value={false}>Không hoạt động</Radio>
+                <Radio value={true}>{t("Active")}</Radio>
+                <Radio value={false}>{t("InActive")}</Radio>
               </Radio.Group>
             )}
             {dialogFilterSelected.type === "radioYesNo" && (
@@ -527,14 +535,14 @@ const FilterData: React.FC<FilterDataProps> = ({
             applyFilter();
           }}
         >
-          Áp dụng
+          {t("Apply")}
         </Button>
         <Button
           danger
           onClick={() => setDialogFilterVisible(false)}
           style={{ width: "100%", borderRadius: 5, height: 40 }}
         >
-          Huỷ
+          {t("Cancel")}
         </Button>
       </Drawer>
     </>

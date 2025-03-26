@@ -1,3 +1,4 @@
+
 .ant-menu-dark .ant-menu-item-selected {
     background: linear-gradient(45deg, #f54266, #3858f9) !important;
 }
@@ -23,6 +24,7 @@
 }
 .ant-btn,
 .ant-input,
+.ant-input-number,
 .ant-select,
 .ant-table,
 .ant-table-thead > tr > th,
@@ -44,12 +46,38 @@
         margin-bottom: -10px !important;
     }
 }
+.ant-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  // box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1), 
+  //             0px -4px 15px rgba(0, 0, 0, 0.07) !important;
+}
 
 .ant-form-item {
-  margin-bottom: 9px !important; 
+  margin-bottom: 15px !important; 
 }
 
 .ant-form-item-label {
-  padding-bottom: 2px !important; /* Giảm khoảng cách giữa label và input */
+  padding-bottom: 2px !important; 
+}
+.ant-form-item-explain-error{
+  padding-bottom: 10px !important;
+}
+.action-button-table {
+   min-width: 30px;
+   padding: 4px;
+   color: white;
+   background-color: #33b79b;
+   border-color: #33b79b;
+   &:hover {
+      background-color: #72d1e7 !important; /* Màu xanh nhạt khi hover */
+      border-color: #72d1e7 !important;
+      color: white !important;
+   }
+}
+/* Chỉnh màu chỉ cho button `type="primary"` mà KHÔNG ảnh hưởng `danger` */
+.ant-btn-primary:not(.ant-btn-dangerous) {
+  background-color: #2196f3 !important;
+  border-color: #2196f3 !important;
+  color: white !important;
 }
 
