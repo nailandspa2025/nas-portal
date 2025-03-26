@@ -31,7 +31,9 @@ jobs:
 
     - name: Build React App
       run: npm run build
-
+    - name: Set IMAGE_NAME env
+      run: echo "IMAGE_NAME=sbdgroup-project-82i5hw8s26" >> $GITHUB_ENV
+      
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
@@ -50,5 +52,3 @@ jobs:
         push: true
         tags: cr1.viettelcloud.vn/sbdgroup-project-82i5hw8s26/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-    - name: Set IMAGE_NAME env
-      run: echo "IMAGE_NAME=your-image-name" >> $GITHUB_ENV
