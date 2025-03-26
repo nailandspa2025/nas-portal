@@ -346,7 +346,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                       selectable: true,
                     }}
                   >
-                    <Button color="cyan" variant="outlined">
+                    <Button variant="outlined">
                       {t("Action")} <DownOutlined />
                     </Button>
                   </Dropdown>
@@ -381,7 +381,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                   //onOpenChange={(visible) => setColumnVisible(visible)}
                 >
                   <Button
-                    color="cyan"
+                    // color="cyan"
                     variant="outlined"
                     onClick={() => setColumnVisible(!columnVisible)}
                   >
