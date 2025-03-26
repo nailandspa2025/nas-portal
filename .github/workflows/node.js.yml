@@ -24,17 +24,22 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
-    - name: Clear npm cache
-      run: npm cache clean --force
+    - name: Check if package-lock.json exists
+      id: check_lockfile
+      run: |
+        if [ -f package-lock.json ]; then
+          echo "lockfile_exists=true" >> $GITHUB_ENV
+        else
+          echo "lockfile_exists=false" >> $GITHUB_ENV
+        fi
 
-    - name: Remove node_modules & package-lock.json
-      run: rm -rf node_modules package-lock.json
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Manually install Rollup (nếu lỗi còn tiếp diễn)
-      run: npm install --save-dev rollup
+    - name: Install dependencies (fallback nếu thiếu package-lock.json)
+      run: |
+        if [ "$lockfile_exists" = "true" ]; then
+          npm ci
+        else
+          npm install
+        fi
 
     - name: Build project
       run: npm run build --if-present
