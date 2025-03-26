@@ -38,7 +38,13 @@ const SiderBarLeft = () => {
       key: item.id,
       icon: item.icon,
       label: (
-        <Link to={item.route} onClick={handleMenuClick}>
+        <Link
+          to={item.route}
+          onClick={() => {
+            handleMenuClick();
+            setOpenKeys([]);
+          }}
+        >
           {t(item.name)}
         </Link>
       ),
