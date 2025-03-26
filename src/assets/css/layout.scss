@@ -1,7 +1,6 @@
 .header {
     padding: 0 !important;
-    box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1), 
-              0px -4px 15px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     position: relative;
     display: flex;
     justify-content: space-between;
@@ -93,7 +92,7 @@
         min-height: calc(100vh - 60px);
     }
     .contentInner {
-        padding: 24px 24px 0px 24px;
+        padding: 20px 10px 0px 10px;
         box-shadow: shadow-1;
         min-height: calc(100vh - 100px);
         position: relative;

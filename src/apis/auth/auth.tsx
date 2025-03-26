@@ -15,7 +15,7 @@ export const AuthApi = {
     const endpoint = `/user/api/v1/users/user-info`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
-  detail: async (id: string) => {
+  getById: async (id: string) => {
     const endpoint = `/user/api/v1/users/${id}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },

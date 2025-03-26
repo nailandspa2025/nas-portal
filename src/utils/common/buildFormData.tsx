@@ -4,21 +4,34 @@ export const buildFormData = (
   data: any,
   parentKey?: string
 ) => {
-  if (
+  if (data instanceof FileList) {
+    Array.from(data).forEach((file) => {
+      formData.append(parentKey!, file);
+    });
+  } else if (
     data &&
     typeof data === "object" &&
     !(data instanceof Date) &&
     !(data instanceof File)
   ) {
     if (data.format) {
-      formData.append(parentKey!, data.format("YYYY-MM-DD"));
+      let formattedValue = "";
+      if (parentKey?.includes("Date")) {
+        formattedValue = data.format("YYYY-MM-DD");
+      } else if (parentKey?.includes("Time")) {
+        formattedValue = data.format("HH:mm");
+      } else {
+        formattedValue = data.format("YYYY-MM-DD HH:mm");
+      }
+      formData.append(parentKey!, formattedValue);
     } else {
       Object.keys(data).forEach((key) => {
-        buildFormData(
-          formData,
-          data[key],
-          parentKey ? `${parentKey}[${key}]` : key
-        );
+        const newKey = Array.isArray(data)
+          ? parentKey
+          : parentKey
+          ? `${parentKey}.${key}`
+          : key;
+        buildFormData(formData, data[key], newKey);
       });
     }
   } else {

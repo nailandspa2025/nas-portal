@@ -1,230 +1,77 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   UserOutlined,
   DashboardOutlined,
   TagsOutlined,
   UsergroupAddOutlined,
   AppstoreOutlined,
-  DatabaseOutlined,
-  ShareAltOutlined,
+  // DatabaseOutlined,
+  // ShareAltOutlined,
+  FormOutlined,
 } from "@ant-design/icons";
 
 const _nav = [
   {
     id: "dashboard",
     icon: <DashboardOutlined />,
-    name: "Trang chủ",
+    name: "Dashboard",
     route: "/",
   },
-  //công ty
   {
-    id: "company",
-    icon: <DashboardOutlined />,
-    name: "Quản lý doanh nghiệp",
-    route: "/company",
-  },
-  // //sản phẩm
-  {
-    id: "groupproduct",
-    name: "Quản lý sản phẩm",
-    icon: <TagsOutlined />,
-    children: [
-      {
-        id: "category",
-        children: "groupproduct",
-        name: "Danh mục sản phẩm",
-        icon: "",
-        route: "/category",
-      },
-      {
-        id: "productgroup",
-        children: "groupproduct",
-        name: "Nhóm sản phẩm",
-        icon: "",
-        route: "/productgroup",
-      },
-      {
-        id: "product",
-        children: "groupproduct",
-        name: "Danh sách sản phẩm",
-        icon: "",
-        route: "/product",
-      },
-      {
-        id: "variant",
-        children: "groupproduct",
-        name: "Thuộc tính sản phẩm",
-        icon: "",
-        route: "/variant",
-      },
-      {
-        id: "unit",
-        children: "groupproduct",
-        name: "Đơn vị tính",
-        icon: "",
-        route: "/unit",
-      },
-    ],
-  },
-  //Nhà phân phối
-  {
-    id: "distributor",
-    icon: <DashboardOutlined />,
-    name: "Nhà phân phối",
-    route: "/distributor",
-  },
-  //Kênh bán
-  {
-    id: "channel",
-    icon: <DashboardOutlined />,
-    name: "Quản lý kênh bán",
-    route: "/channel",
-  },
-  //Giá bán
-  {
-    id: "sellingprice",
-    icon: <DashboardOutlined />,
-    name: "Quản lý giá bán",
-    route: "/sellingprice",
-  },
-  {
-    id: "salesman",
-    icon: <UserOutlined />,
-    name: "Nhân viên",
-    route: "/salesman",
-  },
-  {
-    id: "groupstore",
-    name: "Quản lý cửa hàng",
+    id: "store",
     icon: <AppstoreOutlined />,
-    children: [
-      {
-        id: "typeofstore",
-        name: "Danh sách loại cửa hàng",
-        children: "groupstore",
-        icon: "",
-        route: "/typeofstore",
-      },
-      {
-        id: "store",
-        name: "Danh sách cửa hàng",
-        children: "groupstore",
-        icon: "",
-        route: "/store",
-      },
-    ],
+    name: "Store",
+    route: "/store",
   },
-  //khách hàng
   {
-    id: "groupcustomer",
-    name: "Khách hàng",
+    id: "product",
+    icon: <TagsOutlined />,
+    name: "Product",
+    route: "/product",
+  },
+  {
+    id: "technician",
     icon: <UserOutlined />,
-    children: [
-      {
-        id: "customer",
-        children: "groupcustomer",
-        name: "Khách hàng",
-        icon: "",
-        route: "/customer",
-      },
-    ],
+    name: "Technician",
+    route: "/technician",
+  },
+  {
+    id: "appaccount",
+    icon: <UserOutlined />,
+    name: "App Accoount",
+    route: "/appaccount",
+  },
+  {
+    id: "booking",
+    icon: <FormOutlined />,
+    name: "Booking",
+    route: "/booking",
+  },
+  {
+    id: "post",
+    icon: <FormOutlined />,
+    name: "Post",
+    route: "/post",
   },
   //nhóm & người dùng
   {
     id: "groupuser",
-    name: "Nhóm & người dung",
+    name: "Group & user",
     icon: <UsergroupAddOutlined />,
     children: [
       {
-        id: "users",
+        id: "user",
         children: "groupuser",
-        name: "Người dùng",
+        name: "User",
         icon: "",
-        route: "/users",
+        route: "/user",
       },
       {
         id: "accessgroup",
         children: "groupuser",
-        name: "Nhóm quyền",
+        name: "Group rights",
         icon: "",
         route: "/accessgroup",
-      },
-      {
-        id: "retailer",
-        children: "groupuser",
-        name: "Quản lý retailer",
-        icon: "",
-        route: "/retailer",
-      },
-    ],
-  },
-  {
-    id: "groupwarehouse",
-    name: "Quản lý kho",
-    icon: <DatabaseOutlined />,
-    children: [
-      {
-        id: "warehouse",
-        children: "groupwarehouse",
-        name: "Quản lý kho",
-        icon: "",
-        route: "/warehouse",
-      },
-      {
-        id: "stockin",
-        children: "groupwarehouse",
-        name: "Quản lý nhập kho",
-        icon: "",
-        route: "/stockin",
-      },
-      {
-        id: "warehousetransfer",
-        children: "groupwarehouse",
-        name: "Quản lý điều chỉnh kho ",
-        icon: "",
-        route: "/warehousetransfer ",
-      },
-      {
-        id: "stockout",
-        children: "groupwarehouse",
-        name: "Quản lý xuất kho ",
-        icon: "",
-        route: "/stockout ",
-      },
-      {
-        id: "inventory",
-        children: "groupwarehouse",
-        name: "Quản lý tồn kho ",
-        icon: "",
-        route: "/inventory ",
-      },
-    ],
-  },
-  //khách hàng
-  {
-    id: "grouporder",
-    name: "Kinh doanh",
-    icon: <UserOutlined />,
-    children: [
-      {
-        id: "order",
-        children: "grouporder",
-        name: "Danh sách đơn hàng",
-        icon: "",
-        route: "/order",
-      },
-    ],
-  },
-  {
-    id: "promotion",
-    name: "Quản lý khuyến mãi",
-    icon: <ShareAltOutlined />,
-    children: [
-      {
-        id: "coupon",
-        children: "promotion",
-        name: "Coupon",
-        icon: "",
-        route: "/coupon",
       },
     ],
   },

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Form, Input, Button, Card, Typography } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -6,8 +7,10 @@ import { AuthApi } from "../../apis/auth/auth";
 import { useMutation } from "@tanstack/react-query";
 import { LoginPayload, LoginResponse } from "../../apis/auth/interface";
 import { userLoggedIn } from "../../redux/actions/user.actions";
-//import { STORAGE_KEY } from "../../constants/application.constant";
+import { getDeviceInfo } from "../../firebase/firebaseConfig";
+
 import { useDispatch } from "react-redux";
+import { AppAccountApi } from "../../apis/auth/appaccount";
 const { Title } = Typography;
 const SignIn = () => {
   const dispatch = useDispatch();
@@ -15,14 +18,20 @@ const SignIn = () => {
   const signInMutation = useMutation<LoginResponse, Error, LoginPayload>({
     mutationFn: (request: LoginPayload) => AuthApi.login(request),
   });
-  const onFinish = (values: LoginPayload) => {
+  const trackingDevice = useMutation({
+    mutationFn: async () => {
+      const payload = await getDeviceInfo();
+      return AppAccountApi.trackingDevice(payload);
+    },
+  });
+  const onFinish = async (values: LoginPayload) => {
     signInMutation.mutate(values, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onSuccess: (res: any) => {
         if (res.succeeded) {
           dispatch(userLoggedIn(res));
           toast.success("Đăng nhập thành công!");
           navigate("/");
+          trackingDevice.mutate();
           return;
         } else {
           toast.error(res.message);

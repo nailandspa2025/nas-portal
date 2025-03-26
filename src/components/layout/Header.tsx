@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Layout, Avatar, Dropdown, Typography } from "antd";
+import { Layout, Avatar, Dropdown, Typography, Row, Col, Space } from "antd";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -13,10 +13,12 @@ import { STORAGE_KEY } from "../../constants/application.constant";
 import useIsMobile from "../../utils/useIsMobile";
 import { AuthApi } from "../../apis/auth/auth";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 const { Text } = Typography;
 
 const Header = () => {
+  const { i18n } = useTranslation();
   const dispatch = useDispatch();
   const isMobile = useIsMobile();
   const collapsed = useSelector((state: RootState) => state.global.collapsed);
@@ -44,6 +46,18 @@ const Header = () => {
       onSignOut();
     }
   };
+  const allLanguages = [
+    { key: "vi", label: "Tiếng Việt", flag: "/images/vi.jpg" },
+    { key: "en", label: "English", flag: "/images/en.jpg" },
+  ];
+  const filteredLanguages = allLanguages.filter(
+    (lang) => lang.key !== i18n.language
+  );
+
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem("language", lang);
+  };
   return (
     <Layout.Header
       className={`header fixed ${isMobile ? "mobile-full" : ""} ${
@@ -51,48 +65,81 @@ const Header = () => {
       }`}
       id="layoutHeader"
     >
-      <div className="button" onClick={onCollapseChange}>
-        {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-      </div>
-      <div className="header-right" style={{ paddingRight: 10 }}>
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: "Profile",
-                icon: <UserOutlined />,
-                label: "Thông tin tài khoản",
-              },
-              { type: "divider" },
-              {
-                key: "ChangePassword",
-                icon: <LockOutlined />,
-                label: "Đỏi mật khẩu",
-              },
-              { type: "divider" },
-              {
-                key: "SignOut",
-                icon: <LogoutOutlined />,
-                label: <span style={{ color: "red" }}> Đăng xuất </span>,
-              },
-            ],
-            onClick: handleClickMenu,
-          }}
-          trigger={["click"]}
-          placement="bottomRight"
-        >
-          <div className="profile-dropdown">
-            <Text type="secondary" className="username">
-              {data?.email ?? data?.userName}
-            </Text>
-            <Avatar
-              icon={<UserOutlined />}
-              style={{ marginLeft: 8, cursor: "pointer" }}
-              src={data?.avatar}
-            />
+      <Row style={{ width: "100%" }}>
+        <Col span={4}>
+          <div className="button" onClick={onCollapseChange}>
+            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           </div>
-        </Dropdown>
-      </div>
+        </Col>
+        <Col span={20} style={{ textAlign: "right", paddingRight: 10 }}>
+          <Space size={10}>
+            <Dropdown
+              menu={{
+                items: filteredLanguages.map((lang) => ({
+                  key: lang.key,
+                  label: lang.label,
+                  icon: (
+                    <img
+                      src={lang.flag}
+                      alt={lang.label}
+                      style={{ width: 20, height: 14 }}
+                    />
+                  ),
+                  onClick: () => changeLanguage(lang.key),
+                })),
+              }}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <div className="profile-dropdown">
+                <Avatar
+                  size={22}
+                  style={{ cursor: "pointer" }}
+                  src={`/images/${i18n.language}.jpg`}
+                />
+              </div>
+            </Dropdown>
+
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: "Profile",
+                    icon: <UserOutlined />,
+                    label: "Profile",
+                  },
+                  { type: "divider" },
+                  {
+                    key: "ChangePassword",
+                    icon: <LockOutlined />,
+                    label: "Change password",
+                  },
+                  { type: "divider" },
+                  {
+                    key: "SignOut",
+                    icon: <LogoutOutlined />,
+                    label: <span style={{ color: "red" }}> Đăng xuất </span>,
+                  },
+                ],
+                onClick: handleClickMenu,
+              }}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <div className="profile-dropdown">
+                <Text type="secondary" className="username">
+                  {data?.email ?? data?.userName}
+                </Text>
+                <Avatar
+                  icon={<UserOutlined />}
+                  style={{ marginLeft: 8, cursor: "pointer" }}
+                  src={data?.avatar}
+                />
+              </div>
+            </Dropdown>
+          </Space>
+        </Col>
+      </Row>
     </Layout.Header>
   );
 };

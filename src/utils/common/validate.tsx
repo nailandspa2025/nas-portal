@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const validatePhoneNumber = (rule: any, value: any) => {
+const validatePhoneNumber = (value: any) => {
   const phoneRegex = /^[0-9]{10}$/;
   if (value) {
     if (!value.startsWith("0")) {
-      return Promise.reject("Số điện thoại phải bắt đầu bằng số 0");
+      return Promise.reject("Phone number must start with a 0");
     }
     if (!phoneRegex.test(value)) {
-      return Promise.reject("Số điện thoại không hợp lệ");
+      return Promise.reject("Invalid phone number");
     }
   } else {
     return Promise.reject("");
@@ -14,13 +14,13 @@ const validatePhoneNumber = (rule: any, value: any) => {
   return Promise.resolve();
 };
 
-const validateLongitude = (rule: any, value: any) => {
+const validateLongitude = (value: any) => {
   const longitudeRegex =
-    /^-?((\d|[1-9]\d|1[0-7]\d)(\.\d{1,8})?|180(\.0{1,8})?)$/;
+    /^-?((\d|[1-9]\d|1[0-7]\d)(\.\d{1,14})?|180(\.0{1,14})?)$/;
   if (value) {
     if (!longitudeRegex.test(value)) {
       return Promise.reject(
-        "Kinh độ không hợp lệ. Vui lòng nhập giá trị hợp lệ trong khoảng -180 đến 180."
+        "Invalid longitude. Please enter a valid value between -180 and 180."
       );
     }
   } else {
@@ -29,12 +29,12 @@ const validateLongitude = (rule: any, value: any) => {
   return Promise.resolve();
 };
 
-const validateLatitude = (rule: any, value: any) => {
-  const latitudeRegex = /^-?((\d|[1-8]\d)(\.\d{1,8})?|90(\.0{1,8})?)$/;
+const validateLatitude = (value: any) => {
+  const latitudeRegex = /^-?((\d|[1-8]\d)(\.\d{1,15})?|90(\.0{1,15})?)$/;
   if (value) {
     if (!latitudeRegex.test(value)) {
       return Promise.reject(
-        "Vĩ độ không hợp lệ. Vui lòng nhập giá trị hợp lệ trong khoảng -90 đến 90."
+        "Invalid latitude. Please enter a valid value between -90 and 90."
       );
     }
   } else {
