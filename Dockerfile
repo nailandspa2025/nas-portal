@@ -1,10 +1,16 @@
 # Step 1: Build the React application
 FROM node:lts AS build
 WORKDIR /app
+
+# Copy package files separately to leverage Docker cache
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install --frozen-lockfile
+
+# Copy the rest of the project files
 COPY . .
-RUN npm run build
+
+# Ensure the output folder exists and has proper permissions
+RUN npm run build && ls -lah /app/build
 
 # Step 2: Serve the app using a lightweight server
 FROM nginx:alpine
