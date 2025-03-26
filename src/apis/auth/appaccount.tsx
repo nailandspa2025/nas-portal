@@ -16,7 +16,7 @@ export const AppAccountApi = {
     return await apiCall(API_METHOD.POST, endpoint, payload);
   },
   create: async (payload: any) => {
-    const endpoint = `/user/api/v1/appAccounts`;
+    const endpoint = `/user/api/v1/appAccounts/regiter`;
     return await apiCall(API_METHOD.POST, endpoint, payload);
   },
   update: async (id: string, payload: any) => {

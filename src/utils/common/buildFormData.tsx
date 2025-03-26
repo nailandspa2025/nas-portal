@@ -21,7 +21,7 @@ export const buildFormData = (
       } else if (parentKey?.includes("Time")) {
         formattedValue = data.format("HH:mm");
       } else {
-        formattedValue = data.format("YYYY-MM-DD HH:mm");
+        formattedValue = data.toISOString();
       }
       formData.append(parentKey!, formattedValue);
     } else {
