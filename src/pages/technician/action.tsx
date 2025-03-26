@@ -10,7 +10,7 @@ import { validatePhoneNumber } from "../../utils/common/validate";
 import dayjs from "dayjs";
 import { buildFormData } from "../../utils/common/buildFormData";
 import AvatarUploader from "../../components/AvatarUploader";
-import UserSelect from "../../components/UserSelect";
+import AppAccountSelect from "../../components/AppAccountSelect";
 import StoreSelect from "../../components/StoreSelect";
 import TopActionButtons from "../../components/common/TopActionButtons";
 import BottomActionButtons from "../../components/common/BottomActionButtons";
@@ -44,7 +44,7 @@ const TechnicianAction = () => {
           "YYYY-MM-DD"
         )
       : null,
-    userId: (data as Record<string, any>)?.data?.userId || "",
+    accountId: (data as Record<string, any>)?.data?.accountId || "",
     storeId: (data as Record<string, any>)?.data?.storeId || "",
   };
   const mutation = useMutation({
@@ -112,9 +112,9 @@ const TechnicianAction = () => {
                 >
                   <Input placeholder={t("Enter phone number")} maxLength={10} />
                 </Form.Item>
-                <Form.Item label={t("User")} name="userId">
-                  <UserSelect
-                    value={(data as any)?.data?.userId}
+                <Form.Item label={t("User")} name="accountId">
+                  <AppAccountSelect
+                    value={(data as any)?.data?.accountId}
                     placeholder={t("Choose user")}
                   />
                 </Form.Item>
