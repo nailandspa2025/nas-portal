@@ -1,8 +1,10 @@
 name: Deploy Application
 
 on:
-  repository_dispatch:
-    types: [trigger-deploy]
+  workflow_run:
+    workflows: ["Build and Push Docker Image"]
+    types:
+      - completed
 
 jobs:
   deploy:
@@ -16,7 +18,7 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
-            docker pull docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.event.client_payload.sha }}
+            docker pull docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.sha }}
             docker stop nas-portal || true
             docker rm nas-portal || true
-            docker run -d --restart=always --name nas-portal -p 80:80 docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.event.client_payload.sha }}
+            docker run -d --restart=always --name nas-portal -p 80:80 docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.sha }}
