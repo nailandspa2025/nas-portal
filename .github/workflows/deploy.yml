@@ -21,4 +21,4 @@ jobs:
             docker pull docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.sha }}
             docker stop nas-portal || true
             docker rm nas-portal || true
-            docker run -d --restart=always --name nas-portal -p 8080:80 docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.sha }}
+            docker run -d --restart=always --name nas-portal -p 8080:8080 docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.sha }}
