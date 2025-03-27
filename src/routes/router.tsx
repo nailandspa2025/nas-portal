@@ -22,7 +22,7 @@ interface RouteType {
 }
 
 const routes: RouteType[] = [
-  { path: "/", name: "Trang chủ", element: <Dashboard /> },
+  { path: "/dashboard", name: "Trang chủ", element: <Dashboard /> },
   { path: "/user", name: "Danh sách người dùng", element: <Users /> },
   { path: "/user/none", name: "Thêm mới người dùng", element: <UserAction /> },
   {
