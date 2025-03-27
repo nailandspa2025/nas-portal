@@ -47,7 +47,7 @@ const SignIn = () => {
     <div className="login-container">
       <Card className="login-card">
         <Title level={3} className="login-title">
-          Đăng nhập
+          <span style={{ fontSize: 20 }}>{t("Nas Portal")}</span>
         </Title>
         <Form name="login-form" onFinish={onFinish} layout="vertical">
           <Form.Item
@@ -74,7 +74,7 @@ const SignIn = () => {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" block>
-              Đăng nhập
+              {t("Login")}
             </Button>
           </Form.Item>
         </Form>
