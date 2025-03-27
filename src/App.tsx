@@ -11,13 +11,13 @@ import "react-toastify/dist/ReactToastify.css";
 import Loading from "./components/common/Loading";
 import { useSelector } from "react-redux";
 import { RootState } from "./redux/reducers";
-import { listenForMessages } from "./firebase/firebaseConfig";
+//import { listenForMessages } from "./firebase/firebaseConfig";
 function App() {
   const collapsed = useSelector((state: RootState) => state.global.status);
   const { isAuthorized } = useSelector((state: RootState) => ({
     isAuthorized: state.auth.authToken != null,
   }));
-  listenForMessages();
+  //listenForMessages();
   return (
     <BrowserRouter>
       <Loading isLoading={collapsed} />
