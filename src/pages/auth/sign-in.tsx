@@ -55,21 +55,24 @@ const SignIn = () => {
             rules={[
               {
                 required: true,
-                message: "Vui lòng nhập email hoặc tài khoản!",
+                message: t("Please enter email or username!"),
               },
             ]}
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="Email hoặc Tài khoản"
+              placeholder={t("Email or username")}
             />
           </Form.Item>
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+            rules={[{ required: true, message: t("Please enter password !") }]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu" />
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder={t("Password")}
+            />
           </Form.Item>
 
           <Form.Item>
