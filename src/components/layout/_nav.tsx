@@ -15,7 +15,7 @@ const _nav = [
     id: "dashboard",
     icon: <DashboardOutlined />,
     name: "Dashboard",
-    route: "/",
+    route: "/dashboard",
   },
   {
     id: "store",

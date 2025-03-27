@@ -11,8 +11,11 @@ import { getDeviceInfo } from "../../firebase/firebaseConfig";
 
 import { useDispatch } from "react-redux";
 import { AppAccountApi } from "../../apis/auth/appaccount";
+import { useTranslation } from "react-i18next";
+
 const { Title } = Typography;
 const SignIn = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const signInMutation = useMutation<LoginResponse, Error, LoginPayload>({
@@ -29,15 +32,15 @@ const SignIn = () => {
       onSuccess: (res: any) => {
         if (res.succeeded) {
           dispatch(userLoggedIn(res));
-          toast.success("Đăng nhập thành công!");
-          navigate("/");
+          toast.success(t("Login successful!"));
+          navigate("/dashboard");
           trackingDevice.mutate();
           return;
         } else {
           toast.error(res.message);
         }
       },
-      onError: () => toast.error("Tên đăng nhập và mật khẩu không đúng!"),
+      onError: () => toast.error(t("Incorrect username and password!")),
     });
   };
   return (
