@@ -7,10 +7,10 @@ import { AuthApi } from "../../apis/auth/auth";
 import { useMutation } from "@tanstack/react-query";
 import { LoginPayload, LoginResponse } from "../../apis/auth/interface";
 import { userLoggedIn } from "../../redux/actions/user.actions";
-import { getDeviceInfo } from "../../firebase/firebaseConfig";
+// import { getDeviceInfo } from "../../firebase/firebaseConfig";
+// import { AppAccountApi } from "../../apis/auth/appaccount";
 
 import { useDispatch } from "react-redux";
-import { AppAccountApi } from "../../apis/auth/appaccount";
 import { useTranslation } from "react-i18next";
 
 const { Title } = Typography;
@@ -21,12 +21,12 @@ const SignIn = () => {
   const signInMutation = useMutation<LoginResponse, Error, LoginPayload>({
     mutationFn: (request: LoginPayload) => AuthApi.login(request),
   });
-  const trackingDevice = useMutation({
-    mutationFn: async () => {
-      const payload = await getDeviceInfo();
-      return AppAccountApi.trackingDevice(payload);
-    },
-  });
+  // const trackingDevice = useMutation({
+  //   mutationFn: async () => {
+  //     const payload = await getDeviceInfo();
+  //     return AppAccountApi.trackingDevice(payload);
+  //   },
+  // });
   const onFinish = async (values: LoginPayload) => {
     signInMutation.mutate(values, {
       onSuccess: (res: any) => {
@@ -34,7 +34,7 @@ const SignIn = () => {
           dispatch(userLoggedIn(res));
           toast.success(t("Login successful!"));
           navigate("/dashboard");
-          trackingDevice.mutate();
+          //trackingDevice.mutate();
           return;
         } else {
           toast.error(res.message);
