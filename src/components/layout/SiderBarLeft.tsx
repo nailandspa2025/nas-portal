@@ -43,6 +43,7 @@ const SiderBarLeft = () => {
           onClick={() => {
             handleMenuClick();
             setOpenKeys([]);
+            localStorage.setItem("openKeys", JSON.stringify([]));
           }}
         >
           {t(item.name)}
