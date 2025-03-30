@@ -15,6 +15,8 @@ import Bookings from "../pages/booking/booking";
 import BookingActions from "../pages/booking/action";
 import Posts from "../pages/post/post";
 import PostActions from "../pages/post/action";
+import Profile from "../pages/auth/profile";
+import UpdateProfile from "../pages/auth/update-profile";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -22,7 +24,13 @@ interface RouteType {
 }
 
 const routes: RouteType[] = [
-  { path: "/dashboard", name: "Trang chủ", element: <Dashboard /> },
+  { path: "/profile", name: "Profile", element: <Profile /> },
+  {
+    path: "/update-profile",
+    name: "Update Profile",
+    element: <UpdateProfile />,
+  },
+  { path: "/", name: "Trang chủ", element: <Dashboard /> },
   { path: "/user", name: "Danh sách người dùng", element: <Users /> },
   { path: "/user/none", name: "Thêm mới người dùng", element: <UserAction /> },
   {
@@ -66,37 +74,37 @@ const routes: RouteType[] = [
   { path: "/appaccount", name: "List app account", element: <Appaccounts /> },
   {
     path: "/appaccount/none",
-    name: "List app account",
+    name: "Create app account",
     element: <AppaccountAction />,
   },
   {
     path: "/appaccount/:id",
-    name: "List app account",
+    name: "Update app account",
     element: <AppaccountAction />,
   },
   {
     path: "/booking",
-    name: "List app account",
+    name: "List booking",
     element: <Bookings />,
   },
   {
     path: "/booking/:id",
-    name: "List app account",
+    name: "Update booking",
     element: <BookingActions />,
   },
   {
     path: "/post",
-    name: "List app account",
+    name: "List post",
     element: <Posts />,
   },
   {
     path: "/post/none",
-    name: "List app account",
+    name: "Create post",
     element: <PostActions />,
   },
   {
     path: "/post/:id",
-    name: "List app account",
+    name: "Update post",
     element: <PostActions />,
   },
 ];

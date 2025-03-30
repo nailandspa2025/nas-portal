@@ -42,7 +42,7 @@ const userReducer = (state = initialAuthState, action: UserAction) => {
     }
 
     case USER_LOADED: {
-      const { user } = action.payload.data;
+      const user = action.payload;
       return { ...state, user };
     }
 

@@ -94,7 +94,7 @@ const SiderBarLeft = () => {
         <Menu
           onOpenChange={onOpenChange}
           openKeys={openKeys}
-          selectedKeys={selectedKeys}
+          selectedKeys={selectedKeys.length ? selectedKeys : ["dashboard"]}
           mode="inline"
           theme="light"
           items={menuItems}
