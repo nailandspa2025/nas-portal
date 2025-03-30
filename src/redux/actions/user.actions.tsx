@@ -1,4 +1,5 @@
-import { LoginResponse, UserInfo } from "../../apis/auth/interface";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { LoginResponse } from "../../apis/auth/interface";
 
 export const USER_LOGGED_IN = "USER_LOGGED_IN" as const;
 export const USER_LOGGED_OUT = "USER_LOGGED_OUT" as const;
@@ -17,7 +18,7 @@ export const userLoggedOut = () => {
   };
 };
 
-export const userLoadded = (userInfo: UserInfo) => {
+export const userLoadded = (userInfo: any) => {
   return {
     type: USER_LOADED,
     payload: userInfo,

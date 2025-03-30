@@ -14,14 +14,19 @@ import useIsMobile from "../../utils/useIsMobile";
 import { AuthApi } from "../../apis/auth/auth";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { userLoadded } from "../../redux/actions/user.actions";
+import { useEffect, useState } from "react";
+import ChangePasswordModal from "../../components/ChangePasswordModal";
 
 const { Text } = Typography;
-
 const Header = () => {
+  const navigate = useNavigate();
   const { i18n } = useTranslation();
   const dispatch = useDispatch();
   const isMobile = useIsMobile();
   const collapsed = useSelector((state: RootState) => state.global.collapsed);
+  const [openModal, setOpenModal] = useState(false);
   const { data } = useQuery({
     queryKey: ["userInfo"],
     queryFn: async () => {
@@ -29,6 +34,11 @@ const Header = () => {
       return response.data;
     },
   });
+  useEffect(() => {
+    if (data) {
+      dispatch(userLoadded(data));
+    }
+  }, [data, dispatch]);
   const onCollapseChange = () => {
     if (!isMobile) {
       dispatch({ type: "setCollapsed", collapsed: !collapsed });
@@ -44,6 +54,12 @@ const Header = () => {
   const handleClickMenu = (e: { key: string }) => {
     if (e.key === "SignOut") {
       onSignOut();
+    }
+    if (e.key === "Profile") {
+      navigate("/profile");
+    }
+    if (e.key === "ChangePassword") {
+      setOpenModal(true);
     }
   };
   const allLanguages = [
@@ -140,6 +156,10 @@ const Header = () => {
           </Space>
         </Col>
       </Row>
+      <ChangePasswordModal
+        visible={openModal}
+        onClose={() => setOpenModal(false)}
+      />
     </Layout.Header>
   );
 };

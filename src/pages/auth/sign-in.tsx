@@ -13,7 +13,7 @@ import { userLoggedIn } from "../../redux/actions/user.actions";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const SignIn = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -33,7 +33,7 @@ const SignIn = () => {
         if (res.succeeded) {
           dispatch(userLoggedIn(res));
           toast.success(t("Login successful!"));
-          navigate("/dashboard");
+          navigate("/");
           //trackingDevice.mutate();
           return;
         } else {
@@ -49,6 +49,12 @@ const SignIn = () => {
         <Title level={3} className="login-title">
           <span style={{ fontSize: 20 }}>{t("Nas Portal")}</span>
         </Title>
+        <Text
+          type="secondary"
+          style={{ paddingBottom: 20, textAlign: "center", display: "block" }}
+        >
+          {t("Enter account & password to login")}
+        </Text>
         <Form name="login-form" onFinish={onFinish} layout="vertical">
           <Form.Item
             name="email"
@@ -81,6 +87,11 @@ const SignIn = () => {
             </Button>
           </Form.Item>
         </Form>
+        <Text style={{ display: "block", textAlign: "center" }}>
+          <Button type="link" onClick={() => navigate("/forgotpassword")}>
+            {t("Forgot Password?")}
+          </Button>
+        </Text>
       </Card>
     </div>
   );

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./layouts/default";
 import SignUp from "./pages/auth/sign-in";
 import "./assets/css/custom.scss";
@@ -11,6 +11,8 @@ import "react-toastify/dist/ReactToastify.css";
 import Loading from "./components/common/Loading";
 import { useSelector } from "react-redux";
 import { RootState } from "./redux/reducers";
+import ForgotPassword from "./pages/auth/forgotpassword";
+import ResetPassword from "./pages/auth/resetpassword";
 //import { listenForMessages } from "./firebase/firebaseConfig";
 function App() {
   const collapsed = useSelector((state: RootState) => state.global.status);
@@ -31,7 +33,12 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Route>
         ) : (
-          <Route path="*" element={<SignUp />} />
+          <>
+            <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/forgotpassword" element={<ForgotPassword />} />
+            <Route path="/resetpassword" element={<ResetPassword />} />
+            <Route path="*" element={<Navigate to="/sign-up" />} />
+          </>
         )}
       </Routes>
     </BrowserRouter>

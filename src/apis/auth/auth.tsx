@@ -27,4 +27,20 @@ export const AuthApi = {
     const endpoint = `/user/api/v1/users/${id}`;
     return await apiCall(API_METHOD.PUT, endpoint, payload);
   },
+  changePassword: async (payload: any) => {
+    const endpoint = `/user/api/v1/users/change-password`;
+    return await apiCall(API_METHOD.POST, endpoint, payload);
+  },
+  forgotPassword: async (payload: any) => {
+    const endpoint = `/user/api/v1/users/forgot-password`;
+    return await apiCall(API_METHOD.POST, endpoint, payload);
+  },
+  resetPassword: async (payload: any) => {
+    const endpoint = `/user/api/v1/users/reset-password`;
+    return await apiCall(API_METHOD.POST, endpoint, payload);
+  },
+  updateProfile: async (id: string, payload: any) => {
+    const endpoint = `/user/api/v1/users/update-profile/${id}`;
+    return await apiCall(API_METHOD.PUT, endpoint, payload);
+  },
 };
