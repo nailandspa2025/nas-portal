@@ -37,21 +37,30 @@
 .ant-tabs,
 .ant-checkbox-wrapper,
 .ant-radio-wrapper,
-.ant-typography {
-  font-size: 12px !important;
+.ant-breadcrumb {
+  font-size: 13px !important;
+  
 }
-
+.ant-form-item-label > label {
+    font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+}
 .ant-custom-pagination {
     .ant-table-wrapper .ant-table-pagination.ant-pagination {
         margin-bottom: -10px !important;
     }
 }
 .ant-card {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-  // box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1), 
-  //             0px -4px 15px rgba(0, 0, 0, 0.07) !important;
+  border-color: #d8dbe0 !important;
+  color: #333 !important;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .05)!important;
+  border-radius: 0 !important;
 }
 
+.ant-breadcrumb-link {
+    color: #999;
+}
 .ant-form-item {
   margin-bottom: 15px !important; 
 }
@@ -81,3 +90,31 @@
   color: white !important;
 }
 
+.ant-btn {
+  box-shadow: none !important;
+  transition: none !important;
+  border-radius: 3px !important;
+}
+
+.ant-space-compact .ant-btn:not(:first-child) {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+.ant-input,
+.ant-picker-input,
+.ant-input-affix-wrapper,
+.ant-form-item .ant-input,
+.ant-form-item .ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-select,
+.ant-picker,
+textarea.ant-input {
+  border-radius: 3px !important;
+}
+.custom-title {
+  font-size: 16px;
+  font-weight: 400;
+}
+.custom-row {
+  margin-bottom: 20px !important;  
+}

@@ -14,7 +14,6 @@ const apiCall = async <T,>(
 ): Promise<T> => {
   try {
     store.dispatch(toggleLoading(true));
-
     const authToken = localStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
     if (authToken) {
       headers["Authorization"] = `Bearer ${authToken}`;

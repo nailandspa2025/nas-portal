@@ -385,7 +385,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                     variant="outlined"
                     onClick={() => setColumnVisible(!columnVisible)}
                   >
-                    {t("Show/hide columns")} <DownOutlined />
+                    {t("Show hide columns")} <DownOutlined />
                   </Button>
                 </Dropdown>
               </div>

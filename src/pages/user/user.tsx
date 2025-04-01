@@ -22,7 +22,6 @@ const Users = () => {
   const handleItemTable = {
     handleEdit: (record: any) => {
       navigate(`/user/${record.id}`);
-      console.log("Sửa người dùng:", record);
     },
     handleDelete: (record: any) => {
       console.log("Xóa người dùng:", record);
@@ -62,7 +61,7 @@ const Users = () => {
   return (
     <Card className="ant-custom-pagination">
       <div ref={divRef}>
-        <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
+        <Row style={{ marginBottom: "16px" }}>
           <FilterData
             onColumnChange={setFilteredColumns}
             onFilterChange={handleFilterChange}

@@ -6,6 +6,7 @@ import { RootState } from "../redux/reducers";
 import Footer from "../components/layout/Footer";
 import { Outlet } from "react-router-dom";
 import useIsMobile from "../utils/useIsMobile";
+import CustomBreadcrumb from "../components/layout/Breadcrumb";
 const LayoutDefault = () => {
   const dispatch = useDispatch();
   const isMobile = useIsMobile();
@@ -43,6 +44,7 @@ const LayoutDefault = () => {
 
       <Layout>
         <Header />
+        <CustomBreadcrumb />
         <Layout className="container-content">
           <Layout.Content
             className={`${

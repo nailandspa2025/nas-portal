@@ -14,7 +14,7 @@ interface UserSelectProps {
 const UserSelect: React.FC<UserSelectProps> = ({
   value,
   onChange,
-  placeholder = "Chọn",
+  placeholder = "Please choose",
   mode = "",
 }) => {
   const [searchText, setSearchText] = useState("");

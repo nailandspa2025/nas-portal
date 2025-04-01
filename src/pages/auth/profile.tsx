@@ -30,7 +30,7 @@ const Profile = () => {
         <Row gutter={[24, 24]} align="middle">
           <Col xs={24} md={8} style={styles.avatarContainer}>
             <Avatar
-              size={240}
+              size={180}
               src={user.avatar}
               icon={<UserOutlined />}
               style={styles.avatar}
@@ -84,8 +84,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: "center",
   },
   card: {
-    width: "80%",
-    maxWidth: 900,
+    // width: "100%",
+    // maxWidth: 1024,
     borderRadius: "16px",
     boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
     background: "#fff",

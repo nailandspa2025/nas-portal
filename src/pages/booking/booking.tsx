@@ -54,7 +54,7 @@ const Bookings = () => {
   return (
     <Card className="ant-custom-pagination">
       <div ref={divRef}>
-        <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
+        <Row style={{ marginBottom: "16px" }}>
           <FilterData
             onColumnChange={setFilteredColumns}
             onFilterChange={handleFilterChange}
