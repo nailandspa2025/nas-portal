@@ -12,7 +12,9 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../components/ModalConfirm";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 const Stores = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const divRef = useRef<HTMLDivElement>(null);
   const heightElement = useElementHeight(divRef);
@@ -59,21 +61,21 @@ const Stores = () => {
     onSuccess: () => {
       setRowId(0);
       setOpenModal(false);
-      toast.success("Xóa sản phẩm thành công!");
+      toast.success(t("Deleted successfully!"));
     },
     onError: (error) => {
       setRowId(0);
       setOpenModal(false);
-      toast.error(`Lỗi: ${error.message}`);
+      toast.error(t(error.message));
     },
   });
   const confirmDelete = (id: number) => {
     mutationDelete.mutate(id);
   };
   return (
-    <Card>
+    <Card className="ant-custom-pagination">
       <div ref={divRef}>
-        <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
+        <Row style={{ marginBottom: "16px" }}>
           <FilterData
             onColumnChange={setFilteredColumns}
             onFilterChange={handleFilterChange}

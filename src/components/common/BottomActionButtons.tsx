@@ -24,8 +24,8 @@ const BottomActionButtons: React.FC<ActionButtonsProps> = ({
       style={{
         width: "100%",
         justifyContent: "right",
-        marginTop: "3.5rem",
-        paddingBottom: "1rem",
+        marginTop: "1.2rem",
+        paddingBottom: "1.2rem",
         ...style,
       }}
     >

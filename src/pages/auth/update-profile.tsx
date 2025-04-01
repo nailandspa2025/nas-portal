@@ -60,7 +60,7 @@ const UpdateProfile = () => {
         toast.success(t("Save successfully"));
         dispatch(userLoadded(res.data));
         navigate("/profile");
-      } else toast.error(res.message);
+      } else toast.error(t(res.message));
     },
     onError: () => {
       toast.error(t("An error occurred"));
@@ -73,80 +73,94 @@ const UpdateProfile = () => {
     };
     updateProfile.mutate(payload);
   };
+  const handleSubmit = () => {
+    form.submit();
+  };
   return (
-    <Card>
-      <Form form={form} layout="vertical" onFinish={onFinish}>
-        <TopActionButtons backUrl="/profile" />
-        <Row gutter={32}>
-          <Col xs={24} sm={24} md={12} lg={12}>
-            <Form.Item
-              label={t("Full name")}
-              name="fullName"
-              rules={[
-                { required: true, message: t("Please enter full name!") },
-              ]}
-            >
-              <Input placeholder={t("Enter full name")} />
-            </Form.Item>
-            <Form.Item
-              label={t("Phone number")}
-              name="phoneNumber"
-              rules={[
-                { required: true, message: t("Please enter phone number") },
-                { validator: validatePhoneNumber },
-              ]}
-            >
-              <Input placeholder={t("Enter phone number")} />
-            </Form.Item>
-            <Form.Item
-              label={t("Birthday")}
-              name="dateOfBirth"
-              rules={[{ required: true, message: t("Please enter birthday!") }]}
-            >
-              <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
-            </Form.Item>
-            <Form.Item
-              label={t("Gender")}
-              name="gender"
-              rules={[{ required: true, message: t("Please enter gender!") }]}
-            >
-              <Select
-                style={{ width: "100%" }}
-                showSearch
-                placeholder={t("Choose gender")}
+    <>
+      <Row className="custom-row" justify="space-between" align="middle">
+        <Col>
+          <div className="custom-title">{t("Update profile")}</div>
+        </Col>
+        <Col>
+          <TopActionButtons backUrl="/profile" onSubmit={handleSubmit} />
+        </Col>
+      </Row>
+      <Card style={{ padding: "10px 20px" }}>
+        <Form form={form} layout="vertical" onFinish={onFinish}>
+          <Row gutter={32}>
+            <Col xs={24} sm={24} md={12} lg={12}>
+              <Form.Item
+                label={t("Full name")}
+                name="fullName"
+                rules={[
+                  { required: true, message: t("Please enter full name!") },
+                ]}
               >
-                <Select.Option value={1}>{t("Male")}</Select.Option>
-                <Select.Option value={2}>{t("Female")}</Select.Option>
-                <Select.Option value={3}>{t("Other")}</Select.Option>
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={24} md={12} lg={12}>
-            <Form.Item label={t("Avatar")} name="avatar">
-              <AvatarUploader
-                placeholder={t("Avatar")}
-                data={imageUrl || undefined}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item label={t("Address")} name="street">
-              <Input.TextArea rows={4} placeholder={t("Enter address")} />
-            </Form.Item>
-            <Space align="center">
-              <Form.Item name="isActive" valuePropName="checked" noStyle>
-                <Switch
-                  checkedChildren={<CheckOutlined />}
-                  unCheckedChildren={<CloseOutlined />}
+                <Input placeholder={t("Enter full name")} />
+              </Form.Item>
+              <Form.Item
+                label={t("Phone number")}
+                name="phoneNumber"
+                rules={[
+                  { required: true, message: t("Please enter phone number") },
+                  { validator: validatePhoneNumber },
+                ]}
+              >
+                <Input placeholder={t("Enter phone number")} />
+              </Form.Item>
+              <Form.Item
+                label={t("Birthday")}
+                name="dateOfBirth"
+                rules={[
+                  { required: true, message: t("Please enter birthday!") },
+                ]}
+              >
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              </Form.Item>
+              <Form.Item
+                label={t("Gender")}
+                name="gender"
+                rules={[{ required: true, message: t("Please enter gender!") }]}
+              >
+                <Select
+                  style={{ width: "100%" }}
+                  showSearch
+                  placeholder={t("Choose gender")}
+                >
+                  <Select.Option value={1}>{t("Male")}</Select.Option>
+                  <Select.Option value={2}>{t("Female")}</Select.Option>
+                  <Select.Option value={3}>{t("Other")}</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={24} md={12} lg={12}>
+              <Form.Item label={t("Avatar")} name="avatar">
+                <AvatarUploader
+                  placeholder={t("Avatar")}
+                  data={imageUrl || undefined}
                 />
               </Form.Item>
-              <span>{t("Active")}</span>
-            </Space>
-          </Col>
-        </Row>
-        <BottomActionButtons backUrl="/profile" />
-      </Form>
-    </Card>
+            </Col>
+            <Col span={24}>
+              <Form.Item label={t("Address")} name="street">
+                <Input.TextArea rows={4} placeholder={t("Enter address")} />
+              </Form.Item>
+              <Space align="center">
+                <Form.Item name="isActive" valuePropName="checked" noStyle>
+                  <Switch
+                    checkedChildren={<CheckOutlined />}
+                    unCheckedChildren={<CloseOutlined />}
+                  />
+                </Form.Item>
+                <span>{t("Active")}</span>
+              </Space>
+            </Col>
+          </Row>
+        </Form>
+      </Card>
+      <BottomActionButtons backUrl="/profile" onSubmit={handleSubmit} />
+    </>
   );
 };
 

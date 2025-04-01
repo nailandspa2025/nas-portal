@@ -81,13 +81,13 @@ const Header = () => {
       }`}
       id="layoutHeader"
     >
-      <Row style={{ width: "100%" }}>
-        <Col span={4}>
-          <div className="button" onClick={onCollapseChange}>
+      <Row style={{ width: "100%" }} justify="space-between" align="middle">
+        <Col>
+          <div className="button-collapse" onClick={onCollapseChange}>
             {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           </div>
         </Col>
-        <Col span={20} style={{ textAlign: "right", paddingRight: 10 }}>
+        <Col style={{ textAlign: "right", paddingRight: 10 }}>
           <Space size={10}>
             <Dropdown
               menu={{
@@ -143,7 +143,7 @@ const Header = () => {
               placement="bottomRight"
             >
               <div className="profile-dropdown">
-                <Text type="secondary" className="username">
+                <Text type="secondary" style={{ fontSize: 13 }}>
                   {data?.email ?? data?.userName}
                 </Text>
                 <Avatar

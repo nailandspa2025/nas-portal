@@ -23,6 +23,7 @@ import AvatarUploader from "../../components/AvatarUploader";
 import TopActionButtons from "../../components/common/TopActionButtons";
 import BottomActionButtons from "../../components/common/BottomActionButtons";
 import { useTranslation } from "react-i18next";
+
 const UserAction = () => {
   const { t } = useTranslation();
   const [form] = Form.useForm();
@@ -30,16 +31,33 @@ const UserAction = () => {
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const { data = { data: {} }, isLoading } = useQuery({
+  const { data = { data: {} } } = useQuery({
     queryKey: ["userDetail", params.id],
     queryFn: () => AuthApi.getById(params.id as string),
     enabled: !!params.id,
   });
+
   useEffect(() => {
-    if ((data as Record<string, any>)?.data?.avatar) {
-      setImageUrl((data as Record<string, any>)?.data?.avatar);
+    if ((data as any)?.data) {
+      const value = (data as any).data;
+      setImageUrl(value.avatar);
+      form.setFieldsValue({
+        fullName: value.fullName || "",
+        isActive: value.isActive ?? true,
+        email: value.email || "",
+        phoneNumber: value.phoneNumber || "",
+        dateOfBirth: value.dateOfBirth
+          ? dayjs(value.dateOfBirth, "YYYY-MM-DD")
+          : null,
+        gender: value.gender ?? null,
+        street: value.street || "",
+        wardId: value.wardId || null,
+        districtId: value.districtId || null,
+        cityId: value.cityId || null,
+      });
     }
-  }, [data]);
+  }, [data, form]);
+
   const mutation = useMutation({
     mutationFn: async (values) => {
       const formD = new FormData();
@@ -50,12 +68,12 @@ const UserAction = () => {
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
-        toast.success("Save successfully");
+        toast.success(t("Save successfully"));
         navigate("/user");
-      } else toast.error(res.message);
+      } else toast.error(t(res.message));
     },
     onError: () => {
-      toast.error("An error occurred");
+      toast.error(t("An error occurred"));
     },
   });
   const onFinish = (values: any) => {
@@ -65,165 +83,150 @@ const UserAction = () => {
     if (params.id) payload.id = params.id;
     mutation.mutate(payload);
   };
-  const initialValues = {
-    fullName: (data as Record<string, any>)?.data?.fullName || "",
-    isActive: (data as Record<string, any>)?.data?.isActive ?? true,
-    email: (data as Record<string, any>)?.data?.email || "",
-    phoneNumber: (data as Record<string, any>)?.data?.phoneNumber || "",
-    dateOfBirth: (data as Record<string, any>)?.data?.dateOfBirth
-      ? dayjs((data as Record<string, any>)?.data?.dateOfBirth, "YYYY-MM-DD")
-      : null,
-    gender: (data as Record<string, any>)?.data?.gender ?? null,
-    street: (data as Record<string, any>)?.data?.street || "",
-    wardId: (data as Record<string, any>)?.data?.wardId || null,
-    districtId: (data as Record<string, any>)?.data?.districtId || null,
-    cityId: (data as Record<string, any>)?.data?.cityId || null,
+  const handleSubmit = () => {
+    form.submit();
   };
-
   return (
     <>
-      {!isLoading && (
-        <Card>
-          <Form
-            layout="vertical"
-            form={form}
-            initialValues={initialValues}
-            onFinish={onFinish}
-          >
-            <TopActionButtons backUrl="/user" />
-            <Row gutter={32}>
-              <Col xs={24} sm={24} md={12} lg={12}>
+      <Row className="custom-row" justify="space-between" align="middle">
+        <Col>
+          <div className="custom-title">
+            {params?.id ? t("Update user") : t("Create user")}
+          </div>
+        </Col>
+        <Col>
+          <TopActionButtons backUrl="/user" onSubmit={handleSubmit} />
+        </Col>
+      </Row>
+      <Card style={{ padding: "10px 20px" }}>
+        <Form layout="vertical" form={form} onFinish={onFinish}>
+          <Row gutter={32}>
+            <Col xs={24} sm={24} md={12} lg={12}>
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  {
+                    required: true,
+                    message: t("Pease enter email!"),
+                    type: "email",
+                  },
+                ]}
+              >
+                <Input placeholder={t("Enter email")} disabled={!!params.id} />
+              </Form.Item>
+              {!params.id && (
                 <Form.Item
-                  label="Email"
-                  name="email"
+                  label={t("Password")}
+                  name="password"
                   rules={[
-                    {
-                      required: true,
-                      message: t("Pease enter email!"),
-                      type: "email",
-                    },
+                    { required: true, message: t("Please enter password") },
                   ]}
                 >
-                  <Input
-                    placeholder={t("Enter email")}
+                  <Input.Password
+                    placeholder={t("Enter password")}
                     disabled={!!params.id}
                   />
                 </Form.Item>
-                {!params.id && (
-                  <Form.Item
-                    label={t("Password")}
-                    name="password"
-                    rules={[
-                      { required: true, message: t("Please enter password") },
-                    ]}
-                  >
-                    <Input.Password
-                      placeholder={t("Enter password")}
-                      disabled={!!params.id}
-                    />
-                  </Form.Item>
-                )}
-                <Form.Item
-                  label={t("Full name")}
-                  name="fullName"
-                  rules={[
-                    { required: true, message: t("Please enter full name!") },
-                  ]}
+              )}
+              <Form.Item
+                label={t("Full name")}
+                name="fullName"
+                rules={[
+                  { required: true, message: t("Please enter full name!") },
+                ]}
+              >
+                <Input placeholder={t("Enter full name")} />
+              </Form.Item>
+              <Form.Item
+                label={t("Phone number")}
+                name="phoneNumber"
+                rules={[
+                  { required: true, message: t("Please enter phone number") },
+                  {
+                    validator: validatePhoneNumber,
+                  },
+                ]}
+              >
+                <Input placeholder={t("Enter phone number")} />
+              </Form.Item>
+              <Form.Item
+                label={t("Birthday")}
+                name="dateOfBirth"
+                rules={[
+                  { required: true, message: t("Please enter birthday!") },
+                ]}
+              >
+                <DatePicker
+                  style={{ width: "100%" }}
+                  placeholder={t("Enter birthday")}
+                  format="DD/MM/YYYY"
+                />
+              </Form.Item>
+              <Form.Item
+                label={t("Gender")}
+                name="gender"
+                rules={[{ required: true, message: t("Please enter gender!") }]}
+              >
+                <Select
+                  style={{ width: "100%" }}
+                  showSearch
+                  placeholder={t("Choose gender")}
                 >
-                  <Input placeholder={t("Enter full name")} />
-                </Form.Item>
-                <Form.Item
-                  label={t("Phone number")}
-                  name="phoneNumber"
-                  rules={[
-                    { required: true, message: t("Please enter phone number") },
-                    {
-                      validator: validatePhoneNumber,
-                    },
-                  ]}
-                >
-                  <Input placeholder={t("Enter phone number")} />
-                </Form.Item>
-                <Form.Item
-                  label={t("Birthday")}
-                  name="dateOfBirth"
-                  rules={[
-                    { required: true, message: t("Please enter birthday!") },
-                  ]}
-                >
-                  <DatePicker
-                    style={{ width: "100%" }}
-                    placeholder={t("Enter birthday")}
-                    format="DD/MM/YYYY"
+                  <Select.Option value={1}>{t("Male")}</Select.Option>
+                  <Select.Option value={2}>{t("Female")}</Select.Option>
+                  <Select.Option value={3}>{t("Other")}</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={24} md={12} lg={12}>
+              <Form.Item label={t("Avatar")} name="avatar">
+                <AvatarUploader
+                  placeholder={t("Avatar")}
+                  data={imageUrl || undefined}
+                />
+              </Form.Item>
+              <Form.Item label={t("City")} name="cityId">
+                <Select
+                  style={{ width: "100%" }}
+                  showSearch
+                  placeholder={t("Choose city")}
+                ></Select>
+              </Form.Item>
+              <Form.Item label={t("District")} name="districtId">
+                <Select
+                  style={{ width: "100%" }}
+                  showSearch
+                  placeholder={t("Choose district")}
+                ></Select>
+              </Form.Item>
+              <Form.Item label={t("Ward")} name="wardId">
+                <Select
+                  style={{ width: "100%" }}
+                  showSearch
+                  placeholder={t("Choose ward")}
+                ></Select>
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item label={t("Address")} name="street">
+                <Input.TextArea rows={4} placeholder={t("Enter address")} />
+              </Form.Item>
+              <Space align="center">
+                <Form.Item name="isActive" valuePropName="checked" noStyle>
+                  <Switch
+                    checkedChildren={<CheckOutlined />}
+                    unCheckedChildren={<CloseOutlined />}
+                    defaultChecked={true}
                   />
                 </Form.Item>
-                <Form.Item
-                  label={t("Gender")}
-                  name="gender"
-                  rules={[
-                    { required: true, message: t("Please enter gender!") },
-                  ]}
-                >
-                  <Select
-                    style={{ width: "100%" }}
-                    showSearch
-                    placeholder={t("Choose gender")}
-                  >
-                    <Select.Option value={1}>{t("Male")}</Select.Option>
-                    <Select.Option value={2}>{t("Female")}</Select.Option>
-                    <Select.Option value={3}>{t("Other")}</Select.Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={24} md={12} lg={12}>
-                <Form.Item label={t("Avatar")} name="avatar">
-                  <AvatarUploader
-                    placeholder={t("Avatar")}
-                    data={imageUrl || undefined}
-                  />
-                </Form.Item>
-                <Form.Item label={t("City")} name="cityId">
-                  <Select
-                    style={{ width: "100%" }}
-                    showSearch
-                    placeholder={t("Choose city")}
-                  ></Select>
-                </Form.Item>
-                <Form.Item label={t("District")} name="districtId">
-                  <Select
-                    style={{ width: "100%" }}
-                    showSearch
-                    placeholder={t("Choose district")}
-                  ></Select>
-                </Form.Item>
-                <Form.Item label={t("Ward")} name="wardId">
-                  <Select
-                    style={{ width: "100%" }}
-                    showSearch
-                    placeholder={t("Choose ward")}
-                  ></Select>
-                </Form.Item>
-              </Col>
-              <Col span={24}>
-                <Form.Item label={t("Address")} name="street">
-                  <Input.TextArea rows={4} placeholder={t("Enter address")} />
-                </Form.Item>
-                <Space align="center">
-                  <Form.Item name="isActive" valuePropName="checked" noStyle>
-                    <Switch
-                      checkedChildren={<CheckOutlined />}
-                      unCheckedChildren={<CloseOutlined />}
-                      defaultChecked={true}
-                    />
-                  </Form.Item>
-                  <span>{t("Active")}</span>
-                </Space>
-              </Col>
-            </Row>
-            <BottomActionButtons backUrl="/user" />
-          </Form>
-        </Card>
-      )}
+                <span>{t("Active")}</span>
+              </Space>
+            </Col>
+          </Row>
+        </Form>
+      </Card>
+      <BottomActionButtons backUrl="/user" onSubmit={handleSubmit} />
     </>
   );
 };

@@ -17,6 +17,8 @@ import Posts from "../pages/post/post";
 import PostActions from "../pages/post/action";
 import Profile from "../pages/auth/profile";
 import UpdateProfile from "../pages/auth/update-profile";
+import Groups from "../pages/group/group";
+import GroupActions from "../pages/group/action";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -31,47 +33,47 @@ const routes: RouteType[] = [
     element: <UpdateProfile />,
   },
   { path: "/", name: "Trang chủ", element: <Dashboard /> },
-  { path: "/user", name: "Danh sách người dùng", element: <Users /> },
-  { path: "/user/none", name: "Thêm mới người dùng", element: <UserAction /> },
+  { path: "/user", name: "User", element: <Users /> },
+  { path: "/user/none", name: "Create user", element: <UserAction /> },
   {
     path: "/user/:id",
-    name: "Chỉnh sửa người dùng",
+    name: "Update user",
     element: <UserAction />,
   },
-  { path: "/store", name: "Danh sách cửa hàng", element: <Stores /> },
+  { path: "/store", name: "Store", element: <Stores /> },
   {
     path: "/store/none",
-    name: "Thêm mới cửa hàng",
+    name: "Create store",
     element: <StoreAction />,
   },
   {
     path: "/store/:id",
-    name: "Chỉnh sửa cửa hàng",
+    name: "Update store",
     element: <StoreAction />,
   },
-  { path: "/product", name: "Danh sách cửa hàng", element: <Products /> },
+  { path: "/product", name: "Product", element: <Products /> },
   {
     path: "/product/none",
-    name: "Thêm mới sản phẩm",
+    name: "Create product",
     element: <ProdutActions />,
   },
   {
     path: "/product/:id",
-    name: "Chỉnh sửa sản phẩm",
+    name: "Update product",
     element: <ProdutActions />,
   },
-  { path: "/technician", name: "Danh kỷ thuật viên", element: <Technicians /> },
+  { path: "/technician", name: "Technician", element: <Technicians /> },
   {
     path: "/technician/none",
-    name: "Thêm mới kỷ thuật viên",
+    name: "Create technician",
     element: <TechnicianAction />,
   },
   {
     path: "/technician/:id",
-    name: "Chỉnh sửa kỷ thuật viên",
+    name: "Update technician",
     element: <TechnicianAction />,
   },
-  { path: "/appaccount", name: "List app account", element: <Appaccounts /> },
+  { path: "/appaccount", name: "App Account", element: <Appaccounts /> },
   {
     path: "/appaccount/none",
     name: "Create app account",
@@ -84,8 +86,13 @@ const routes: RouteType[] = [
   },
   {
     path: "/booking",
-    name: "List booking",
+    name: "Booking",
     element: <Bookings />,
+  },
+  {
+    path: "/booking/none",
+    name: "Create booking",
+    element: <BookingActions />,
   },
   {
     path: "/booking/:id",
@@ -106,6 +113,22 @@ const routes: RouteType[] = [
     path: "/post/:id",
     name: "Update post",
     element: <PostActions />,
+  },
+
+  {
+    path: "/group",
+    name: "Group",
+    element: <Groups />,
+  },
+  {
+    path: "/group/none",
+    name: "Create group",
+    element: <GroupActions />,
+  },
+  {
+    path: "/group/:id",
+    name: "Update group",
+    element: <GroupActions />,
   },
 ];
 

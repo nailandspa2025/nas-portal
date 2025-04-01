@@ -12,10 +12,10 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../components/ModalConfirm";
 import { toast } from "react-toastify";
-
+import { useTranslation } from "react-i18next";
 const Posts = () => {
   const navigate = useNavigate();
-
+  const { t } = useTranslation();
   const divRef = useRef<HTMLDivElement>(null);
   const heightElement = useElementHeight(divRef);
   const [pageNumber, setPageNumber] = useState<number>(1);
@@ -61,12 +61,12 @@ const Posts = () => {
     onSuccess: () => {
       setRowId(0);
       setOpenModal(false);
-      toast.success("Xóa sản phẩm thành công!");
+      toast.success(t("Deleted successfully!"));
     },
     onError: (error) => {
       setRowId(0);
       setOpenModal(false);
-      toast.error(`Lỗi: ${error.message}`);
+      toast.error(t(error.message));
     },
   });
   const confirmDelete = (id: number) => {
@@ -74,9 +74,9 @@ const Posts = () => {
   };
 
   return (
-    <Card>
+    <Card className="ant-custom-pagination">
       <div ref={divRef}>
-        <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
+        <Row style={{ marginBottom: "16px" }}>
           <FilterData
             onColumnChange={setFilteredColumns}
             onFilterChange={handleFilterChange}

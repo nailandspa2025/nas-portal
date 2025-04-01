@@ -67,14 +67,53 @@ const _nav = [
         route: "/user",
       },
       {
-        id: "accessgroup",
+        id: "group",
         children: "groupuser",
         name: "Group rights",
         icon: "",
-        route: "/accessgroup",
+        route: "/group",
       },
     ],
   },
 ];
 
 export default _nav;
+
+export const defaultRights = [
+  {
+    name: "Admin",
+    value: "admin",
+  },
+  {
+    name: "View",
+    value: "view",
+  },
+  {
+    name: "Create",
+    value: "create",
+  },
+  {
+    name: "Update",
+    value: "update",
+  },
+  {
+    name: "Delete",
+    value: "delete",
+  },
+  {
+    name: "Export",
+    value: "export",
+  },
+];
+export const customRightsMap: {
+  [key: string]: { name: string; value: string }[];
+} = {
+  post: [
+    { name: "Gửi duyệt", value: "submitForApproval" },
+    { name: "Xét duyệt của trưởng nhóm", value: "approvel1" },
+  ],
+  booking: [
+    { name: "Duyệt lịch hẹn", value: "approveBooking" },
+    { name: "Hủy lịch hẹn", value: "cancelBooking" },
+  ],
+};

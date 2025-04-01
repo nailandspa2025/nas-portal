@@ -64,6 +64,7 @@ const AvatarUploader: React.FC<AvatarUploaderProps> = ({
             justifyContent: "center",
             border: "1px dashed #ccc",
             color: "#888",
+            fontSize: 13,
           }}
         >
           {placeholder}
