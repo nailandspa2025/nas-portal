@@ -78,11 +78,16 @@ const UpdateProfile = () => {
   };
   return (
     <>
-      <Row className="custom-row" justify="space-between" align="middle">
-        <Col>
+      <Row
+        className="custom-row"
+        justify="space-between"
+        align="middle"
+        gutter={[0, 16]}
+      >
+        <Col flex="auto">
           <div className="custom-title">{t("Update profile")}</div>
         </Col>
-        <Col>
+        <Col flex="auto">
           <TopActionButtons backUrl="/profile" onSubmit={handleSubmit} />
         </Col>
       </Row>

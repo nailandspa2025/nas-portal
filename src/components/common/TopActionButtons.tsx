@@ -1,4 +1,4 @@
-import { Button, Space, Row } from "antd";
+import { Button, Space } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 interface ActionButtonsProps {
@@ -19,23 +19,21 @@ const TopActionButtons: React.FC<ActionButtonsProps> = ({
   const navigate = useNavigate();
   const { t } = useTranslation();
   return (
-    <Row>
-      <Space
-        wrap
-        style={{
-          width: "100%",
-          justifyContent: "right",
-          ...style,
-        }}
-      >
-        <Button type="default" onClick={() => navigate(backUrl)}>
-          {t(backText)}
-        </Button>
-        <Button type="primary" htmlType="submit" onClick={onSubmit}>
-          {t(submitText)}
-        </Button>
-      </Space>
-    </Row>
+    <Space
+      wrap
+      style={{
+        width: "100%",
+        justifyContent: "flex-end",
+        ...style,
+      }}
+    >
+      <Button type="default" onClick={() => navigate(backUrl)}>
+        {t(backText)}
+      </Button>
+      <Button type="primary" htmlType="submit" onClick={onSubmit}>
+        {t(submitText)}
+      </Button>
+    </Space>
   );
 };
 

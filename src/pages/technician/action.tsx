@@ -76,13 +76,18 @@ const TechnicianAction = () => {
   };
   return (
     <>
-      <Row className="custom-row" justify="space-between" align="middle">
-        <Col>
+      <Row
+        className="custom-row"
+        justify="space-between"
+        align="middle"
+        gutter={[0, 16]}
+      >
+        <Col flex="auto">
           <div className="custom-title">
             {params?.id ? t("Update technician") : t("Create technician")}
           </div>
         </Col>
-        <Col>
+        <Col flex="auto">
           <TopActionButtons backUrl="/technician" onSubmit={handleSubmit} />
         </Col>
       </Row>

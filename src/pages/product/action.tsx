@@ -71,18 +71,23 @@ const ProdutActions = () => {
   };
   return (
     <>
-      <Row className="custom-row" justify="space-between" align="middle">
-        <Col>
+      <Row
+        className="custom-row"
+        justify="space-between"
+        align="middle"
+        gutter={[0, 16]}
+      >
+        <Col flex="auto">
           <div className="custom-title">
             {params?.id ? t("Update product") : t("Create product")}
           </div>
         </Col>
-        <Col>
+        <Col flex="auto">
           <TopActionButtons backUrl="/product" onSubmit={handleSubmit} />
         </Col>
       </Row>
 
-      <Card style={{ padding: "10px 20px" }}>
+      <Card>
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Row gutter={32}>
             <Col span={24}>
