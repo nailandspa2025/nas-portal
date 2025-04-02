@@ -38,7 +38,7 @@ const GroupActions = () => {
         name: value.name || "",
         note: value.note || "",
         isActive: value.isActive ?? true,
-        userIds: value.userIds ?? [],
+        userIds: value?.userIds ?? null,
       });
       const permissionMap: { [key: string]: string[] } = {};
       value.permissions?.forEach((perm: string) => {
@@ -46,9 +46,13 @@ const GroupActions = () => {
         if (!permissionMap[key]) permissionMap[key] = [];
         permissionMap[key].push(action);
       });
-      setCheckedPermissions(permissionMap);
+      if (
+        JSON.stringify(permissionMap) !== JSON.stringify(checkedPermissions)
+      ) {
+        setCheckedPermissions(permissionMap);
+      }
     }
-  }, [data, form]);
+  }, [data, form, checkedPermissions]);
   const getNavItems = () => {
     return _nav.flatMap((nav: any) =>
       nav.children ? nav.children : nav.id !== "groupuser" ? [nav] : []
@@ -106,17 +110,22 @@ const GroupActions = () => {
   };
   return (
     <>
-      <Row className="custom-row" justify="space-between" align="middle">
-        <Col>
+      <Row
+        className="custom-row"
+        justify="space-between"
+        align="middle"
+        gutter={[0, 16]}
+      >
+        <Col flex="auto">
           <div className="custom-title">
             {params?.id ? t("Update group") : t("Create group")}
           </div>
         </Col>
-        <Col>
+        <Col flex="auto">
           <TopActionButtons backUrl="/group" onSubmit={handleSubmit} />
         </Col>
       </Row>
-      <Card style={{ padding: "10px 20px " }}>
+      <Card>
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Row gutter={32}>
             <Col xs={24} sm={24} md={12} lg={12}>

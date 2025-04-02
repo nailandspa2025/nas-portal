@@ -83,17 +83,22 @@ const AppAccountActions = () => {
   };
   return (
     <>
-      <Row className="custom-row" justify="space-between" align="middle">
-        <Col>
+      <Row
+        className="custom-row"
+        justify="space-between"
+        align="middle"
+        gutter={[0, 16]}
+      >
+        <Col flex="auto">
           <div className="custom-title">
             {params?.id ? t("Update account") : t("Create account")}
           </div>
         </Col>
-        <Col>
-          <TopActionButtons backUrl="/group" onSubmit={handleSubmit} />
+        <Col flex="auto">
+          <TopActionButtons backUrl="/appaccount" onSubmit={handleSubmit} />
         </Col>
       </Row>
-      <Card style={{ padding: "10px 20px" }}>
+      <Card>
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Row gutter={32}>
             <Col xs={24} sm={24} md={12} lg={12}>

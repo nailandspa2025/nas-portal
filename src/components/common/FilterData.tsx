@@ -227,7 +227,7 @@ const FilterData: React.FC<FilterDataProps> = ({
   }, []);
   return (
     <>
-      <Row gutter={[8, 8]} style={{ width: "100%" }}>
+      <Row gutter={[0, 10]} style={{ width: "100%" }}>
         <Col
           xs={24}
           sm={24}
@@ -305,7 +305,16 @@ const FilterData: React.FC<FilterDataProps> = ({
               alignItems: "center",
             }}
           >
-            <Space size={[5, 8]} wrap>
+            <Space
+              size={[0, 10]}
+              wrap
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "8px",
+                justifyContent: "flex-end",
+              }}
+            >
               <div>
                 {utils?.buttons
                   ?.filter((f: any) => f.position === "left")
