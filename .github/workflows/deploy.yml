@@ -56,6 +56,7 @@ jobs:
           script: |
             docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
             docker pull docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.sha }}
+            docker network inspect nas-net >/dev/null 2>&1 || docker network create nas-net
             docker stop nas-portal || true
             docker rm nas-portal || true
-            docker run -d --restart=always --name nas-portal -p 8080:80 docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.sha }}
+            docker run -d --restart=always --name nas-portal --network nas-net -p 8080:80 docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.sha }}
