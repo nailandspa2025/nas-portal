@@ -8,12 +8,16 @@ import * as utils from "../../utils/filter/products";
 import FilterData from "../../components/common/FilterData";
 import DataTable from "../../components/common/DataTable";
 import useElementHeight from "../../utils/useElementHeight";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../components/ModalConfirm";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { checkAccessRight } from "../../utils/common/accessUtils";
+
 const Products = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const divRef = useRef<HTMLDivElement>(null);
@@ -23,6 +27,7 @@ const Products = () => {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [rowId, setRowId] = useState<number>(0);
+  const [filteredColumns, setFilteredColumns] = useState();
   const handleItemTable = {
     handleEdit: (record: any) => {
       navigate(`/product/${record.id}`);
@@ -32,9 +37,7 @@ const Products = () => {
       setOpenModal(true);
     },
   };
-  const [filteredColumns, setFilteredColumns] = useState(
-    utils.columns(handleItemTable)
-  );
+
   const { data } = useQuery({
     queryKey: ["productList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
@@ -72,6 +75,16 @@ const Products = () => {
   const confirmDelete = (id: number) => {
     mutationDelete.mutate(id);
   };
+
+  const columns = useMemo(() => {
+    return utils.columns({
+      hasEditPermission: checkAccessRight(accesses, "update", "product"),
+      hasDeletePermission: checkAccessRight(accesses, "delete", "product"),
+      t,
+      handleEdit: handleItemTable.handleEdit,
+      handleDelete: handleItemTable.handleDelete,
+    });
+  }, [accesses]);
   return (
     <Card className="ant-custom-pagination">
       <div ref={divRef}>
@@ -81,7 +94,7 @@ const Products = () => {
             onFilterChange={handleFilterChange}
             handlers={handleActions}
             utils={utils}
-            handleItemTable={handleItemTable}
+            filteredColumns={columns}
           />
         </Row>
       </div>

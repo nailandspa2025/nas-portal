@@ -7,6 +7,7 @@ interface ActionButtonsProps {
   backText?: string;
   submitText?: string;
   style?: React.CSSProperties;
+  hasSubmitPermission?: boolean;
 }
 
 const TopActionButtons: React.FC<ActionButtonsProps> = ({
@@ -15,6 +16,7 @@ const TopActionButtons: React.FC<ActionButtonsProps> = ({
   backText = "Come back",
   submitText = "Save",
   style = {},
+  hasSubmitPermission = true,
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -30,9 +32,11 @@ const TopActionButtons: React.FC<ActionButtonsProps> = ({
       <Button type="default" onClick={() => navigate(backUrl)}>
         {t(backText)}
       </Button>
-      <Button type="primary" htmlType="submit" onClick={onSubmit}>
-        {t(submitText)}
-      </Button>
+      {hasSubmitPermission && (
+        <Button type="primary" htmlType="submit" onClick={onSubmit}>
+          {t(submitText)}
+        </Button>
+      )}
     </Space>
   );
 };

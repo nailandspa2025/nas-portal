@@ -8,12 +8,16 @@ import * as utils from "../../utils/filter/technicians";
 import FilterData from "../../components/common/FilterData";
 import DataTable from "../../components/common/DataTable";
 import useElementHeight from "../../utils/useElementHeight";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalConfirm from "../../components/ModalConfirm";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { checkAccessRight } from "../../utils/common/accessUtils";
+
 const Technicians = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const divRef = useRef<HTMLDivElement>(null);
@@ -24,7 +28,7 @@ const Technicians = () => {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [rowId, setRowId] = useState<number>(0);
-
+  const [filteredColumns, setFilteredColumns] = useState();
   const handleItemTable = {
     handleEdit: (record: any) => {
       navigate(`/technician/${record.id}`);
@@ -34,9 +38,7 @@ const Technicians = () => {
       setOpenModal(true);
     },
   };
-  const [filteredColumns, setFilteredColumns] = useState(
-    utils.columns(handleItemTable)
-  );
+
   const { data } = useQuery({
     queryKey: ["technicianList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
@@ -74,6 +76,16 @@ const Technicians = () => {
   const confirmDelete = (id: number) => {
     mutationDelete.mutate(id);
   };
+
+  const columns = useMemo(() => {
+    return utils.columns({
+      hasEditPermission: checkAccessRight(accesses, "update", "technician"),
+      hasDeletePermission: checkAccessRight(accesses, "delete", "technician"),
+      t,
+      handleEdit: handleItemTable.handleEdit,
+      handleDelete: handleItemTable.handleDelete,
+    });
+  }, [accesses]);
   return (
     <Card className="ant-custom-pagination">
       <div ref={divRef}>
@@ -83,7 +95,7 @@ const Technicians = () => {
             onFilterChange={handleFilterChange}
             handlers={handleActions}
             utils={utils}
-            handleItemTable={handleItemTable}
+            filteredColumns={columns}
           />
         </Row>
       </div>

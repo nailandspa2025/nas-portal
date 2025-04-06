@@ -21,10 +21,11 @@ import { validatePhoneNumber } from "../../utils/common/validate";
 import dayjs from "dayjs";
 import AvatarUploader from "../../components/AvatarUploader";
 import TopActionButtons from "../../components/common/TopActionButtons";
-import BottomActionButtons from "../../components/common/BottomActionButtons";
 import { useTranslation } from "react-i18next";
-
+import { useSelector } from "react-redux";
+import { checkAccessRight } from "../../utils/common/accessUtils";
 const UserAction = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ const UserAction = () => {
   });
 
   useEffect(() => {
-    if ((data as any)?.data) {
+    if (params.id && (data as any)?.data) {
       const value = (data as any).data;
       setImageUrl(value.avatar);
       form.setFieldsValue({
@@ -56,7 +57,7 @@ const UserAction = () => {
         cityId: value.cityId || null,
       });
     }
-  }, [data, form]);
+  }, [data, form, params.id]);
 
   const mutation = useMutation({
     mutationFn: async (values) => {
@@ -79,6 +80,7 @@ const UserAction = () => {
   const onFinish = (values: any) => {
     const payload = {
       ...values,
+      isActive: values.isActive ?? true,
     };
     if (params.id) payload.id = params.id;
     mutation.mutate(payload);
@@ -100,7 +102,11 @@ const UserAction = () => {
           </div>
         </Col>
         <Col flex="auto">
-          <TopActionButtons backUrl="/user" onSubmit={handleSubmit} />
+          <TopActionButtons
+            backUrl="/user"
+            onSubmit={handleSubmit}
+            hasSubmitPermission={checkAccessRight(accesses, "update", "user")}
+          />
         </Col>
       </Row>
       <Card>
@@ -231,7 +237,15 @@ const UserAction = () => {
           </Row>
         </Form>
       </Card>
-      <BottomActionButtons backUrl="/user" onSubmit={handleSubmit} />
+      <TopActionButtons
+        style={{
+          marginTop: 20,
+          marginBottom: 20,
+        }}
+        backUrl="/user"
+        onSubmit={handleSubmit}
+        hasSubmitPermission={checkAccessRight(accesses, "update", "user")}
+      />
     </>
   );
 };

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import useElementHeight from "../../utils/useElementHeight";
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { Row, Card } from "antd";
 import DataTable from "../../components/common/DataTable";
 import * as utils from "../../utils/filter/users";
@@ -10,8 +10,12 @@ import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
+import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { checkAccessRight } from "../../utils/common/accessUtils";
 const Users = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const divRef = useRef<HTMLDivElement>(null);
   const heightElement = useElementHeight(divRef);
@@ -30,16 +34,14 @@ const Users = () => {
       console.log("Xem chi tiết người dùng:", record);
     },
   };
-  const [filteredColumns, setFilteredColumns] = useState(
-    utils.columns(handleItemTable)
-  );
+  const [filteredColumns, setFilteredColumns] = useState();
   const { data } = useQuery({
     queryKey: ["userList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
       const response: any = await AuthApi.getWithPagination(
         queryString.stringify({ pageNumber, pageSize, ...filters })
       );
-      return response.data;
+      return response.data || [];
     },
     enabled: !!filters,
   });
@@ -58,16 +60,26 @@ const Users = () => {
       toast.success("Đang phát triển");
     },
   };
+  const columns = useMemo(() => {
+    return utils.columns({
+      hasEditPermission: checkAccessRight(accesses, "update", "user"),
+      hasDeletePermission: checkAccessRight(accesses, "delete", "user"),
+      t,
+      handleEdit: handleItemTable.handleEdit,
+      handleDelete: handleItemTable.handleDelete,
+    });
+  }, [accesses]);
+
   return (
     <Card className="ant-custom-pagination">
       <div ref={divRef}>
         <Row style={{ marginBottom: "16px" }}>
           <FilterData
+            filteredColumns={columns}
             onColumnChange={setFilteredColumns}
             onFilterChange={handleFilterChange}
             handlers={handleActions}
             utils={utils}
-            handleItemTable={handleItemTable}
           />
         </Row>
       </div>

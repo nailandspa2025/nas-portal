@@ -1,12 +1,22 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from "react-router-dom";
 import { Space, Tooltip } from "antd";
 import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
-import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
-export const columns = (items: any) => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { t } = useTranslation();
+export const columns = ({
+  hasEditPermission,
+  hasDeletePermission,
+  t,
+  handleEdit,
+  handleDelete,
+}: {
+  hasEditPermission: boolean;
+  hasDeletePermission: boolean;
+  t: any;
+  handleEdit: (record: any) => void;
+  handleDelete: (record: any) => void;
+}) => {
   return [
     {
       title: t("Group name"),
@@ -44,7 +54,6 @@ export const columns = (items: any) => {
         </span>
       ),
       width: 100,
-      hidden: false,
     },
     {
       title: t("System information"),
@@ -54,15 +63,14 @@ export const columns = (items: any) => {
         <>
           <div>
             <span>
-              {record.createdBy} {" - "}
+              {record.createdBy} -{" "}
               {dayjs(record.created).format("HH:mm - DD/MM/YYYY")}
             </span>
           </div>
           {record.lastModifiedBy && (
             <div>
               <span>
-                {record.lastModifiedBy}
-                {" - "}
+                {record.lastModifiedBy} -{" "}
                 {dayjs(record.lastModified).format("HH:mm - DD/MM/YYYY")}
               </span>
             </div>
@@ -79,28 +87,32 @@ export const columns = (items: any) => {
       width: 60,
       render: (_: any, record: any) => (
         <Space>
-          <Tooltip title={t("Edit")}>
-            <a
-              onClick={() => items.handleEdit(record)}
-              style={{ color: "#1890ff" }}
-            >
-              <FormOutlined style={{ fontSize: 16 }} />
-            </a>
-          </Tooltip>
-          <Tooltip title={t("Delete")}>
-            <a
-              onClick={() => items.handleDelete(record)}
-              style={{ color: "#ff4d4f" }}
-            >
-              <DeleteOutlined style={{ fontSize: 16 }} />
-            </a>
-          </Tooltip>
+          {hasEditPermission && (
+            <Tooltip title={t("Edit")}>
+              <a
+                onClick={() => handleEdit(record)}
+                style={{ color: "#1890ff" }}
+              >
+                <FormOutlined style={{ fontSize: 16 }} />
+              </a>
+            </Tooltip>
+          )}
+
+          {hasDeletePermission && (
+            <Tooltip title={t("Delete")}>
+              <a
+                onClick={() => handleDelete(record)}
+                style={{ color: "#ff4d4f" }}
+              >
+                <DeleteOutlined style={{ fontSize: 16 }} />
+              </a>
+            </Tooltip>
+          )}
         </Space>
       ),
     },
   ];
 };
-
 export const filters = [
   {
     name: "Enter group name",
@@ -117,5 +129,6 @@ export const buttons = [
     label: "Create",
     funcName: "createNew",
     color: "primary",
+    accessRight: ["group.create", "group.admin", "admin"],
   },
 ];

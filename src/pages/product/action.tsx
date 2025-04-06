@@ -9,11 +9,13 @@ import { toast } from "react-toastify";
 import { buildFormData } from "../../utils/common/buildFormData";
 import { uploadImage } from "../../utils/common/uploadImages";
 import TopActionButtons from "../../components/common/TopActionButtons";
-import BottomActionButtons from "../../components/common/BottomActionButtons";
 import StoreSelect from "../../components/StoreSelect";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { checkAccessRight } from "../../utils/common/accessUtils";
 
 const ProdutActions = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -27,7 +29,7 @@ const ProdutActions = () => {
     enabled: !!params.id,
   });
   useEffect(() => {
-    if ((data as any)?.data) {
+    if (params.id && (data as any)?.data) {
       const value = (data as any).data;
       setDescription(value.description ?? "");
       form.setFieldsValue({
@@ -37,7 +39,7 @@ const ProdutActions = () => {
         storeId: value.storeId || null,
       });
     }
-  }, [data, form]);
+  }, [data, form, params.id]);
   const mutation = useMutation({
     mutationFn: async (values) => {
       const formD = new FormData();
@@ -83,7 +85,15 @@ const ProdutActions = () => {
           </div>
         </Col>
         <Col flex="auto">
-          <TopActionButtons backUrl="/product" onSubmit={handleSubmit} />
+          <TopActionButtons
+            backUrl="/product"
+            onSubmit={handleSubmit}
+            hasSubmitPermission={checkAccessRight(
+              accesses,
+              "update",
+              "product"
+            )}
+          />
         </Col>
       </Row>
 
@@ -139,7 +149,15 @@ const ProdutActions = () => {
           </Row>
         </Form>
       </Card>
-      <BottomActionButtons backUrl="/product" onSubmit={handleSubmit} />
+      <TopActionButtons
+        style={{
+          marginTop: 20,
+          marginBottom: 20,
+        }}
+        backUrl="/product"
+        onSubmit={handleSubmit}
+        hasSubmitPermission={checkAccessRight(accesses, "update", "product")}
+      />
     </>
   );
 };

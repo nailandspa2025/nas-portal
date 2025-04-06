@@ -13,10 +13,11 @@ import AvatarUploader from "../../components/AvatarUploader";
 import AppAccountSelect from "../../components/AppAccountSelect";
 import StoreSelect from "../../components/StoreSelect";
 import TopActionButtons from "../../components/common/TopActionButtons";
-import BottomActionButtons from "../../components/common/BottomActionButtons";
 import { useTranslation } from "react-i18next";
-
+import { useSelector } from "react-redux";
+import { checkAccessRight } from "../../utils/common/accessUtils";
 const TechnicianAction = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const TechnicianAction = () => {
   });
 
   useEffect(() => {
-    if ((data as any)?.data) {
+    if (params.id && (data as any)?.data) {
       const value = (data as any).data;
       setImageUrl(value.avatar);
       form.setFieldsValue({
@@ -44,7 +45,7 @@ const TechnicianAction = () => {
         storeId: value.storeId || "",
       });
     }
-  }, [data, form]);
+  }, [data, form, params.id]);
 
   const mutation = useMutation({
     mutationFn: async (values) => {
@@ -88,7 +89,15 @@ const TechnicianAction = () => {
           </div>
         </Col>
         <Col flex="auto">
-          <TopActionButtons backUrl="/technician" onSubmit={handleSubmit} />
+          <TopActionButtons
+            backUrl="/technician"
+            onSubmit={handleSubmit}
+            hasSubmitPermission={checkAccessRight(
+              accesses,
+              "update",
+              "technician"
+            )}
+          />
         </Col>
       </Row>
       <Card>
@@ -168,7 +177,15 @@ const TechnicianAction = () => {
           </Row>
         </Form>
       </Card>
-      <BottomActionButtons backUrl="/technician" onSubmit={handleSubmit} />
+      <TopActionButtons
+        style={{
+          marginTop: 20,
+          marginBottom: 20,
+        }}
+        backUrl="/technician"
+        onSubmit={handleSubmit}
+        hasSubmitPermission={checkAccessRight(accesses, "update", "technician")}
+      />
     </>
   );
 };

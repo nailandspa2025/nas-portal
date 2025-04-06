@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, Row } from "antd";
-
 import { ProductApi } from "../../apis/catalog/product";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import queryString from "query-string";
@@ -8,16 +7,18 @@ import * as utils from "../../utils/filter/groups";
 import FilterData from "../../components/common/FilterData";
 import DataTable from "../../components/common/DataTable";
 import useElementHeight from "../../utils/useElementHeight";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../components/ModalConfirm";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { RoleApi } from "../../apis/auth/role";
+import { useSelector } from "react-redux";
+import { checkAccessRight } from "../../utils/common/accessUtils";
 const Groups = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const navigate = useNavigate();
-
   const divRef = useRef<HTMLDivElement>(null);
   const heightElement = useElementHeight(divRef);
   const [pageNumber, setPageNumber] = useState<number>(1);
@@ -34,9 +35,7 @@ const Groups = () => {
       setOpenModal(true);
     },
   };
-  const [filteredColumns, setFilteredColumns] = useState(
-    utils.columns(handleItemTable)
-  );
+
   const { data } = useQuery({
     queryKey: ["roleList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
@@ -74,16 +73,26 @@ const Groups = () => {
   const confirmDelete = (id: number) => {
     mutationDelete.mutate(id);
   };
+  const [filteredColumns, setFilteredColumns] = useState<any[]>([]);
+  const columns = useMemo(() => {
+    return utils.columns({
+      hasEditPermission: checkAccessRight(accesses, "update", "group"),
+      hasDeletePermission: checkAccessRight(accesses, "delete", "group"),
+      t,
+      handleEdit: handleItemTable.handleEdit,
+      handleDelete: handleItemTable.handleDelete,
+    });
+  }, [accesses]);
   return (
     <Card className="ant-custom-pagination">
       <div ref={divRef}>
         <Row style={{ marginBottom: "16px" }}>
           <FilterData
+            filteredColumns={columns}
             onColumnChange={setFilteredColumns}
             onFilterChange={handleFilterChange}
             handlers={handleActions}
             utils={utils}
-            handleItemTable={handleItemTable}
           />
         </Row>
       </div>

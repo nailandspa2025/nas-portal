@@ -7,7 +7,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/reducers";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
+import { checkAccessRight } from "../../utils/common/accessUtils";
+
 const SiderBarLeft = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const collapsed = useSelector((state: RootState) => state.global.collapsed);
@@ -17,40 +20,55 @@ const SiderBarLeft = () => {
   const handleMenuClick = () => {
     dispatch({ type: "setDrawerVisible", drawerVisible: false });
   };
-  const menuItems = _nav.map((item) => {
-    if (item.children) {
+  const menuItems = _nav
+    .filter((item) => {
+      if (item.children) {
+        return item.children.some((child) =>
+          checkAccessRight(accesses, "view", child.id)
+        );
+      }
+      return checkAccessRight(accesses, "view", item.id);
+    })
+    .map((item) => {
+      if (item.children) {
+        const filteredChildren = item.children
+          .filter((child) => checkAccessRight(accesses, "view", child.id))
+          .map((child) => ({
+            key: child.id,
+            icon: child.icon,
+            label: (
+              <Link to={child.route} onClick={handleMenuClick}>
+                {t(child.name)}
+              </Link>
+            ),
+          }));
+
+        return {
+          key: item.id,
+          icon: item.icon,
+          label: t(item.name),
+          children: filteredChildren,
+        };
+      }
+
       return {
         key: item.id,
         icon: item.icon,
-        label: item.name,
-        children: item.children.map((child) => ({
-          key: child.id,
-          icon: child.icon,
-          label: (
-            <Link to={child.route} onClick={handleMenuClick}>
-              {t(child.name)}
-            </Link>
-          ),
-        })),
+        label: (
+          <Link
+            to={item.route}
+            onClick={() => {
+              handleMenuClick();
+              setOpenKeys([]);
+              localStorage.setItem("openKeys", JSON.stringify([]));
+            }}
+          >
+            {t(item.name)}
+          </Link>
+        ),
       };
-    }
-    return {
-      key: item.id,
-      icon: item.icon,
-      label: (
-        <Link
-          to={item.route}
-          onClick={() => {
-            handleMenuClick();
-            setOpenKeys([]);
-            localStorage.setItem("openKeys", JSON.stringify([]));
-          }}
-        >
-          {t(item.name)}
-        </Link>
-      ),
-    };
-  });
+    });
+
   const rootSubmenuKeys = _nav.map((_) => _.id);
   const onOpenChange = (keys: string[]) => {
     const latestOpenKey = keys.find((key) => !openKeys.includes(key));

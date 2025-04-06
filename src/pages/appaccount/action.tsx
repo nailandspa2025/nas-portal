@@ -21,10 +21,11 @@ import { validatePhoneNumber } from "../../utils/common/validate";
 import dayjs from "dayjs";
 import AvatarUploader from "../../components/AvatarUploader";
 import TopActionButtons from "../../components/common/TopActionButtons";
-import BottomActionButtons from "../../components/common/BottomActionButtons";
 import { useTranslation } from "react-i18next";
-
+import { useSelector } from "react-redux";
+import { checkAccessRight } from "../../utils/common/accessUtils";
 const AppAccountActions = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ const AppAccountActions = () => {
     enabled: !!params.id,
   });
   useEffect(() => {
-    if ((data as any)?.data) {
+    if (params.id && (data as any)?.data) {
       const value = (data as any).data;
       setImageUrl(value.avatar);
       form.setFieldsValue({
@@ -52,7 +53,7 @@ const AppAccountActions = () => {
         street: value.street || "",
       });
     }
-  }, [data, form]);
+  }, [data, form, params.id]);
   const mutation = useMutation({
     mutationFn: async (values) => {
       const formD = new FormData();
@@ -74,6 +75,7 @@ const AppAccountActions = () => {
   const onFinish = (values: any) => {
     const payload = {
       ...values,
+      isActive: values.isActive ?? true,
     };
     if (params.id) payload.id = params.id;
     mutation.mutate(payload);
@@ -95,7 +97,15 @@ const AppAccountActions = () => {
           </div>
         </Col>
         <Col flex="auto">
-          <TopActionButtons backUrl="/appaccount" onSubmit={handleSubmit} />
+          <TopActionButtons
+            backUrl="/appaccount"
+            onSubmit={handleSubmit}
+            hasSubmitPermission={checkAccessRight(
+              accesses,
+              "update",
+              "appaccount"
+            )}
+          />
         </Col>
       </Row>
       <Card>
@@ -205,7 +215,15 @@ const AppAccountActions = () => {
           </Row>
         </Form>
       </Card>
-      <BottomActionButtons backUrl="/appaccount" onSubmit={handleSubmit} />
+      <TopActionButtons
+        style={{
+          marginTop: 20,
+          marginBottom: 20,
+        }}
+        backUrl="/appaccount"
+        onSubmit={handleSubmit}
+        hasSubmitPermission={checkAccessRight(accesses, "update", "appaccount")}
+      />
     </>
   );
 };

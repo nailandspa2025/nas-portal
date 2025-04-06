@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Modal } from "antd";
-
+import { useTranslation } from "react-i18next";
 interface ModalConfirmProps {
   content?: string;
   title?: string;
@@ -11,16 +11,17 @@ interface ModalConfirmProps {
 }
 
 const ModalConfirm: React.FC<ModalConfirmProps> = ({
-  content = "Bạn chắc chắn muốn xóa dữ liệu?",
-  title = "Xóa",
+  content = "Are you sure you want to delete the data?",
+  title = "Delete",
   openModal = false,
   setOpenModal,
   loading = false,
   onChange = () => {},
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
-      title={title}
+      title={t(title)}
       open={openModal}
       onCancel={() => setOpenModal(false)}
       footer={[
@@ -30,7 +31,7 @@ const ModalConfirm: React.FC<ModalConfirmProps> = ({
           danger
           onClick={() => setOpenModal(false)}
         >
-          Hủy bỏ
+          {t("Cancel")}
         </Button>,
         <Button
           key="submit"
@@ -38,11 +39,11 @@ const ModalConfirm: React.FC<ModalConfirmProps> = ({
           loading={loading}
           onClick={onChange}
         >
-          Đồng ý
+          {t("Agree")}
         </Button>,
       ]}
     >
-      <p>{content}</p>
+      <p>{t(content)}</p>
     </Modal>
   );
 };
