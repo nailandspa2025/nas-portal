@@ -27,7 +27,7 @@ const Header = () => {
   const isMobile = useIsMobile();
   const collapsed = useSelector((state: RootState) => state.global.collapsed);
   const [openModal, setOpenModal] = useState(false);
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["userInfo"],
     queryFn: async () => {
       const response: any = await AuthApi.userInfo();
@@ -35,10 +35,14 @@ const Header = () => {
     },
   });
   useEffect(() => {
-    if (data) {
-      dispatch(userLoadded(data));
+    if (!isLoading) {
+      if (data) {
+        dispatch(userLoadded(data));
+      } else {
+        onSignOut();
+      }
     }
-  }, [data, dispatch]);
+  }, [data, dispatch, isLoading]);
   const onCollapseChange = () => {
     if (!isMobile) {
       dispatch({ type: "setCollapsed", collapsed: !collapsed });
