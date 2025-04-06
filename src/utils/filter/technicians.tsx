@@ -51,7 +51,7 @@ export const columns = ({
       title: t("Address"),
       dataIndex: "technicianAddress",
       key: "technicianAddress",
-      //width: 250,
+      width: 250,
     },
     {
       title: t("Rating"),
