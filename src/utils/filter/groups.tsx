@@ -59,7 +59,8 @@ export const columns = ({
       title: t("System information"),
       dataIndex: "system",
       key: "system",
-      minWidth: 180,
+      width: 200,
+      ellipsis: true,
       render: (_: any, record: any) => (
         <>
           <div>
