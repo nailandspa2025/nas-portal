@@ -23,12 +23,14 @@ import {
 import { getDataForFilter } from "../../utils/common/getDataForFilter";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { intersection } from "lodash-es";
 type FilterDataProps = {
   onFilterChange?: (filters: any) => void;
   onColumnChange?: (columns: any) => void;
   handlers?: Record<string, () => void>;
   utils?: any;
-  handleItemTable?: any;
+  filteredColumns?: any;
 };
 
 const FilterData: React.FC<FilterDataProps> = ({
@@ -36,8 +38,9 @@ const FilterData: React.FC<FilterDataProps> = ({
   onColumnChange,
   handlers,
   utils = [],
-  handleItemTable,
+  filteredColumns,
 }) => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const location = useLocation();
   const dropdownRef = useRef<any>(null);
@@ -51,15 +54,35 @@ const FilterData: React.FC<FilterDataProps> = ({
   const [dialogFilterOptions, setDialogFilterOptions] = useState<
     { value: string; label: string }[]
   >([]);
-
   const [dialogFilterLabel, setDialogFilterLabel] = useState(
     utils?.filters?.filter((f: any) => f.isActive && f.popup)
   );
   const [columnVisible, setColumnVisible] = useState<boolean>(false);
-  const [currentColumns, setCurrentColumns] = useState<any>(
-    utils?.columns(handleItemTable)
-  );
-  const [initialLoad, setInitialLoad] = useState(false);
+  const [currentColumns, setCurrentColumns] = useState<any>([]);
+  useEffect(() => {
+    const stored = localStorage.getItem(storageKey);
+    const parsed: Record<string, boolean> | null = stored
+      ? JSON.parse(stored)
+      : null;
+
+    const columnsToUse = filteredColumns?.map((col: any) => ({
+      ...col,
+      hidden: parsed?.[col.key] ?? col.hidden ?? false,
+    }));
+
+    setCurrentColumns(columnsToUse);
+
+    if (onColumnChange) {
+      onColumnChange(columnsToUse);
+    }
+  }, [filteredColumns, storageKey, onColumnChange]);
+
+  useEffect(() => {
+    const hiddenMap = Object.fromEntries(
+      currentColumns?.map((col: any) => [col.key, col.hidden ?? false])
+    );
+    localStorage.setItem(storageKey, JSON.stringify(hiddenMap));
+  }, [currentColumns, storageKey]);
 
   const addFilter = useCallback((f: any) => {
     const params = f.reduce((acc: any, f: any) => {
@@ -83,28 +106,6 @@ const FilterData: React.FC<FilterDataProps> = ({
     getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogFilterLabel, keywordSearch]);
-
-  useEffect(() => {
-    const savedHiddenColumns = JSON.parse(
-      localStorage.getItem(storageKey) || "{}"
-    );
-    setCurrentColumns((prevColumns: any) =>
-      prevColumns.map((col: any) => ({
-        ...col,
-        hidden: savedHiddenColumns[col.key] ?? col.hidden,
-      }))
-    );
-  }, [storageKey]);
-  useEffect(() => {
-    if (!onColumnChange) return;
-    const hiddenColumns = Object.fromEntries(
-      currentColumns.map((col: any) => [col.key, col.hidden])
-    );
-    if (initialLoad) {
-      localStorage.setItem(storageKey, JSON.stringify(hiddenColumns));
-    }
-    onColumnChange(currentColumns);
-  }, [currentColumns, storageKey, onColumnChange, initialLoad]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilterTextData((prev: any) => ({
@@ -200,12 +201,13 @@ const FilterData: React.FC<FilterDataProps> = ({
       f.popup && !dialogFilterLabel.some((df: any) => df.field === f.field)
   );
   const handleColumn = (key: string) => {
-    setCurrentColumns((prev: any) =>
-      prev.map((col: any) =>
-        col.key === key ? { ...col, hidden: !col.hidden } : col
-      )
+    const updatedColumns = currentColumns.map((col: any) =>
+      col.key === key ? { ...col, hidden: !col.hidden } : col
     );
-    setInitialLoad(true);
+    setCurrentColumns(updatedColumns);
+    if (onColumnChange) {
+      onColumnChange(updatedColumns);
+    }
   };
   const handleAction = (funcName: string) => {
     if (handlers && handlers[funcName]) {
@@ -315,20 +317,25 @@ const FilterData: React.FC<FilterDataProps> = ({
                 justifyContent: "flex-end",
               }}
             >
-              <div>
+              <Space>
                 {utils?.buttons
                   ?.filter((f: any) => f.position === "left")
                   .map((item: any) => (
-                    <Button
-                      color={item.color}
-                      variant="solid"
-                      key={item.funcName}
-                      onClick={() => handleAction(item.funcName)}
-                    >
-                      {t(item.label)}
-                    </Button>
+                    <>
+                      {intersection(accesses || [], item.accessRight).length >
+                        0 && (
+                        <Button
+                          color={item.color}
+                          variant="solid"
+                          key={item.funcName}
+                          onClick={() => handleAction(item.funcName)}
+                        >
+                          {t(item.label)}
+                        </Button>
+                      )}
+                    </>
                   ))}
-              </div>
+              </Space>
               <div>
                 {utils?.actions && utils?.actions.length > 0 && (
                   <Dropdown
@@ -337,9 +344,22 @@ const FilterData: React.FC<FilterDataProps> = ({
                       items: utils?.actions?.flatMap(
                         (item: any, index: number) => [
                           {
+                            disabled:
+                              intersection(accesses || [], item.accessRight)
+                                .length <= 0,
                             key: item.key,
                             label: (
-                              <span onClick={() => handleAction(item.funcName)}>
+                              <span
+                                onClick={() => {
+                                  if (
+                                    intersection(
+                                      accesses || [],
+                                      item.accessRight
+                                    ).length > 0
+                                  )
+                                    handleAction(item.funcName);
+                                }}
+                              >
                                 {item.icon}
                                 <span style={{ marginLeft: 8 }}>
                                   {t(item.label)}
@@ -364,7 +384,7 @@ const FilterData: React.FC<FilterDataProps> = ({
               <div ref={dropdownRef}>
                 <Dropdown
                   menu={{
-                    items: currentColumns.flatMap(
+                    items: currentColumns?.flatMap(
                       (item: any, index: number) => [
                         {
                           key: item.key,
@@ -398,20 +418,25 @@ const FilterData: React.FC<FilterDataProps> = ({
                   </Button>
                 </Dropdown>
               </div>
-              <div>
+              <Space>
                 {utils?.buttons
                   ?.filter((f: any) => f.position === "right")
                   .map((item: any) => (
-                    <Button
-                      key={item.funcName}
-                      type={item.color ?? "primary"}
-                      variant="solid"
-                      onClick={() => handleAction(item.funcName)}
-                    >
-                      {t(item.label)}
-                    </Button>
+                    <>
+                      {intersection(accesses || [], item.accessRight).length >
+                        0 && (
+                        <Button
+                          key={item.funcName}
+                          color={item.color}
+                          variant="solid"
+                          onClick={() => handleAction(item.funcName)}
+                        >
+                          {t(item.label)}
+                        </Button>
+                      )}
+                    </>
                   ))}
-              </div>
+              </Space>
             </Space>
           </Col>
         )}

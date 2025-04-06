@@ -118,3 +118,9 @@ textarea.ant-input {
 .custom-row {
   margin-bottom: 20px !important;  
 }
+
+.group-collapse {
+  .ant-collapse-content-box {
+    padding: 0 !important;
+  }
+}

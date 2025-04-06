@@ -7,7 +7,6 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { buildFormData } from "../../utils/common/buildFormData";
 import TopActionButtons from "../../components/common/TopActionButtons";
-import BottomActionButtons from "../../components/common/BottomActionButtons";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import UserSelect from "../../components/UserSelect";
@@ -18,8 +17,11 @@ import {
   validateLatitude,
   validatePhoneNumber,
 } from "../../utils/common/validate";
+import { useSelector } from "react-redux";
+import { checkAccessRight } from "../../utils/common/accessUtils";
 
 const StoreAction = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -33,7 +35,7 @@ const StoreAction = () => {
     enabled: !!params.id,
   });
   useEffect(() => {
-    if ((data as any)?.data) {
+    if (params.id && (data as any)?.data) {
       const value = (data as any).data;
       setImageUrls(value.imageUrls);
       setImageUrl(value.avatar);
@@ -50,7 +52,7 @@ const StoreAction = () => {
         ratingStar: value.ratingStar || "",
       });
     }
-  }, [data, form]);
+  }, [data, form, params.id]);
   const mutation = useMutation({
     mutationFn: async (values) => {
       const formD = new FormData();
@@ -93,7 +95,11 @@ const StoreAction = () => {
           </div>
         </Col>
         <Col flex="auto">
-          <TopActionButtons backUrl="/store" onSubmit={handleSubmit} />
+          <TopActionButtons
+            backUrl="/store"
+            onSubmit={handleSubmit}
+            hasSubmitPermission={checkAccessRight(accesses, "update", "store")}
+          />
         </Col>
       </Row>
       <Card>
@@ -275,7 +281,15 @@ const StoreAction = () => {
           </Row>
         </Form>
       </Card>
-      <BottomActionButtons backUrl="/store" onSubmit={handleSubmit} />
+      <TopActionButtons
+        style={{
+          marginTop: 20,
+          marginBottom: 20,
+        }}
+        backUrl="/store"
+        onSubmit={handleSubmit}
+        hasSubmitPermission={checkAccessRight(accesses, "update", "store")}
+      />
     </>
   );
 };

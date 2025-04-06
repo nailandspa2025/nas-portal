@@ -1,12 +1,22 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { UserOutlined, FormOutlined } from "@ant-design/icons";
+import { UserOutlined, FormOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Avatar, Space, Tooltip } from "antd";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
-export const columns = (items: any) => {
-  const { t } = useTranslation();
+export const columns = ({
+  hasEditPermission,
+  hasDeletePermission,
+  t,
+  handleEdit,
+  handleDelete,
+}: {
+  hasEditPermission: boolean;
+  hasDeletePermission: boolean;
+  t: any;
+  handleEdit: (record: any) => void;
+  handleDelete: (record: any) => void;
+}) => {
   return [
     {
       title: t("Avatar"),
@@ -84,14 +94,27 @@ export const columns = (items: any) => {
       width: 60,
       render: (_: any, record: any) => (
         <Space>
-          <Tooltip title={t("Edit")}>
-            <a
-              onClick={() => items.handleEdit(record)}
-              style={{ color: "#1890ff" }}
-            >
-              <FormOutlined style={{ fontSize: 16 }} />
-            </a>
-          </Tooltip>
+          {hasEditPermission && (
+            <Tooltip title={t("Edit")}>
+              <a
+                onClick={() => handleEdit(record)}
+                style={{ color: "#1890ff" }}
+              >
+                <FormOutlined style={{ fontSize: 16 }} />
+              </a>
+            </Tooltip>
+          )}
+
+          {hasDeletePermission && (
+            <Tooltip title={t("Delete")}>
+              <a
+                onClick={() => handleDelete(record)}
+                style={{ color: "#ff4d4f" }}
+              >
+                <DeleteOutlined style={{ fontSize: 16 }} />
+              </a>
+            </Tooltip>
+          )}
         </Space>
       ),
     },
@@ -122,6 +145,6 @@ export const buttons = [
     label: "Create",
     funcName: "createNew",
     color: "primary",
-    accessRight: ["customer.insert", "customer.admin", "admin"],
+    accessRight: ["appaccount.create", "appaccount.admin", "admin"],
   },
 ];

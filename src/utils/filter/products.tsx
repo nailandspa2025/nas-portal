@@ -2,11 +2,20 @@
 import { Link } from "react-router-dom";
 import { Space, Tooltip } from "antd";
 import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
-import { useTranslation } from "react-i18next";
 
-export const columns = (items: any) => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { t } = useTranslation();
+export const columns = ({
+  hasEditPermission,
+  hasDeletePermission,
+  t,
+  handleEdit,
+  handleDelete,
+}: {
+  hasEditPermission: boolean;
+  hasDeletePermission: boolean;
+  t: any;
+  handleEdit: (record: any) => void;
+  handleDelete: (record: any) => void;
+}) => {
   return [
     {
       title: t("Product name"),
@@ -57,22 +66,26 @@ export const columns = (items: any) => {
       width: 60,
       render: (_: any, record: any) => (
         <Space>
-          <Tooltip title={t("Edit")}>
-            <a
-              onClick={() => items.handleEdit(record)}
-              style={{ color: "#1890ff" }}
-            >
-              <FormOutlined style={{ fontSize: 16 }} />
-            </a>
-          </Tooltip>
-          <Tooltip title={t("Delete")}>
-            <a
-              onClick={() => items.handleDelete(record)}
-              style={{ color: "#ff4d4f" }}
-            >
-              <DeleteOutlined style={{ fontSize: 16 }} />
-            </a>
-          </Tooltip>
+          {hasEditPermission && (
+            <Tooltip title={t("Edit")}>
+              <a
+                onClick={() => handleEdit(record)}
+                style={{ color: "#1890ff" }}
+              >
+                <FormOutlined style={{ fontSize: 16 }} />
+              </a>
+            </Tooltip>
+          )}
+          {hasDeletePermission && (
+            <Tooltip title={t("Delete")}>
+              <a
+                onClick={() => handleDelete(record)}
+                style={{ color: "#ff4d4f" }}
+              >
+                <DeleteOutlined style={{ fontSize: 16 }} />
+              </a>
+            </Tooltip>
+          )}
         </Space>
       ),
     },
@@ -95,5 +108,6 @@ export const buttons = [
     label: "Create",
     funcName: "createNew",
     color: "primary",
+    accessRight: ["product.import", "product.admin", "admin"],
   },
 ];

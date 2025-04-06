@@ -9,11 +9,12 @@ import { toast } from "react-toastify";
 import { buildFormData } from "../../utils/common/buildFormData";
 import { uploadImage } from "../../utils/common/uploadImages";
 import TopActionButtons from "../../components/common/TopActionButtons";
-import BottomActionButtons from "../../components/common/BottomActionButtons";
 import { useTranslation } from "react-i18next";
 import AvatarUploader from "../../components/AvatarUploader";
-
+import { useSelector } from "react-redux";
+import { checkAccessRight } from "../../utils/common/accessUtils";
 const PostActions = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const PostActions = () => {
     enabled: !!params.id,
   });
   useEffect(() => {
-    if ((data as any)?.data) {
+    if (params.id && (data as any)?.data) {
       const value = (data as any).data;
       setImageUrl(value.avatar);
       setContent(value.content ?? "");
@@ -37,7 +38,7 @@ const PostActions = () => {
         description: value.description || "",
       });
     }
-  }, [data, form]);
+  }, [data, form, params.id]);
 
   const mutation = useMutation({
     mutationFn: async (values) => {
@@ -84,7 +85,11 @@ const PostActions = () => {
           </div>
         </Col>
         <Col flex="auto">
-          <TopActionButtons backUrl="/post" onSubmit={handleSubmit} />
+          <TopActionButtons
+            backUrl="/post"
+            onSubmit={handleSubmit}
+            hasSubmitPermission={checkAccessRight(accesses, "update", "post")}
+          />
         </Col>
       </Row>
       <Card>
@@ -139,7 +144,15 @@ const PostActions = () => {
           </Row>
         </Form>
       </Card>
-      <BottomActionButtons backUrl="/post" onSubmit={handleSubmit} />
+      <TopActionButtons
+        style={{
+          marginTop: 20,
+          marginBottom: 20,
+        }}
+        backUrl="/post"
+        onSubmit={handleSubmit}
+        hasSubmitPermission={checkAccessRight(accesses, "update", "post")}
+      />
     </>
   );
 };

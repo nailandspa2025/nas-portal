@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, Col, Form, Input, Row, Space, Switch } from "antd";
 import TopActionButtons from "../../components/common/TopActionButtons";
-import BottomActionButtons from "../../components/common/BottomActionButtons";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
@@ -17,8 +16,10 @@ import _nav, {
   defaultRights,
 } from "../../components/layout/_nav";
 import UserSelect from "../../components/UserSelect";
-
+import { useSelector } from "react-redux";
+import { checkAccessRight } from "../../utils/common/accessUtils";
 const GroupActions = () => {
+  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const params = useParams();
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const GroupActions = () => {
     enabled: !!params.id,
   });
   useEffect(() => {
-    if ((data as any)?.data) {
+    if (params.id && (data as any)?.data) {
       const value = (data as any).data;
       form.setFieldsValue({
         name: value.name || "",
@@ -40,24 +41,19 @@ const GroupActions = () => {
         isActive: value.isActive ?? true,
         userIds: value?.userIds ?? null,
       });
-      const permissionMap: { [key: string]: string[] } = {};
-      value.permissions?.forEach((perm: string) => {
-        const [key, action] = perm.split(".");
-        if (!permissionMap[key]) permissionMap[key] = [];
-        permissionMap[key].push(action);
-      });
-      if (
-        JSON.stringify(permissionMap) !== JSON.stringify(checkedPermissions)
-      ) {
-        setCheckedPermissions(permissionMap);
+      if (value.permissions) {
+        const mappedPermissions: { [key: string]: string[] } = {};
+        value.permissions.forEach((perm: string) => {
+          const [key, action] = perm.split(".");
+          if (!mappedPermissions[key]) {
+            mappedPermissions[key] = [];
+          }
+          mappedPermissions[key].push(action);
+        });
+        setCheckedPermissions(mappedPermissions);
       }
     }
-  }, [data, form, checkedPermissions]);
-  const getNavItems = () => {
-    return _nav.flatMap((nav: any) =>
-      nav.children ? nav.children : nav.id !== "groupuser" ? [nav] : []
-    );
-  };
+  }, [data, form, params.id]);
   const handleCheck = (key: string, action: string, checked: boolean) => {
     setCheckedPermissions((prev) => {
       const updatedActions = checked
@@ -65,16 +61,6 @@ const GroupActions = () => {
         : prev[key]?.filter((a) => a !== action) || [];
       return { ...prev, [key]: updatedActions };
     });
-  };
-  const handleCheckAll = (navId: string, checked: boolean) => {
-    const allRights = [
-      ...defaultRights.map((r) => r.value),
-      ...(customRightsMap[navId]?.map((r) => r.value) || []),
-    ];
-    setCheckedPermissions((prev) => ({
-      ...prev,
-      [navId]: checked ? allRights : [],
-    }));
   };
   const mutation = useMutation({
     mutationFn: async (values) => {
@@ -104,6 +90,7 @@ const GroupActions = () => {
     const paylpad = {
       ...values,
       permissions,
+      isActive: values.isActive ?? true,
     };
     if (params?.id) paylpad.id = params.id;
     mutation.mutate(paylpad);
@@ -122,7 +109,11 @@ const GroupActions = () => {
           </div>
         </Col>
         <Col flex="auto">
-          <TopActionButtons backUrl="/group" onSubmit={handleSubmit} />
+          <TopActionButtons
+            backUrl="/group"
+            onSubmit={handleSubmit}
+            hasSubmitPermission={checkAccessRight(accesses, "update", "group")}
+          />
         </Col>
       </Row>
       <Card>
@@ -161,100 +152,189 @@ const GroupActions = () => {
               </Form.Item>
             </Col>
           </Row>
+          <div style={{ padding: "30px 0px" }} className="custom-title">
+            {t("Access Rights")}
+          </div>
+          <div className="group-collapse">
+            {_nav.map((nav) => {
+              return (
+                <Collapse
+                  key={nav.id}
+                  defaultActiveKey={nav.id}
+                  expandIconPosition="end"
+                  style={{ marginBottom: 10 }}
+                  items={[
+                    {
+                      key: nav.id,
+                      label: (
+                        <div style={{ fontWeight: 500, fontSize: 13 }}>
+                          {nav.name}
+                        </div>
+                      ),
+                      children: (
+                        <div>
+                          {nav.children && nav.children.length > 0 ? (
+                            <Row>
+                              {nav.children.map((child, index) => (
+                                <Row
+                                  key={child.id}
+                                  gutter={[0, 10]}
+                                  style={{
+                                    width: "100%",
+                                    borderBottom:
+                                      index !== nav.children.length - 1
+                                        ? "1px solid #ddd"
+                                        : "none",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: 16,
+                                  }}
+                                >
+                                  <Col
+                                    key={index}
+                                    xs={24}
+                                    sm={12}
+                                    md={4}
+                                    lg={4}
+                                    xl={4}
+                                    style={{
+                                      fontWeight: 500,
+                                      display: "flex",
+                                      alignItems: "center",
+                                      fontSize: 13,
+                                    }}
+                                  >
+                                    {child.name}
+                                  </Col>
+                                  <Col xs={24} sm={20} md={20} lg={20} xl={20}>
+                                    <Row
+                                      gutter={[16, 5]}
+                                      style={{ width: "100%" }}
+                                    >
+                                      {[
+                                        ...defaultRights,
+                                        ...(customRightsMap[nav.id] || []),
+                                      ].map((right) => (
+                                        <Col
+                                          key={right.value}
+                                          xs={24}
+                                          sm={12}
+                                          md={8}
+                                          lg={6}
+                                          xl={4}
+                                          style={{ fontSize: 13 }}
+                                        >
+                                          <Space>
+                                            <Checkbox
+                                              checked={checkedPermissions[
+                                                child.id
+                                              ]?.includes(right.value)}
+                                              onChange={(e) =>
+                                                handleCheck(
+                                                  child.id,
+                                                  right.value,
+                                                  e.target.checked
+                                                )
+                                              }
+                                              onClick={(e) =>
+                                                e.stopPropagation()
+                                              }
+                                            />
+                                            <span
+                                              style={{ whiteSpace: "nowrap" }}
+                                            >
+                                              {right.name}
+                                            </span>
+                                          </Space>
+                                        </Col>
+                                      ))}
+                                    </Row>
+                                  </Col>
+                                </Row>
+                              ))}
+                            </Row>
+                          ) : (
+                            <Row
+                              gutter={[0, 10]}
+                              key={nav.id}
+                              style={{
+                                width: "100%",
+                                alignItems: "center",
+                                padding: 16,
+                                fontSize: 13,
+                              }}
+                            >
+                              <Col
+                                xs={24}
+                                sm={12}
+                                md={4}
+                                lg={4}
+                                xl={4}
+                                style={{
+                                  fontWeight: 500,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  fontSize: 13,
+                                }}
+                              >
+                                <Space>{nav.name}</Space>
+                              </Col>
+                              <Col xs={24} sm={20} md={20} lg={20} xl={20}>
+                                <Row gutter={[16, 5]} style={{ width: "100%" }}>
+                                  {[
+                                    ...defaultRights,
+                                    ...(customRightsMap[nav.id] || []),
+                                  ].map((right) => (
+                                    <Col
+                                      key={right.value}
+                                      xs={24}
+                                      sm={12}
+                                      md={8}
+                                      lg={6}
+                                      xl={4}
+                                      style={{ fontSize: 13 }}
+                                    >
+                                      <Space>
+                                        <Checkbox
+                                          checked={checkedPermissions[
+                                            nav.id
+                                          ]?.includes(right.value)}
+                                          onChange={(e) =>
+                                            handleCheck(
+                                              nav.id,
+                                              right.value,
+                                              e.target.checked
+                                            )
+                                          }
+                                          onClick={(e) => e.stopPropagation()}
+                                        />
+                                        <span style={{ whiteSpace: "nowrap" }}>
+                                          {right.name}
+                                        </span>
+                                      </Space>
+                                    </Col>
+                                  ))}
+                                </Row>
+                              </Col>
+                            </Row>
+                          )}
+                        </div>
+                      ),
+                    },
+                  ]}
+                />
+              );
+            })}
+          </div>
         </Form>
-        <div style={{ padding: "30px 0px" }} className="custom-title">
-          {t("Access Rights")}
-        </div>
-        <div>
-          {getNavItems().map((nav) => {
-            const allRights = [
-              ...defaultRights.map((r) => r.value),
-              ...(customRightsMap[nav.id]?.map((r) => r.value) || []),
-            ];
-            const isAllChecked =
-              checkedPermissions[nav.id]?.length === allRights.length &&
-              allRights.length > 0;
-
-            return (
-              <Collapse
-                key={nav.id}
-                defaultActiveKey={nav.id}
-                expandIconPosition="end"
-                style={{ marginBottom: 10 }}
-                items={[
-                  {
-                    key: nav.id,
-                    label: (
-                      <Checkbox
-                        checked={isAllChecked}
-                        indeterminate={
-                          checkedPermissions[nav.id]?.length > 0 &&
-                          checkedPermissions[nav.id]?.length < allRights.length
-                        }
-                        onChange={(e) =>
-                          handleCheckAll(nav.id, e.target.checked)
-                        }
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {nav.name}
-                      </Checkbox>
-                    ),
-
-                    children: (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: 16,
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        {/* Mặc định quyền */}
-                        {defaultRights.map((right) => (
-                          <Checkbox
-                            key={right.value}
-                            checked={checkedPermissions[nav.id]?.includes(
-                              right.value
-                            )}
-                            onChange={(e) =>
-                              handleCheck(nav.id, right.value, e.target.checked)
-                            }
-                            onClick={(e) => e.stopPropagation()}
-                            style={{
-                              width: "auto",
-                              marginRight: "10px",
-                            }}
-                          >
-                            {right.name}
-                          </Checkbox>
-                        ))}
-                        {/* Quyền tùy chỉnh (chỉ hiển thị với từng trang) */}
-                        {customRightsMap[nav.id]?.map((right) => (
-                          <Checkbox
-                            key={right.value}
-                            checked={checkedPermissions[nav.id]?.includes(
-                              right.value
-                            )}
-                            onChange={(e) =>
-                              handleCheck(nav.id, right.value, e.target.checked)
-                            }
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {right.name}
-                          </Checkbox>
-                        ))}
-                      </div>
-                    ),
-                  },
-                ]}
-              />
-            );
-          })}
-        </div>
       </Card>
-      <BottomActionButtons backUrl="/group" onSubmit={handleSubmit} />
+      <TopActionButtons
+        style={{ marginTop: 20, marginBottom: 20 }}
+        backUrl="/group"
+        onSubmit={handleSubmit}
+        hasSubmitPermission={checkAccessRight(accesses, "update", "group")}
+      />
     </>
   );
 };
-
 export default GroupActions;
