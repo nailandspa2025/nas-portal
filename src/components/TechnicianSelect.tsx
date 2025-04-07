@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { AppAccountApi } from "../apis/auth/appaccount";
+import { TechnicianApi } from "../apis/technician/technician";
 import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
@@ -11,21 +11,19 @@ interface UserSelectProps {
   onChange?: (value: string) => void;
   placeholder?: string;
   mode?: any;
-  disabled?: boolean;
 }
-const AppAccuntSelect: React.FC<UserSelectProps> = ({
+const TechnicianSelect: React.FC<UserSelectProps> = ({
   value,
   onChange,
   placeholder = "Choose",
   mode = "",
-  disabled = false,
 }) => {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useQuery({
-    queryKey: ["appAccountOption", searchText],
+    queryKey: ["technicianOption", searchText],
     queryFn: () =>
-      AppAccountApi.getWithPagination(
+      TechnicianApi.getWithPagination(
         queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
       ),
   });
@@ -33,9 +31,9 @@ const AppAccuntSelect: React.FC<UserSelectProps> = ({
     (u: { id: number }) => u.id == value
   );
   const { data: singleUserData } = useQuery({
-    queryKey: ["singleAppAccount", value],
+    queryKey: ["singleTechnician", value],
     queryFn: () =>
-      value ? AppAccountApi.getById(Number(value)) : Promise.resolve(null),
+      value ? TechnicianApi.getById(value) : Promise.resolve(null),
     enabled: !!value && !isUserInList,
   });
   const userList = (data as any)?.data?.items || [];
@@ -48,7 +46,6 @@ const AppAccuntSelect: React.FC<UserSelectProps> = ({
   };
   return (
     <Select
-      disabled={disabled}
       mode={mode}
       showSearch
       placeholder={t(placeholder)}
@@ -59,7 +56,7 @@ const AppAccuntSelect: React.FC<UserSelectProps> = ({
       filterOption={false}
       allowClear
       options={mergedUsers.map((user: any) => ({
-        label: `${user.fullName} - ${user.email}`,
+        label: `${user.technicianName} - ${user.phone}`,
         value: user.id,
       }))}
       notFoundContent={isLoading ? <Spin size="small" /> : t("No data")}
@@ -67,4 +64,4 @@ const AppAccuntSelect: React.FC<UserSelectProps> = ({
   );
 };
 
-export default AppAccuntSelect;
+export default TechnicianSelect;

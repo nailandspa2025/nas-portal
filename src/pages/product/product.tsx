@@ -38,7 +38,7 @@ const Products = () => {
     },
   };
 
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["productList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
       const response: any = await ProductApi.getWithPagination(
@@ -59,12 +59,17 @@ const Products = () => {
   };
   const mutationDelete = useMutation({
     mutationFn: async (id: number) => {
-      ProductApi.delete(id);
+      return ProductApi.delete(id);
     },
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       setRowId(0);
       setOpenModal(false);
-      toast.success(t("Deleted successfully!"));
+      if (res.succeeded) {
+        refetch();
+        toast.success(t("Delete successfully!"));
+      } else {
+        toast.error(t(res.message));
+      }
     },
     onError: (error) => {
       setRowId(0);

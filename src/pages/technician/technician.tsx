@@ -39,7 +39,7 @@ const Technicians = () => {
     },
   };
 
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["technicianList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
       const response: any = await TechnicianApi.getWithPagination(
@@ -60,12 +60,17 @@ const Technicians = () => {
   };
   const mutationDelete = useMutation({
     mutationFn: async (id: number) => {
-      TechnicianApi.delete(id);
+      return TechnicianApi.delete(id);
     },
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       setRowId(0);
       setOpenModal(false);
-      toast.success(t("Deleted successfully!"));
+      if (res.succeeded) {
+        refetch();
+        toast.success(t("Delete successfully!"));
+      } else {
+        toast.error(t(res.message));
+      }
     },
     onError: (error) => {
       setRowId(0);

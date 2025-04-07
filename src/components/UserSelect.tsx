@@ -30,7 +30,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
   );
   const { data: singleUserData } = useQuery({
     queryKey: ["singleUser", value],
-    queryFn: () => (value ? AuthApi.getById(value) : null),
+    queryFn: () => (value ? AuthApi.getById(value) : Promise.resolve(null)),
     enabled: !!value && !isUserInList,
   });
   const userList = (data as any)?.data?.items || [];

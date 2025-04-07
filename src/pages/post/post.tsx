@@ -37,7 +37,7 @@ const Posts = () => {
       setOpenModal(true);
     },
   };
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["postList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
       const response: any = await PostApi.getWithPagination(
@@ -58,12 +58,17 @@ const Posts = () => {
   };
   const mutationDelete = useMutation({
     mutationFn: async (id: number) => {
-      PostApi.delete(id);
+      return PostApi.delete(id);
     },
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       setRowId(0);
       setOpenModal(false);
-      toast.success(t("Deleted successfully!"));
+      if (res.succeeded) {
+        refetch();
+        toast.success(t("Delete successfully!"));
+      } else {
+        toast.error(t(res.message));
+      }
     },
     onError: (error) => {
       setRowId(0);
