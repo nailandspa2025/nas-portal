@@ -54,7 +54,7 @@ const BookingActions = () => {
         gender: value.gender ?? null,
         note: value.note || "",
         address: value.address || "",
-        userId: value.userId ?? null,
+        userId: value.userId || null,
         productId: value.productId || null,
         technicianId: value.technicianId || null,
         storeId: value.storeId || null,
