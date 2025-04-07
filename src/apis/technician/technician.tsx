@@ -7,7 +7,7 @@ export const TechnicianApi = {
     const endpoint = `/user/api/v1/technicians/pagingation?${queryString}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
-  getById: async (id: string) => {
+  getById: async (id: number) => {
     const endpoint = `/user/api/v1/technicians/${id}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
@@ -15,7 +15,7 @@ export const TechnicianApi = {
     const endpoint = `/user/api/v1/technicians`;
     return await apiCall(API_METHOD.POST, endpoint, payload);
   },
-  update: async (id: string, payload: any) => {
+  update: async (id: number, payload: any) => {
     const endpoint = `/user/api/v1/technicians/${id}`;
     return await apiCall(API_METHOD.PUT, endpoint, payload);
   },

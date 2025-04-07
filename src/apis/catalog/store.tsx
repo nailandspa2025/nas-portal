@@ -15,7 +15,7 @@ export const StoreApi = {
     const endpoint = `/catalog/api/v1/stores`;
     return await apiCall(API_METHOD.POST, endpoint, payload);
   },
-  update: async (id: string, payload: any) => {
+  update: async (id: number, payload: any) => {
     const endpoint = `/catalog/api/v1/stores/${id}`;
     return await apiCall(API_METHOD.PUT, endpoint, payload);
   },
