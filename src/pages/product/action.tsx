@@ -45,7 +45,7 @@ const ProdutActions = () => {
       const formD = new FormData();
       buildFormData(formD, values);
       return params.id
-        ? await ProductApi.update(params.id as string, formD)
+        ? await ProductApi.update(params.id as any, formD)
         : await ProductApi.create(formD);
     },
     onSuccess: (res: any) => {

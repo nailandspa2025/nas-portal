@@ -34,7 +34,7 @@ const AppAccountActions = () => {
 
   const { data = { data: {} } } = useQuery({
     queryKey: ["appAccountDetail", params.id],
-    queryFn: () => AppAccountApi.getById(params.id as string),
+    queryFn: () => AppAccountApi.getById(params.id as any),
     enabled: !!params.id,
   });
   useEffect(() => {
@@ -59,7 +59,7 @@ const AppAccountActions = () => {
       const formD = new FormData();
       buildFormData(formD, values);
       return params.id
-        ? await AppAccountApi.update(params.id as string, formD)
+        ? await AppAccountApi.update(params.id as any, formD)
         : await AppAccountApi.create(formD);
     },
     onSuccess: (res: any) => {

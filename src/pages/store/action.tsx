@@ -58,7 +58,7 @@ const StoreAction = () => {
       const formD = new FormData();
       buildFormData(formD, values);
       return params.id
-        ? await StoreApi.update(params.id as string, formD)
+        ? await StoreApi.update(params.id as any, formD)
         : await StoreApi.create(formD);
     },
     onSuccess: (res: any) => {

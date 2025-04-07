@@ -7,7 +7,7 @@ export const BookingApi = {
     const endpoint = `/order/api/v1/bookings/pagingation?${queryString}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
-  getById: async (id: string) => {
+  getById: async (id: number) => {
     const endpoint = `/order/api/v1/bookings/${id}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
@@ -15,7 +15,7 @@ export const BookingApi = {
     const endpoint = `/order/api/v1/bookings`;
     return await apiCall(API_METHOD.POST, endpoint, payload);
   },
-  update: async (id: string, payload: any) => {
+  update: async (id: number, payload: any) => {
     const endpoint = `/order/api/v1/bookings/${id}`;
     return await apiCall(API_METHOD.PUT, endpoint, payload);
   },

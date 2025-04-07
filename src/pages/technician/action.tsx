@@ -25,7 +25,7 @@ const TechnicianAction = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const { data = { data: {} } } = useQuery({
     queryKey: ["technicianDetail", params.id],
-    queryFn: () => TechnicianApi.getById(params.id as string),
+    queryFn: () => TechnicianApi.getById(params.id as any),
     enabled: !!params.id,
   });
 
@@ -52,7 +52,7 @@ const TechnicianAction = () => {
       const formD = new FormData();
       buildFormData(formD, values);
       return params.id
-        ? await TechnicianApi.update(params.id as string, formD)
+        ? await TechnicianApi.update(params.id as any, formD)
         : await TechnicianApi.create(formD);
     },
     onSuccess: (res: any) => {

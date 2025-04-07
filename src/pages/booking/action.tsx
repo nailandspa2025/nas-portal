@@ -67,7 +67,7 @@ const BookingActions = () => {
       const formD = new FormData();
       buildFormData(formD, values);
       return params.id
-        ? await BookingApi.update(params.id as string, formD)
+        ? await BookingApi.update(params.id as any, formD)
         : await BookingApi.create(formD);
     },
     onSuccess: (res: any) => {
