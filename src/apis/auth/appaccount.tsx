@@ -7,7 +7,7 @@ export const AppAccountApi = {
     const endpoint = `/user/api/v1/appAccounts/pagingation?${queryString}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
-  getById: async (id: string) => {
+  getById: async (id: number) => {
     const endpoint = `/user/api/v1/appAccounts/${id}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
@@ -19,7 +19,7 @@ export const AppAccountApi = {
     const endpoint = `/user/api/v1/appAccounts/regiter`;
     return await apiCall(API_METHOD.POST, endpoint, payload);
   },
-  update: async (id: string, payload: any) => {
+  update: async (id: number, payload: any) => {
     const endpoint = `/user/api/v1/appAccounts/${id}`;
     return await apiCall(API_METHOD.PUT, endpoint, payload);
   },

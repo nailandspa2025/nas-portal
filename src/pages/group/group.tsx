@@ -36,8 +36,8 @@ const Groups = () => {
     },
   };
 
-  const { data } = useQuery({
-    queryKey: ["roleList", { pageNumber, pageSize, ...filters }],
+  const { data, refetch } = useQuery({
+    queryKey: ["groupList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
       const response: any = await RoleApi.getWithPagination(
         queryString.stringify({ pageNumber, pageSize, ...filters })
@@ -59,10 +59,15 @@ const Groups = () => {
     mutationFn: async (id: number) => {
       ProductApi.delete(id);
     },
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       setRowId(0);
       setOpenModal(false);
-      toast.success(t("Delete successful!"));
+      if (res.succeeded) {
+        refetch();
+        toast.success(t("Delete successfully!"));
+      } else {
+        toast.error(t(res.message));
+      }
     },
     onError: (error) => {
       setRowId(0);

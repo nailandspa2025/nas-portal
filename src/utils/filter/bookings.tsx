@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
+import { CloseOutlined, DeleteOutlined, FormOutlined } from "@ant-design/icons";
 import { Space, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
@@ -19,12 +19,14 @@ export const columns = ({
   t,
   handleEdit,
   handleDelete,
+  handleCancel,
 }: {
   hasEditPermission: boolean;
   hasDeletePermission: boolean;
   t: any;
   handleEdit: (record: any) => void;
   handleDelete: (record: any) => void;
+  handleCancel: (record: any) => void;
 }) => {
   return [
     {
@@ -33,7 +35,7 @@ export const columns = ({
       key: "fullName",
       width: 180,
       render: (text: string, record: { id: string }) => (
-        <Link to={`/user/${record.id}`}>{text}</Link>
+        <Link to={`/booking/${record.id}`}>{text}</Link>
       ),
     },
     {
@@ -121,7 +123,6 @@ export const columns = ({
               </a>
             </Tooltip>
           )}
-
           {hasDeletePermission && (
             <Tooltip title={t("Delete")}>
               <a
@@ -129,6 +130,16 @@ export const columns = ({
                 style={{ color: "#ff4d4f" }}
               >
                 <DeleteOutlined style={{ fontSize: 16 }} />
+              </a>
+            </Tooltip>
+          )}
+          {hasEditPermission && (
+            <Tooltip title={t("Cancel")}>
+              <a
+                onClick={() => handleCancel(record)}
+                style={{ color: "#1890ff" }}
+              >
+                <CloseOutlined style={{ fontSize: 16 }} />
               </a>
             </Tooltip>
           )}

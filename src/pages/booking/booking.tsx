@@ -6,13 +6,14 @@ import DataTable from "../../components/common/DataTable";
 import * as utils from "../../utils/filter/bookings";
 import FilterData from "../../components/common/FilterData";
 import queryString from "query-string";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { BookingApi } from "../../apis/booking/booking";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 import { useTranslation } from "react-i18next";
+import ModalConfirm from "../../components/ModalConfirm";
 const Bookings = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -23,15 +24,28 @@ const Bookings = () => {
   const [pageSize, setPageSize] = useState<number>(20);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [filteredColumns, setFilteredColumns] = useState();
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [rowId, setRowId] = useState<number>(0);
+  const [actionType, setActionType] = useState<"delete" | "cancel" | null>(
+    null
+  );
+
   const handleItemTable = {
     handleEdit: (record: any) => {
-      navigate(`/appaccount/${record.id}`);
+      navigate(`/booking/${record.id}`);
     },
     handleDelete: (record: any) => {
-      console.log(record);
+      setRowId(record.id);
+      setActionType("delete");
+      setOpenModal(true);
+    },
+    handleCancel: (record: any) => {
+      setRowId(record.id);
+      setActionType("cancel");
+      setOpenModal(true);
     },
   };
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["bookingList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
       const response: any = await BookingApi.getWithPagination(
@@ -56,7 +70,50 @@ const Bookings = () => {
       toast.success("Đang phát triển");
     },
   };
-
+  const mutationDelete = useMutation({
+    mutationFn: async (id: number) => {
+      return BookingApi.delete(id);
+    },
+    onSuccess: (res: any) => {
+      if (res.succeeded) {
+        refetch();
+        toast.success(t("Delete successfully!"));
+      } else {
+        toast.error(t(res.message));
+      }
+      setRowId(0);
+      setOpenModal(false);
+    },
+    onError: (error) => {
+      setRowId(0);
+      setOpenModal(false);
+      toast.error(t(error.message));
+    },
+  });
+  const mutationCancel = useMutation({
+    mutationFn: async (id: number) => {
+      return BookingApi.cancel(id);
+    },
+    onSuccess: (res: any) => {
+      if (res.succeeded) {
+        refetch();
+        toast.success(t("Cancel successfully!"));
+      } else {
+        toast.error(t(res.message));
+      }
+      setRowId(0);
+      setOpenModal(false);
+    },
+    onError: (error) => {
+      setRowId(0);
+      setOpenModal(false);
+      toast.error(t(error.message));
+    },
+  });
+  const onConfirm = (id: any, type: any) => {
+    if (type === "delete") mutationDelete.mutate(id);
+    else if (type == "cancel") mutationCancel.mutate(id);
+  };
   const columns = useMemo(() => {
     return utils.columns({
       hasEditPermission: checkAccessRight(accesses, "update", "group"),
@@ -64,6 +121,7 @@ const Bookings = () => {
       t,
       handleEdit: handleItemTable.handleEdit,
       handleDelete: handleItemTable.handleDelete,
+      handleCancel: handleItemTable.handleCancel,
     });
   }, [accesses]);
   return (
@@ -90,6 +148,17 @@ const Bookings = () => {
           setPageSize(pageSize);
           setPageNumber(page);
         }}
+      />
+      <ModalConfirm
+        title={actionType == "delete" ? "Delete" : "Cancel"}
+        content={
+          actionType == "delete"
+            ? "Are you sure you want to delete the data?"
+            : "Are you sure you want to update the data?"
+        }
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        onChange={() => onConfirm(rowId, actionType)}
       />
     </Card>
   );

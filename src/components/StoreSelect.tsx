@@ -5,6 +5,7 @@ import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 interface StoreSelectProps {
   value?: any;
   onChange?: (value: string) => void;
@@ -14,9 +15,10 @@ interface StoreSelectProps {
 const StoreSelect: React.FC<StoreSelectProps> = ({
   value,
   onChange,
-  placeholder = "Chọn",
+  placeholder = "Choose",
   mode = "",
 }) => {
+  const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useQuery({
     queryKey: ["storeOption", searchText],
@@ -30,7 +32,7 @@ const StoreSelect: React.FC<StoreSelectProps> = ({
   );
   const { data: singleUserData } = useQuery({
     queryKey: ["singleStore", value],
-    queryFn: () => (value ? StoreApi.getById(value) : null),
+    queryFn: () => (value ? StoreApi.getById(value) : Promise.resolve(null)),
     enabled: !!value && !isUserInList,
   });
   const storeList = (data as any)?.data?.items || [];
@@ -45,7 +47,7 @@ const StoreSelect: React.FC<StoreSelectProps> = ({
     <Select
       mode={mode}
       showSearch
-      placeholder={placeholder}
+      placeholder={t(placeholder)}
       value={value || null}
       loading={isLoading}
       onSearch={onSearch}
@@ -56,7 +58,7 @@ const StoreSelect: React.FC<StoreSelectProps> = ({
         label: `${store.storeName} - ${store.hotline}`,
         value: store.id,
       }))}
-      notFoundContent={isLoading ? <Spin size="small" /> : "Không tìm thấy"}
+      notFoundContent={isLoading ? <Spin size="small" /> : t("No data")}
     />
   );
 };

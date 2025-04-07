@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
 import { useState } from "react";
 import { ProductApi } from "../apis/catalog/product";
+import { useTranslation } from "react-i18next";
 interface ProductSelectProps {
   value?: any;
   onChange?: (value: string) => void;
@@ -14,12 +15,13 @@ interface ProductSelectProps {
 const ProductSelect: React.FC<ProductSelectProps> = ({
   value,
   onChange,
-  placeholder = "Chọn",
+  placeholder = "Choose",
   mode = "",
 }) => {
+  const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useQuery({
-    queryKey: ["storeOption", searchText],
+    queryKey: ["productOption", searchText],
     queryFn: () =>
       ProductApi.getWithPagination(
         queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
@@ -29,8 +31,8 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
     (u: { id: number }) => u.id == value
   );
   const { data: singleUserData } = useQuery({
-    queryKey: ["mutiProduct", value],
-    queryFn: () => (value ? ProductApi.getById(value) : null),
+    queryKey: ["singleProduct", value],
+    queryFn: () => (value ? ProductApi.getById(value) : Promise.resolve(null)),
     enabled: !!value && !isUserInList,
   });
   const storeList = (data as any)?.data?.items || [];
@@ -45,7 +47,7 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
     <Select
       mode={mode}
       showSearch
-      placeholder={placeholder}
+      placeholder={t(placeholder)}
       value={value || null}
       loading={isLoading}
       onSearch={onSearch}
@@ -56,7 +58,7 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
         label: `${product.productName} - ${product.price?.toLocaleString()}`,
         value: product.id,
       }))}
-      notFoundContent={isLoading ? <Spin size="small" /> : "Không tìm thấy"}
+      notFoundContent={isLoading ? <Spin size="small" /> : t("No data")}
     />
   );
 };
