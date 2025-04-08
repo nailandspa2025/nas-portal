@@ -27,18 +27,23 @@ const StoreAction = () => {
   const navigate = useNavigate();
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+
   const [imageUrls, setImageUrls] = useState([]);
 
+  const [linkUrls, setLinkUrls] = useState([]);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const { data = { data: {} } } = useQuery({
     queryKey: ["storeDetail", params.id],
     queryFn: () => StoreApi.getById(params.id as any),
     enabled: !!params.id,
   });
+
   useEffect(() => {
     if (params.id && (data as any)?.data) {
       const value = (data as any).data;
       setImageUrls(value.imageUrls);
       setImageUrl(value.avatar);
+      setLinkUrls(value.imageUrls);
       form.setFieldsValue({
         storeName: value.storeName || "",
         hotline: value.hotline || "",
@@ -50,6 +55,7 @@ const StoreAction = () => {
         ownerId: value.ownerId || "",
         googleReviewLink: value.googleReviewLink || "",
         ratingStar: value.ratingStar || "",
+        images: value.imageUrls || null,
       });
     }
   }, [data, form, params.id]);
@@ -75,7 +81,13 @@ const StoreAction = () => {
     const payload = {
       ...values,
     };
-    if (params.id) payload.id = params.id;
+    if (params.id) {
+      payload.id = params.id;
+      payload.linkUrls = linkUrls.filter(
+        (item: any) => typeof item === "string"
+      );
+      payload.avatarUrl = avatarUrl;
+    }
     mutation.mutate(payload);
   };
   const handleSubmit = () => {
@@ -269,12 +281,19 @@ const StoreAction = () => {
                 <AvatarUploader
                   data={imageUrl || undefined}
                   placeholder="Choose avatar"
+                  onChange={(e) => {
+                    setAvatarUrl(e);
+                  }}
                 />
               </Form.Item>
               <Form.Item label={t("Images")} name="images">
                 <ImagesUploader
-                  data={imageUrls || undefined}
+                  value={imageUrls || undefined}
                   placeholder="Chose images"
+                  onChange={(e) => {
+                    setLinkUrls(e);
+                    form.setFieldsValue({ images: e });
+                  }}
                 />
               </Form.Item>
             </Col>

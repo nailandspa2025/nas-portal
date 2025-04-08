@@ -154,6 +154,6 @@ export const buttons = [
     label: "Create",
     funcName: "createNew",
     color: "primary",
-    accessRight: ["booking.create", "appaccount.admin", "admin"],
+    accessRight: ["booking.create", "booking.admin", "admin"],
   },
 ];

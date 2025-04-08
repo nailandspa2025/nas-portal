@@ -19,6 +19,8 @@ import Profile from "../pages/auth/profile";
 import UpdateProfile from "../pages/auth/update-profile";
 import Groups from "../pages/group/group";
 import GroupActions from "../pages/group/action";
+import Banners from "../pages/banner/banner";
+import BannerActions from "../pages/banner/acion";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -129,6 +131,21 @@ const routes: RouteType[] = [
     path: "/group/:id",
     name: "Update group",
     element: <GroupActions />,
+  },
+  {
+    path: "/banner",
+    name: "Banner",
+    element: <Banners />,
+  },
+  {
+    path: "/banner/none",
+    name: "Create banner",
+    element: <BannerActions />,
+  },
+  {
+    path: "/banner/:id",
+    name: "Update banner",
+    element: <BannerActions />,
   },
 ];
 

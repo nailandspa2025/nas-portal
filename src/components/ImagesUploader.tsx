@@ -1,55 +1,67 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Upload, Button, Image, Space } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
-
+import { useTranslation } from "react-i18next";
 interface AvatarUploaderProps {
-  data?: any;
-  onChange?: (value: string[]) => void;
+  value?: any;
+  onChange?: (value: any) => void;
   placeholder?: string;
 }
+
 const ImagesUploader: React.FC<AvatarUploaderProps> = ({
-  data = [],
+  value = [],
   onChange,
-  placeholder = "Ảnh đại diện",
+  placeholder = "Avatar",
 }) => {
-  const [imageUrls, setImageUrls] = useState<string[]>(data || []);
-  useEffect(() => {
-    if (Array.isArray(data) && data.length > 0) {
-      setImageUrls(data);
-    }
-  }, [data]);
+  const { t } = useTranslation();
+  const [uploadKey, setUploadKey] = useState(0);
+
+  const getPreviewUrl = (file: string | File) =>
+    typeof file === "string" ? file : URL.createObjectURL(file);
   const handleUpload = (info: any) => {
-    const files = info.fileList.map((file: any) => file.originFileObj);
-    if (!files.length) return;
-    const newImages = files
-      .filter((file: File) => file.type.startsWith("image/"))
-      .map((file: File) => URL.createObjectURL(file));
-    if (newImages.length !== files.length) {
-      toast.error("Some files are not images and have been ignored!");
+    const newFiles = info.fileList
+      .map((file: any) => file.originFileObj)
+      .filter(
+        (file: File | undefined) => file && file.type.startsWith("image/")
+      );
+
+    if (!newFiles.length) return;
+
+    const existingFileSet = new Set(
+      value.map((f: File) => `${f.name}-${f.size}`)
+    );
+
+    const uniqueFiles = newFiles.filter(
+      (f: File) => !existingFileSet.has(`${f.name}-${f.size}`)
+    );
+
+    if (uniqueFiles.length < newFiles.length) {
+      toast.warning("Some duplicate images were skipped!");
     }
-    setImageUrls(newImages);
-    onChange?.(files);
+    const updatedValue = [...value, ...uniqueFiles];
+    onChange?.(updatedValue);
+    setUploadKey((prev) => prev + 1);
   };
+
   const handleRemoveImage = (index: number) => {
-    const newImageList = imageUrls.filter((_, i) => i !== index);
-    setImageUrls(newImageList);
-    onChange?.(newImageList);
+    const newValue = value.filter((_: any, i: any) => i !== index);
+    onChange?.(newValue);
   };
+
   const handleClearAll = () => {
-    setImageUrls([]);
     onChange?.([]);
   };
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      {imageUrls.length > 0 ? (
+      {value?.length > 0 ? (
         <Space wrap style={{ display: "flex", gap: "10px" }}>
-          {imageUrls.map((url, index) => (
+          {value.map((item: any, index: number) => (
             <div key={index} style={{ position: "relative" }}>
               <Image
-                src={url}
-                alt={placeholder}
+                src={getPreviewUrl(item)}
+                alt={t(placeholder)}
                 width={120}
                 height={120}
                 style={{
@@ -98,6 +110,7 @@ const ImagesUploader: React.FC<AvatarUploaderProps> = ({
           {placeholder}
         </div>
       )}
+
       <Space
         style={{
           display: "flex",
@@ -106,6 +119,7 @@ const ImagesUploader: React.FC<AvatarUploaderProps> = ({
         }}
       >
         <Upload
+          key={uploadKey}
           name="avatar"
           showUploadList={false}
           multiple
@@ -114,10 +128,11 @@ const ImagesUploader: React.FC<AvatarUploaderProps> = ({
           accept="image/png, image/jpeg, image/gif"
         >
           <Button type="primary" ghost icon={<PlusOutlined />}>
-            Choose images
+            {t("Choose images")}
           </Button>
         </Upload>
-        {imageUrls.length > 1 && (
+
+        {value?.length > 1 && (
           <Button
             type="primary"
             danger
@@ -125,7 +140,7 @@ const ImagesUploader: React.FC<AvatarUploaderProps> = ({
             icon={<DeleteOutlined />}
             onClick={handleClearAll}
           >
-            Remove
+            {t("Remove")}
           </Button>
         )}
       </Space>
