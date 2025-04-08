@@ -65,6 +65,7 @@ const BannerActions = () => {
   const onFinish = (values: any) => {
     const payload = {
       ...values,
+      isActive: values.isActive ?? true,
     };
     if (params.id) {
       payload.id = params.id;
