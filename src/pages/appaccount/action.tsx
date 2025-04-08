@@ -31,7 +31,7 @@ const AppAccountActions = () => {
   const navigate = useNavigate();
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-
+  const [isAvatar, setIsAvatar] = useState(false);
   const { data = { data: {} } } = useQuery({
     queryKey: ["appAccountDetail", params.id],
     queryFn: () => AppAccountApi.getById(params.id as any),
@@ -77,7 +77,10 @@ const AppAccountActions = () => {
       ...values,
       isActive: values.isActive ?? true,
     };
-    if (params.id) payload.id = params.id;
+    if (params.id) {
+      payload.id = params.id;
+      payload.isAvatar = isAvatar;
+    }
     mutation.mutate(payload);
   };
   const handleSubmit = () => {
@@ -194,6 +197,7 @@ const AppAccountActions = () => {
                 <AvatarUploader
                   placeholder={t("Avatar")}
                   data={imageUrl || undefined}
+                  onChange={() => setIsAvatar(true)}
                 />
               </Form.Item>
             </Col>

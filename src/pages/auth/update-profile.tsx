@@ -32,6 +32,7 @@ const UpdateProfile = () => {
   const { t } = useTranslation();
   const user = useSelector((state: any) => state.auth.user);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isAvatar, setIsAvatar] = useState(false);
   const [form] = Form.useForm();
   useEffect(() => {
     if (user) {
@@ -70,6 +71,7 @@ const UpdateProfile = () => {
     const payload = {
       ...values,
       id: user.id,
+      isAvatar: isAvatar,
     };
     updateProfile.mutate(payload);
   };
@@ -144,6 +146,7 @@ const UpdateProfile = () => {
                 <AvatarUploader
                   placeholder={t("Avatar")}
                   data={imageUrl || undefined}
+                  onChange={() => setIsAvatar(true)}
                 />
               </Form.Item>
             </Col>

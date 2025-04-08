@@ -23,6 +23,7 @@ const TechnicianAction = () => {
   const navigate = useNavigate();
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isAvatar, setIsAvatar] = useState(false);
   const { data = { data: {} } } = useQuery({
     queryKey: ["technicianDetail", params.id],
     queryFn: () => TechnicianApi.getById(params.id as any),
@@ -57,19 +58,22 @@ const TechnicianAction = () => {
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
-        toast.success("Lưu thành công");
+        toast.success(t("Save successfully"));
         navigate("/technician");
       } else toast.error(t(res.message));
     },
     onError: () => {
-      toast.error("Xảy ra lỗi");
+      toast.error(t("An error occurred"));
     },
   });
   const onFinish = (values: any) => {
     const payload = {
       ...values,
     };
-    if (params.id) payload.id = params.id;
+    if (params.id) {
+      payload.id = params.id;
+      payload.IsAvatar = isAvatar;
+    }
     mutation.mutate(payload);
   };
   const handleSubmit = () => {
@@ -155,6 +159,9 @@ const TechnicianAction = () => {
                 <AvatarUploader
                   data={imageUrl || undefined}
                   placeholder={t("Avatar")}
+                  onChange={() => {
+                    setIsAvatar(true);
+                  }}
                 />
               </Form.Item>
               <Form.Item

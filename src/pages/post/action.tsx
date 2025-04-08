@@ -22,6 +22,7 @@ const PostActions = () => {
   const [content, setContent] = useState("");
   const [imageList, setImageList] = useState<File[]>([]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isAvatar, setIsAvatar] = useState(false);
   const { data = { data: {} } } = useQuery({
     queryKey: ["postDetail", params.id],
     queryFn: () => PostApi.getById(params.id as any),
@@ -64,7 +65,10 @@ const PostActions = () => {
       ...values,
       content: updatedDescription,
     };
-    if (params.id) payload.id = params.id;
+    if (params.id) {
+      payload.id = params.id;
+      payload.isAvatar = isAvatar;
+    }
 
     mutation.mutate(payload);
   };
@@ -126,6 +130,7 @@ const PostActions = () => {
                 <AvatarUploader
                   data={imageUrl || undefined}
                   placeholder="Choose avatar"
+                  onChange={() => setIsAvatar(true)}
                 />
               </Form.Item>
             </Col>
