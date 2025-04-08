@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, Row } from "antd";
-import { PostApi } from "../../apis/article/post";
+import { BannerApi } from "../../apis/catalog/banner";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import queryString from "query-string";
-import * as utils from "../../utils/filter/posts";
+import * as utils from "../../utils/filter/banners";
 import FilterData from "../../components/common/FilterData";
 import DataTable from "../../components/common/DataTable";
 import useElementHeight from "../../utils/useElementHeight";
@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 
-const Posts = () => {
+const Banners = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -27,19 +27,11 @@ const Posts = () => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [rowId, setRowId] = useState<number>(0);
   const [filteredColumns, setFilteredColumns] = useState();
-  const handleItemTable = {
-    handleEdit: (record: any) => {
-      navigate(`/post/${record.id}`);
-    },
-    handleDelete: (record: any) => {
-      setRowId(record.id);
-      setOpenModal(true);
-    },
-  };
+
   const { data, refetch } = useQuery({
-    queryKey: ["postList", { pageNumber, pageSize, ...filters }],
+    queryKey: ["bannerList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
-      const response: any = await PostApi.getWithPagination(
+      const response: any = await BannerApi.getWithPagination(
         queryString.stringify({ pageNumber, pageSize, ...filters })
       );
       return response.data;
@@ -52,12 +44,21 @@ const Posts = () => {
   };
   const handleActions = {
     createNew: () => {
-      navigate("/post/none");
+      navigate("/banner/none");
+    },
+  };
+  const handleItemTable = {
+    handleEdit: (record: any) => {
+      navigate(`/banner/${record.id}`);
+    },
+    handleDelete: (record: any) => {
+      setRowId(record.id);
+      setOpenModal(true);
     },
   };
   const mutationDelete = useMutation({
     mutationFn: async (id: number) => {
-      return PostApi.delete(id);
+      return BannerApi.delete(id);
     },
     onSuccess: (res: any) => {
       setRowId(0);
@@ -78,11 +79,10 @@ const Posts = () => {
   const confirmDelete = (id: number) => {
     mutationDelete.mutate(id);
   };
-
   const columns = useMemo(() => {
     return utils.columns({
-      hasEditPermission: checkAccessRight(accesses, "update", "post"),
-      hasDeletePermission: checkAccessRight(accesses, "delete", "post"),
+      hasEditPermission: checkAccessRight(accesses, "update", "banner"),
+      hasDeletePermission: checkAccessRight(accesses, "delete", "banner"),
       t,
       handleEdit: handleItemTable.handleEdit,
       handleDelete: handleItemTable.handleDelete,
@@ -121,4 +121,4 @@ const Posts = () => {
     </Card>
   );
 };
-export default Posts;
+export default Banners;

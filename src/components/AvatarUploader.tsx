@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 
 interface AvatarUploaderProps {
   data?: string;
-  onChange?: (value: string | null) => void;
+  onChange?: (value: any) => void;
   placeholder?: string;
 }
 const AvatarUploader: React.FC<AvatarUploaderProps> = ({

@@ -8,6 +8,7 @@ import {
   // DatabaseOutlined,
   // ShareAltOutlined,
   FormOutlined,
+  PictureOutlined,
 } from "@ant-design/icons";
 
 const _nav = [
@@ -52,6 +53,12 @@ const _nav = [
     icon: <FormOutlined />,
     name: "Post",
     route: "/post",
+  },
+  {
+    id: "banner",
+    icon: <PictureOutlined />,
+    name: "Banner",
+    route: "/banner",
   },
   //nhóm & người dùng
   {
@@ -108,12 +115,12 @@ export const defaultRights = [
 export const customRightsMap: {
   [key: string]: { name: string; value: string }[];
 } = {
-  post: [
-    { name: "Gửi duyệt", value: "submitForApproval" },
-    { name: "Xét duyệt của trưởng nhóm", value: "approvel1" },
-  ],
-  booking: [
-    { name: "Duyệt lịch hẹn", value: "approveBooking" },
-    { name: "Hủy lịch hẹn", value: "cancelBooking" },
-  ],
+  // post: [
+  //   { name: "Gửi duyệt", value: "submitForApproval" },
+  //   { name: "Xét duyệt của trưởng nhóm", value: "approvel1" },
+  // ],
+  // booking: [
+  //   { name: "Duyệt lịch hẹn", value: "approveBooking" },
+  //   { name: "Hủy lịch hẹn", value: "cancelBooking" },
+  // ],
 };
