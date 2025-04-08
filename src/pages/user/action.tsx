@@ -31,7 +31,7 @@ const UserAction = () => {
   const navigate = useNavigate();
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-
+  const [isAvatar, setIsAvatar] = useState(false);
   const { data = { data: {} } } = useQuery({
     queryKey: ["userDetail", params.id],
     queryFn: () => AuthApi.getById(params.id as string),
@@ -82,7 +82,10 @@ const UserAction = () => {
       ...values,
       isActive: values.isActive ?? true,
     };
-    if (params.id) payload.id = params.id;
+    if (params.id) {
+      payload.id = params.id;
+      payload.isAvatar = isAvatar;
+    }
     mutation.mutate(payload);
   };
   const handleSubmit = () => {
@@ -196,6 +199,7 @@ const UserAction = () => {
                 <AvatarUploader
                   placeholder={t("Avatar")}
                   data={imageUrl || undefined}
+                  onChange={() => setIsAvatar(true)}
                 />
               </Form.Item>
               <Form.Item label={t("City")} name="cityId">

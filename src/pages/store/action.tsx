@@ -27,11 +27,9 @@ const StoreAction = () => {
   const navigate = useNavigate();
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-
   const [imageUrls, setImageUrls] = useState([]);
-
   const [linkUrls, setLinkUrls] = useState([]);
-  const [avatarUrl, setAvatarUrl] = useState("");
+  const [isAvatar, setIsAvatar] = useState(false);
   const { data = { data: {} } } = useQuery({
     queryKey: ["storeDetail", params.id],
     queryFn: () => StoreApi.getById(params.id as any),
@@ -86,7 +84,7 @@ const StoreAction = () => {
       payload.linkUrls = linkUrls.filter(
         (item: any) => typeof item === "string"
       );
-      payload.avatarUrl = avatarUrl;
+      payload.isAvatar = isAvatar;
     }
     mutation.mutate(payload);
   };
@@ -281,8 +279,8 @@ const StoreAction = () => {
                 <AvatarUploader
                   data={imageUrl || undefined}
                   placeholder="Choose avatar"
-                  onChange={(e) => {
-                    setAvatarUrl(e);
+                  onChange={() => {
+                    setIsAvatar(true);
                   }}
                 />
               </Form.Item>
