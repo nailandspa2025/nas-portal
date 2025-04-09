@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { AppAccountApi } from "../apis/auth/appaccount";
 import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { DropdownApi } from "../apis/dropdown/dropdown";
 interface UserSelectProps {
   value?: any;
   onChange?: (value: string) => void;
@@ -25,7 +25,7 @@ const AppAccuntSelect: React.FC<UserSelectProps> = ({
   const { data, isLoading } = useQuery({
     queryKey: ["appAccountOption", searchText],
     queryFn: () =>
-      AppAccountApi.getWithPagination(
+      DropdownApi.getAppAccounts(
         queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
       ),
   });
@@ -35,7 +35,7 @@ const AppAccuntSelect: React.FC<UserSelectProps> = ({
   const { data: singleUserData } = useQuery({
     queryKey: ["singleAppAccount", value],
     queryFn: () =>
-      value ? AppAccountApi.getById(Number(value)) : Promise.resolve(null),
+      value ? DropdownApi.getAppAccountById(value) : Promise.resolve(null),
     enabled: !!value && !isUserInList,
   });
   const userList = (data as any)?.data?.items || [];

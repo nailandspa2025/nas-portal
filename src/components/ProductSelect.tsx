@@ -4,8 +4,8 @@ import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
 import { useState } from "react";
-import { ProductApi } from "../apis/catalog/product";
 import { useTranslation } from "react-i18next";
+import { DropdownApi } from "../apis/dropdown/dropdown";
 interface ProductSelectProps {
   value?: any;
   onChange?: (value: string) => void;
@@ -23,7 +23,7 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
   const { data, isLoading } = useQuery({
     queryKey: ["productOption", searchText],
     queryFn: () =>
-      ProductApi.getWithPagination(
+      DropdownApi.getProducts(
         queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
       ),
   });
@@ -32,7 +32,8 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
   );
   const { data: singleUserData } = useQuery({
     queryKey: ["singleProduct", value],
-    queryFn: () => (value ? ProductApi.getById(value) : Promise.resolve(null)),
+    queryFn: () =>
+      value ? DropdownApi.getProductById(value) : Promise.resolve(null),
     enabled: !!value && !isUserInList,
   });
   const storeList = (data as any)?.data?.items || [];

@@ -3,7 +3,7 @@ export const getDataForFilter = async (actionName: string) => {
     case "userType":
       return [
         {
-          value: 0,
+          value: 2,
           label: "User",
         },
         {
