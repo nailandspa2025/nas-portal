@@ -10,28 +10,35 @@ const Profile = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const user = useSelector((state: any) => state.auth.user);
+
   const genderType = [
-    {
-      label: t("Male"),
-      value: 1,
-    },
-    {
-      label: t("Female"),
-      value: 2,
-    },
-    {
-      label: t("Other"),
-      value: 3,
-    },
+    { label: t("Male"), value: 1 },
+    { label: t("Female"), value: 2 },
+    { label: t("Other"), value: 3 },
   ];
   return (
     <div style={styles.container}>
-      <Card style={styles.card}>
-        <Row gutter={[24, 24]} align="middle">
+      <Card
+        style={styles.card}
+        styles={{ body: { paddingLeft: 0, paddingRight: 0 } }}
+      >
+        <Row align="middle">
           <Col xs={24} md={8} style={styles.avatarContainer}>
             <Avatar
               size={180}
-              src={user.avatar}
+              src={
+                user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="avatar"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : undefined
+              }
               icon={<UserOutlined />}
               style={styles.avatar}
             />
@@ -67,7 +74,7 @@ const Profile = () => {
                 icon={<EditOutlined />}
                 onClick={() => navigate("/update-profile")}
               >
-                Edit Profile
+                {t("Edit Profile")}
               </Button>
             </div>
           </Col>
@@ -76,18 +83,21 @@ const Profile = () => {
     </div>
   );
 };
+
 const styles: { [key: string]: React.CSSProperties } = {
   container: {
-    height: "calc(100vh - 100px)",
+    minHeight: "85vh",
+    // padding: "24px",
     display: "flex",
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
+    //background: "#f0f2f5",
   },
   card: {
-    // width: "100%",
-    // maxWidth: 1024,
+    width: "100%",
+    maxWidth: 1000,
     borderRadius: "16px",
-    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
+    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
     background: "#fff",
   },
   avatarContainer: {
@@ -96,15 +106,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: "center",
   },
   avatar: {
-    border: "5px solid #1890ff",
-    transition: "transform 0.3s ease-in-out",
-    cursor: "pointer",
+    border: "4px solid #1890ff",
+    backgroundColor: "#fff",
   },
   userName: {
-    fontSize: "28px",
+    fontSize: "24px",
     fontWeight: 600,
     marginBottom: 16,
     textAlign: "center",
   },
 };
+
 export default Profile;
