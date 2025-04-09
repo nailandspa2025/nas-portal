@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { TechnicianApi } from "../apis/technician/technician";
 import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { DropdownApi } from "../apis/dropdown/dropdown";
 interface UserSelectProps {
   value?: any;
   onChange?: (value: string) => void;
@@ -23,7 +23,7 @@ const TechnicianSelect: React.FC<UserSelectProps> = ({
   const { data, isLoading } = useQuery({
     queryKey: ["technicianOption", searchText],
     queryFn: () =>
-      TechnicianApi.getWithPagination(
+      DropdownApi.getTechnicians(
         queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
       ),
   });
@@ -33,7 +33,7 @@ const TechnicianSelect: React.FC<UserSelectProps> = ({
   const { data: singleUserData } = useQuery({
     queryKey: ["singleTechnician", value],
     queryFn: () =>
-      value ? TechnicianApi.getById(value) : Promise.resolve(null),
+      value ? DropdownApi.getTechnicianById(value) : Promise.resolve(null),
     enabled: !!value && !isUserInList,
   });
   const userList = (data as any)?.data?.items || [];

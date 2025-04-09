@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { StoreApi } from "../apis/catalog/store";
 import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { DropdownApi } from "../apis/dropdown/dropdown";
 interface StoreSelectProps {
   value?: any;
   onChange?: (value: string) => void;
@@ -23,7 +23,7 @@ const StoreSelect: React.FC<StoreSelectProps> = ({
   const { data, isLoading } = useQuery({
     queryKey: ["storeOption", searchText],
     queryFn: () =>
-      StoreApi.getWithPagination(
+      DropdownApi.getStores(
         queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
       ),
   });
@@ -32,7 +32,8 @@ const StoreSelect: React.FC<StoreSelectProps> = ({
   );
   const { data: singleUserData } = useQuery({
     queryKey: ["singleStore", value],
-    queryFn: () => (value ? StoreApi.getById(value) : Promise.resolve(null)),
+    queryFn: () =>
+      value ? DropdownApi.getStoreById(value) : Promise.resolve(null),
     enabled: !!value && !isUserInList,
   });
   const storeList = (data as any)?.data?.items || [];

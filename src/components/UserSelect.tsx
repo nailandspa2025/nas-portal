@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { AuthApi } from "../apis/auth/auth";
 import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
 import { useState } from "react";
+import { DropdownApi } from "../apis/dropdown/dropdown";
+import { useTranslation } from "react-i18next";
 interface UserSelectProps {
   value?: string;
   onChange?: (value: string) => void;
@@ -17,11 +18,12 @@ const UserSelect: React.FC<UserSelectProps> = ({
   placeholder = "Please choose",
   mode = "",
 }) => {
+  const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useQuery({
     queryKey: ["userOption", searchText],
     queryFn: () =>
-      AuthApi.getWithPagination(
+      DropdownApi.getUsers(
         queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
       ),
   });
@@ -30,7 +32,8 @@ const UserSelect: React.FC<UserSelectProps> = ({
   );
   const { data: singleUserData } = useQuery({
     queryKey: ["singleUser", value],
-    queryFn: () => (value ? AuthApi.getById(value) : Promise.resolve(null)),
+    queryFn: () =>
+      value ? DropdownApi.getUserById(value) : Promise.resolve(null),
     enabled: !!value && !isUserInList,
   });
   const userList = (data as any)?.data?.items || [];
@@ -45,7 +48,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
     <Select
       mode={mode}
       showSearch
-      placeholder={placeholder}
+      placeholder={t(placeholder)}
       value={value || undefined}
       loading={isLoading}
       onSearch={onSearch}
@@ -56,7 +59,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
         label: `${user.fullName} - ${user.email}`,
         value: user.id,
       }))}
-      notFoundContent={isLoading ? <Spin size="small" /> : "Không tìm thấy"}
+      notFoundContent={isLoading ? <Spin size="small" /> : t("No data")}
     />
   );
 };
