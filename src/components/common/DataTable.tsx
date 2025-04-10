@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table, Empty, TableProps } from "antd";
 import { useTranslation } from "react-i18next";
+import useIsMobile from "../../utils/useIsMobile";
 interface DataTableProps<T> {
   dataSource?: T[];
   columns?: any;
@@ -29,7 +30,7 @@ const DataTable = <T extends Record<string, unknown>>({
   current = 1,
 }: DataTableProps<T>) => {
   const { t } = useTranslation();
-
+  const isMobile = useIsMobile();
   return (
     <Table<T>
       columns={columns.filter((col: any) => !col.hidden)}
@@ -37,7 +38,7 @@ const DataTable = <T extends Record<string, unknown>>({
       tableLayout="fixed"
       rowKey="id"
       scroll={{
-        y: `calc(65vh - ${heightTable}px)`,
+        y: !isMobile ? `calc(65vh - ${heightTable}px)` : "100%",
         x: "max-content",
       }}
       locale={{
