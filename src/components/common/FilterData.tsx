@@ -6,13 +6,13 @@ import {
   Button,
   Input,
   Dropdown,
-  Drawer,
   Select,
   Tag,
   Radio,
   RadioChangeEvent,
   Row,
   Checkbox,
+  Modal,
 } from "antd";
 import {
   DownOutlined,
@@ -472,7 +472,98 @@ const FilterData: React.FC<FilterDataProps> = ({
           </Col>
         )}
       </Row>
-      <Drawer
+      <Modal
+        title={t("Filter")}
+        open={dialogFilterVisible}
+        onCancel={() => setDialogFilterVisible(false)}
+        footer={[
+          <Button
+            key="cancel"
+            type="primary"
+            danger
+            onClick={() => setDialogFilterVisible(false)}
+          >
+            {t("Cancel")}
+          </Button>,
+          <Button key="submit" type="primary" onClick={applyFilter}>
+            {t("Apply")}
+          </Button>,
+        ]}
+      >
+        {dialogFilterSelected && (
+          <div
+            style={{
+              paddingTop: 24,
+              paddingBottom: 24,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            {(dialogFilterSelected.type === "select" ||
+              dialogFilterSelected.type === "multiSelect") && (
+              <Select
+                mode={
+                  dialogFilterSelected.type === "multiSelect"
+                    ? "multiple"
+                    : undefined
+                }
+                showSearch
+                allowClear
+                style={{ width: "100%" }}
+                placeholder={t(`Choose ${dialogFilterSelected.name}`)}
+                value={dialogFilterValue.value ?? dialogFilterSelected.value}
+                onChange={handleSelectChange}
+                optionFilterProp="label"
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toString()
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={dialogFilterOptions.map((item: any) => ({
+                  label: `${item.label}`,
+                  value: item.value,
+                }))}
+              />
+            )}
+
+            {dialogFilterSelected.type === "radioActive" && (
+              <Radio.Group
+                onChange={handleRadioChange}
+                value={dialogFilterValue.value ?? dialogFilterSelected.value}
+                style={{
+                  display: "flex",
+                  gap: 16,
+                  justifyContent: "center",
+                  paddingTop: 4,
+                }}
+              >
+                <Radio value={true}>{t("Active")}</Radio>
+                <Radio value={false}>{t("InActive")}</Radio>
+              </Radio.Group>
+            )}
+
+            {dialogFilterSelected.type === "radioYesNo" && (
+              <Radio.Group
+                onChange={handleRadioChange}
+                value={dialogFilterValue.value ?? dialogFilterSelected.value}
+                style={{
+                  display: "flex",
+                  gap: 16,
+                  justifyContent: "center",
+                  paddingTop: 4,
+                }}
+              >
+                <Radio value={true}>Yes</Radio>
+                <Radio value={false}>No</Radio>
+              </Radio.Group>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* <Drawer
         title="Bộ lọc"
         placement="right"
         onClose={() => setDialogFilterVisible(false)}
@@ -578,7 +669,7 @@ const FilterData: React.FC<FilterDataProps> = ({
         >
           {t("Cancel")}
         </Button>
-      </Drawer>
+      </Drawer> */}
     </>
   );
 };
