@@ -21,6 +21,8 @@ import Groups from "../pages/group/group";
 import GroupActions from "../pages/group/action";
 import Banners from "../pages/banner/banner";
 import BannerActions from "../pages/banner/acion";
+import ChatBox from "../pages/chat/chat";
+import GroupChat from "../pages/chat/GroupChat";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -146,6 +148,17 @@ const routes: RouteType[] = [
     path: "/banner/:id",
     name: "Update banner",
     element: <BannerActions />,
+  },
+
+  {
+    path: "/chatbox",
+    name: "Chat",
+    element: <ChatBox />,
+  },
+  {
+    path: "/chatgroup",
+    name: "Chat",
+    element: <GroupChat />,
   },
 ];
 
