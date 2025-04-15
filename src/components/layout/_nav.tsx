@@ -80,6 +80,13 @@ const _nav = [
         icon: "",
         route: "/group",
       },
+      {
+        id: "usermerchant",
+        children: "groupuser",
+        name: "User merchant",
+        icon: "",
+        route: "/usermerchant",
+      },
     ],
   },
 ];

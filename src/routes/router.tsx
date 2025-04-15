@@ -21,6 +21,10 @@ import Groups from "../pages/group/group";
 import GroupActions from "../pages/group/action";
 import Banners from "../pages/banner/banner";
 import BannerActions from "../pages/banner/acion";
+import MerchantUsers from "../pages/user-merchant/user-merchant";
+import MerchantUserActions from "../pages/user-merchant/action";
+import MerchantGroups from "../pages/group-merchant/group-merchant";
+import MerchantGroupActions from "../pages/group-merchant/action";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -146,6 +150,37 @@ const routes: RouteType[] = [
     path: "/banner/:id",
     name: "Update banner",
     element: <BannerActions />,
+  },
+
+  {
+    path: "/usermerchant",
+    name: "User merchant",
+    element: <MerchantUsers />,
+  },
+  {
+    path: "/usermerchant/none",
+    name: "Create user merchant",
+    element: <MerchantUserActions />,
+  },
+  {
+    path: "/usermerchant/:id",
+    name: "Update user merchant",
+    element: <MerchantUserActions />,
+  },
+  {
+    path: "/groupmerchant",
+    name: "User merchant",
+    element: <MerchantGroups />,
+  },
+  {
+    path: "/groupmerchant/none",
+    name: "Create group merchant",
+    element: <MerchantGroupActions />,
+  },
+  {
+    path: "/groupmerchant/:id",
+    name: "Update group merchant",
+    element: <MerchantGroupActions />,
   },
 ];
 

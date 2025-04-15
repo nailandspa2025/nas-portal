@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { AuthApi } from "../../apis/auth/auth";
+import { UserMerchantApi } from "../../apis/auth/userMerchant";
 import { buildFormData } from "../../utils/common/buildFormData";
 import { validatePhoneNumber } from "../../utils/common/validate";
 import dayjs from "dayjs";
@@ -25,7 +25,8 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 import GroupSelect from "../../components/GroupSelect";
-const UserAction = () => {
+import StoreSelect from "../../components/StoreSelect";
+const MerchantUserActions = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const [form] = Form.useForm();
@@ -35,7 +36,7 @@ const UserAction = () => {
   const [isAvatar, setIsAvatar] = useState(false);
   const { data = { data: {} } } = useQuery({
     queryKey: ["userDetail", params.id],
-    queryFn: () => AuthApi.getById(params.id as string),
+    queryFn: () => UserMerchantApi.getById(params.id as string),
     enabled: !!params.id,
   });
 
@@ -57,6 +58,7 @@ const UserAction = () => {
         districtId: value.districtId || null,
         cityId: value.cityId || null,
         groupIds: value.groupIds || null,
+        storeIds: value.storeIds || null,
       });
     }
   }, [data, form, params.id]);
@@ -66,13 +68,13 @@ const UserAction = () => {
       const formD = new FormData();
       buildFormData(formD, values);
       return params.id
-        ? await AuthApi.update(params.id as string, formD)
-        : await AuthApi.create(formD);
+        ? await UserMerchantApi.update(params.id as string, formD)
+        : await UserMerchantApi.create(formD);
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
         toast.success(t("Save successfully"));
-        navigate("/user");
+        navigate("/usermerchant");
       } else toast.error(t(res.message));
     },
     onError: () => {
@@ -103,14 +105,18 @@ const UserAction = () => {
       >
         <Col flex="auto">
           <div className="custom-title">
-            {params?.id ? t("Update user") : t("Create user")}
+            {params?.id ? t("Update user merchant") : t("Create user merchant")}
           </div>
         </Col>
         <Col flex="auto">
           <TopActionButtons
             backUrl="/user"
             onSubmit={handleSubmit}
-            hasSubmitPermission={checkAccessRight(accesses, "update", "user")}
+            hasSubmitPermission={checkAccessRight(
+              accesses,
+              "update",
+              "usermerchant"
+            )}
           />
         </Col>
       </Row>
@@ -198,6 +204,9 @@ const UserAction = () => {
               <Form.Item label={t("Group")} name={"groupIds"}>
                 <GroupSelect mode="multiple" placeholder={t("Choose group")} />
               </Form.Item>
+              <Form.Item label={t("Store")} name={"storeIds"}>
+                <StoreSelect mode="multiple" placeholder={t("Choose group")} />
+              </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12} lg={12}>
               <Form.Item label={t("Avatar")} name="avatar">
@@ -254,10 +263,14 @@ const UserAction = () => {
         }}
         backUrl="/user"
         onSubmit={handleSubmit}
-        hasSubmitPermission={checkAccessRight(accesses, "update", "user")}
+        hasSubmitPermission={checkAccessRight(
+          accesses,
+          "update",
+          "usermerchant"
+        )}
       />
     </>
   );
 };
 
-export default UserAction;
+export default MerchantUserActions;
