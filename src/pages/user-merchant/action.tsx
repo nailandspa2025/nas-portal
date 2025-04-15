@@ -57,8 +57,8 @@ const MerchantUserActions = () => {
         wardId: value.wardId || null,
         districtId: value.districtId || null,
         cityId: value.cityId || null,
-        groupIds: value.groupIds || null,
-        storeIds: value.storeIds || null,
+        groupIds: value.groupIds?.length > 0 ? value.groupIds : null,
+        storeIds: value.storeIds ?? null,
       });
     }
   }, [data, form, params.id]);

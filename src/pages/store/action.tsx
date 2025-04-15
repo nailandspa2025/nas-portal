@@ -9,7 +9,7 @@ import { buildFormData } from "../../utils/common/buildFormData";
 import TopActionButtons from "../../components/common/TopActionButtons";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
-import UserSelect from "../../components/UserSelect";
+import UserMerchnatSelect from "../../components/UserMerchantSelect";
 import AvatarUploader from "../../components/AvatarUploader";
 import ImagesUploader from "../../components/ImagesUploader";
 import {
@@ -54,6 +54,7 @@ const StoreAction = () => {
         googleReviewLink: value.googleReviewLink || "",
         ratingStar: value.ratingStar || "",
         images: value.imageUrls || null,
+        userIds: value.userIds?.length > 0 ? value.userIds : null,
       });
     }
   }, [data, form, params.id]);
@@ -253,15 +254,18 @@ const StoreAction = () => {
 
               <Form.Item
                 label={t("User")}
-                name="ownerId"
-                rules={[
-                  {
-                    required: true,
-                    message: t("Please choose user!"),
-                  },
-                ]}
+                name="userIds"
+                // rules={[
+                //   {
+                //     required: true,
+                //     message: t("Please choose user!"),
+                //   },
+                // ]}
               >
-                <UserSelect placeholder={t("Please choose user")} />
+                <UserMerchnatSelect
+                  mode={"multiple"}
+                  placeholder={t("Please choose user")}
+                />
               </Form.Item>
               <Form.Item
                 label={t("Google review link")}
