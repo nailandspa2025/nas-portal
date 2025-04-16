@@ -31,6 +31,20 @@ const accessRights = [
     id: "customer",
     name: "Customer",
   },
+  {
+    id: "groupuser",
+    name: "Group & user",
+    children: [
+      {
+        id: "usermerchant",
+        name: "User",
+      },
+      {
+        id: "group",
+        name: "Access rights",
+      },
+    ],
+  },
 ];
 const defaultRights = [
   {
