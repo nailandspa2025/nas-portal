@@ -76,7 +76,7 @@ const _nav = [
       {
         id: "group",
         children: "groupuser",
-        name: "Group rights",
+        name: "Access rights",
         icon: "",
         route: "/group",
       },
@@ -86,6 +86,13 @@ const _nav = [
         name: "User merchant",
         icon: "",
         route: "/usermerchant",
+      },
+      {
+        id: "groupmerchant",
+        children: "groupuser",
+        name: "Merchant access",
+        icon: "",
+        route: "/groupmerchant",
       },
     ],
   },
