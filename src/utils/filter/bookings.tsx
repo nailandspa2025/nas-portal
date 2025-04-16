@@ -99,6 +99,13 @@ export const columns = ({
       width: 80,
     },
     {
+      title: t("Store name"),
+      dataIndex: "store",
+      key: "store",
+      width: 190,
+      render: (_: any, record: any) => <span> {record?.store?.storeName}</span>,
+    },
+    {
       title: t("Note"),
       dataIndex: "note",
       key: "note",

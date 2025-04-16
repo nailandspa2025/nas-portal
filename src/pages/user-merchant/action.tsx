@@ -110,7 +110,7 @@ const MerchantUserActions = () => {
         </Col>
         <Col flex="auto">
           <TopActionButtons
-            backUrl="/user"
+            backUrl="/usermerchant"
             onSubmit={handleSubmit}
             hasSubmitPermission={checkAccessRight(
               accesses,
@@ -261,7 +261,7 @@ const MerchantUserActions = () => {
           marginTop: 20,
           marginBottom: 20,
         }}
-        backUrl="/user"
+        backUrl="/usermerchant"
         onSubmit={handleSubmit}
         hasSubmitPermission={checkAccessRight(
           accesses,
