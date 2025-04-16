@@ -106,6 +106,15 @@ export const columns = ({
       render: (_: any, record: any) => <span> {record?.store?.storeName}</span>,
     },
     {
+      title: t("Technician"),
+      dataIndex: "technician",
+      key: "technician",
+      width: 190,
+      render: (_: any, record: any) => (
+        <span> {record?.technician?.technicianName}</span>
+      ),
+    },
+    {
       title: t("Note"),
       dataIndex: "note",
       key: "note",
