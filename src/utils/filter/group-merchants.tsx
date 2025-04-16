@@ -34,7 +34,8 @@ export const columns = ({
       width: 180,
       render: (_: any, record: any) => (
         <span>
-          {t("Have")} {record.userIds?.length?.toString()} {t("members")}
+          {t("Have")} {record.userMerchantIds?.length?.toString()}{" "}
+          {t("members")}
         </span>
       ),
     },
@@ -131,6 +132,6 @@ export const buttons = [
     label: "Create",
     funcName: "createNew",
     color: "primary",
-    accessRight: ["group.create", "group.admin", "admin"],
+    accessRight: ["groupmerchant.create", "groupmerchant.admin", "admin"],
   },
 ];
