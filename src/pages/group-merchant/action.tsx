@@ -16,12 +16,20 @@ import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 const accessRights = [
   {
+    id: "dashboard",
+    name: "Dashboard",
+  },
+  {
     id: "booking",
     name: "Booking",
   },
   {
     id: "store",
     name: "Store",
+  },
+  {
+    id: "customer",
+    name: "Customer",
   },
 ];
 const defaultRights = [
@@ -83,7 +91,8 @@ const GroupMerchantActions = () => {
         name: value.name || "",
         note: value.note || "",
         isActive: value.isActive ?? true,
-        userIds: value?.userIds ?? null,
+        userIds:
+          value?.userMerchantIds?.length > 0 ? value?.userMerchantIds : null,
       });
       if (value.permissions) {
         const mappedPermissions: { [key: string]: string[] } = {};
