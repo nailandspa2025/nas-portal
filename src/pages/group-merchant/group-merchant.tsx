@@ -81,8 +81,12 @@ const GroupMerchant = () => {
   const [filteredColumns, setFilteredColumns] = useState<any[]>([]);
   const columns = useMemo(() => {
     return utils.columns({
-      hasEditPermission: checkAccessRight(accesses, "update", "group"),
-      hasDeletePermission: checkAccessRight(accesses, "delete", "group"),
+      hasEditPermission: checkAccessRight(accesses, "update", "groupmerchant"),
+      hasDeletePermission: checkAccessRight(
+        accesses,
+        "delete",
+        "groupmerchant"
+      ),
       t,
       handleEdit: handleItemTable.handleEdit,
       handleDelete: handleItemTable.handleDelete,

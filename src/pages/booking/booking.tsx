@@ -116,8 +116,8 @@ const Bookings = () => {
   };
   const columns = useMemo(() => {
     return utils.columns({
-      hasEditPermission: checkAccessRight(accesses, "update", "group"),
-      hasDeletePermission: checkAccessRight(accesses, "delete", "group"),
+      hasEditPermission: checkAccessRight(accesses, "update", "booking"),
+      hasDeletePermission: checkAccessRight(accesses, "delete", "booking"),
       t,
       handleEdit: handleItemTable.handleEdit,
       handleDelete: handleItemTable.handleDelete,

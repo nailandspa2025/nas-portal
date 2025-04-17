@@ -28,7 +28,7 @@ const accessRights = [
     name: "Store",
   },
   {
-    id: "customer",
+    id: "appaccount",
     name: "Customer",
   },
   {
