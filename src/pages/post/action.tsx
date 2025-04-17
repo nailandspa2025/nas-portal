@@ -25,18 +25,20 @@ const PostActions = () => {
   const [isAvatar, setIsAvatar] = useState(false);
   const { data = { data: {} } } = useQuery({
     queryKey: ["postDetail", params.id],
-    queryFn: () => PostApi.getById(params.id as any),
+    queryFn: async () => {
+      const res: any = await PostApi.getById(params.id as any);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
-      setImageUrl(value.avatar);
-      setContent(value.content ?? "");
+    if (params.id && data) {
+      setImageUrl(data.avatar);
+      setContent(data.content ?? "");
       form.setFieldsValue({
-        title: value.title || "",
-        content: value.content || "",
-        description: value.description || "",
+        title: data.title || "",
+        content: data.content || "",
+        description: data.description || "",
       });
     }
   }, [data, form, params.id]);

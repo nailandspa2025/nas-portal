@@ -95,22 +95,24 @@ const GroupMerchantActions = () => {
   const [form] = Form.useForm();
   const { data = { data: {} } } = useQuery({
     queryKey: ["roleDetail", params.id],
-    queryFn: () => RoleApi.getById(params.id as any),
+    queryFn: async () => {
+      const res: any = await RoleApi.getById(params.id as any);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
+    if (params.id && data) {
       form.setFieldsValue({
-        name: value.name || "",
-        note: value.note || "",
-        isActive: value.isActive ?? true,
+        name: data.name || "",
+        note: data.note || "",
+        isActive: data.isActive ?? true,
         userIds:
-          value?.userMerchantIds?.length > 0 ? value?.userMerchantIds : null,
+          data?.userMerchantIds?.length > 0 ? data?.userMerchantIds : null,
       });
-      if (value.permissions) {
+      if (data.permissions) {
         const mappedPermissions: { [key: string]: string[] } = {};
-        value.permissions.forEach((perm: string) => {
+        data.permissions.forEach((perm: string) => {
           const [key, action] = perm.split(".");
           if (!mappedPermissions[key]) {
             mappedPermissions[key] = [];

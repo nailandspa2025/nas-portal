@@ -11,12 +11,20 @@ export const DropdownApi = {
     const endpoint = `/user/api/v1/dropdownlist/user/${id}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
+  getUserByIds: async (ids: string) => {
+    const endpoint = `/user/api/v1/dropdownlist/user-ids/${ids}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
   getTechnicians: async (queryString: any) => {
     const endpoint = `/user/api/v1/dropdownlist/technicians?${queryString}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
   getTechnicianById: async (id: number) => {
     const endpoint = `/user/api/v1/dropdownlist/technician/${id}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getTechnicianByIds: async (ids: string) => {
+    const endpoint = `/user/api/v1/dropdownlist/technician-ids/${ids}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
   getGroups: async (queryString: any) => {
@@ -27,6 +35,10 @@ export const DropdownApi = {
     const endpoint = `/user/api/v1/dropdownlist/group/${id}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
+  getGroupByIds: async (ids: string) => {
+    const endpoint = `/user/api/v1/dropdownlist/group-ids/${ids}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
   getAppAccounts: async (queryString: any) => {
     const endpoint = `/user/api/v1/dropdownlist/appaccounts?${queryString}`;
     return await apiCall(API_METHOD.GET, endpoint);
@@ -35,13 +47,20 @@ export const DropdownApi = {
     const endpoint = `/user/api/v1/dropdownlist/appaccount/${id}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
-
+  getAppAccountByIds: async (ids: string) => {
+    const endpoint = `/user/api/v1/dropdownlist/appaccount-ids/${ids}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
   getProducts: async (queryString: any) => {
     const endpoint = `/catalog/api/v1/dropdownlist/products?${queryString}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
   getProductById: async (id: number) => {
     const endpoint = `/catalog/api/v1/dropdownlist/product/${id}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getProductByIds: async (ids: string) => {
+    const endpoint = `/catalog/api/v1/dropdownlist/product-ids/${ids}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
   getStores: async (queryString: any) => {
@@ -52,12 +71,20 @@ export const DropdownApi = {
     const endpoint = `/catalog/api/v1/dropdownlist/store/${id}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
+  getStoreByIds: async (ids: string) => {
+    const endpoint = `/catalog/api/v1/dropdownlist/store-ids/${ids}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
   getUserMerchants: async (queryString: any) => {
     const endpoint = `/user/api/v1/dropdownlist/user-merchants?${queryString}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
   getUserMerchantById: async (id: string) => {
     const endpoint = `/user/api/v1/dropdownlist/user-merchant/${id}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getUserMerchantByIds: async (ids: string) => {
+    const endpoint = `/user/api/v1/dropdownlist/user-merchant-ids/${ids}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
 };

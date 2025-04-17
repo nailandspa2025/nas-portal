@@ -3,14 +3,15 @@
 import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DropdownApi } from "../apis/dropdown/dropdown";
+import { debounce, uniqBy } from "lodash-es";
 interface ProductSelectProps {
   value?: any;
-  onChange?: (value: string) => void;
+  onChange?: (value: any) => void;
   placeholder?: string;
-  mode?: any;
+  mode?: "multiple" | "tags" | "";
 }
 const ProductSelect: React.FC<ProductSelectProps> = ({
   value,
@@ -20,33 +21,45 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
 }) => {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
-  const { data, isLoading } = useQuery({
+  const { data = [], isLoading } = useQuery({
     queryKey: ["productOption", searchText],
-    queryFn: () =>
-      DropdownApi.getProducts(
+    queryFn: async () => {
+      const res: any = await DropdownApi.getProducts(
         queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
-      ),
+      );
+      return res?.data?.items || [];
+    },
   });
-  const isUserInList = (data as any)?.data?.items?.some(
-    (u: { id: number }) => u.id == value
+  const valuesArray = Array.isArray(value) ? value : value ? [value] : [];
+  const isDataInList = valuesArray.every((id) =>
+    data.some((u: { id: string }) => u.id === id)
   );
-  const { data: singleUserData } = useQuery({
-    queryKey: ["singleProduct", value],
-    queryFn: () =>
-      value ? DropdownApi.getProductById(value) : Promise.resolve(null),
-    enabled: !!value && !isUserInList,
+  const { data: extraData } = useQuery({
+    queryKey: ["singleProduct", valuesArray],
+    queryFn: async () => {
+      if (!valuesArray.length || isDataInList) return [];
+      if (valuesArray.length === 1) {
+        const res: any = await DropdownApi.getProductById(valuesArray[0]);
+        return res?.data ? [res.data] : [];
+      } else {
+        const res: any = await DropdownApi.getProductByIds(
+          valuesArray.join(",")
+        );
+        return res?.data || [];
+      }
+    },
+    enabled: !!valuesArray.length && !isDataInList,
   });
-  const storeList = (data as any)?.data?.items || [];
-  const mergedStore = [...storeList];
-  if ((singleUserData as any)?.succeeded && !isUserInList) {
-    mergedStore.push((singleUserData as any).data);
-  }
-  const onSearch = (event: string) => {
-    setSearchText(event);
-  };
+  const mergedData = useMemo(() => {
+    if (searchText) return data;
+    return uniqBy([...data, ...(extraData || [])], "id");
+  }, [data, extraData, searchText]);
+  const onSearch = debounce((value: string) => {
+    setSearchText(value);
+  }, 500);
   return (
     <Select
-      mode={mode}
+      mode={mode || undefined}
       showSearch
       placeholder={t(placeholder)}
       value={value || null}
@@ -55,7 +68,7 @@ const ProductSelect: React.FC<ProductSelectProps> = ({
       onChange={onChange}
       filterOption={false}
       allowClear
-      options={mergedStore.map((product: any) => ({
+      options={mergedData.map((product: any) => ({
         label: `${product.productName} - ${product.price?.toLocaleString()}`,
         value: product.id,
       }))}

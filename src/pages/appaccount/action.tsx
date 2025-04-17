@@ -32,25 +32,27 @@ const AppAccountActions = () => {
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isAvatar, setIsAvatar] = useState(false);
-  const { data = { data: {} } } = useQuery({
+  const { data } = useQuery({
     queryKey: ["appAccountDetail", params.id],
-    queryFn: () => AppAccountApi.getById(params.id as any),
+    queryFn: async () => {
+      const res: any = await AppAccountApi.getById(params.id as any);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
-      setImageUrl(value.avatar);
+    if (params.id && data) {
+      setImageUrl(data.avatar);
       form.setFieldsValue({
-        fullName: value.fullName || "",
-        isActive: value.isActive ?? true,
-        email: value.email || "",
-        phone: value.phone || "",
-        dateOfBirth: value.dateOfBirth
-          ? dayjs(value.dateOfBirth, "YYYY-MM-DD")
+        fullName: data.fullName || "",
+        isActive: data.isActive ?? true,
+        email: data.email || "",
+        phone: data.phone || "",
+        dateOfBirth: data.dateOfBirth
+          ? dayjs(data.dateOfBirth, "YYYY-MM-DD")
           : null,
-        gender: value.gender ?? null,
-        street: value.street || "",
+        gender: data.gender ?? null,
+        street: data.street || "",
       });
     }
   }, [data, form, params.id]);

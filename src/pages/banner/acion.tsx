@@ -23,21 +23,23 @@ const BannerActions = () => {
   const [linkUrls, setLinkUrls] = useState([]);
   const { data } = useQuery({
     queryKey: ["bookingDetail", params.id],
-    queryFn: () => BannerApi.getById(params.id as any),
+    queryFn: async () => {
+      const res: any = await BannerApi.getById(params.id as any);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
-      setImageUrls(value.imageUrls);
-      setLinkUrls(value.imageUrls);
+    if (params.id && data) {
+      setImageUrls(data.imageUrls);
+      setLinkUrls(data.imageUrls);
       form.setFieldsValue({
-        title: value.title || "",
-        link: value.link || "",
-        isActive: value.isActive || true,
-        showTo: value.showTo ? dayjs(value.showTo, "YYYY-MM-DD") : null,
-        showFrom: value.showFrom ? dayjs(value.showTo, "YYYY-MM-DD") : null,
-        images: value.imageUrls || null,
+        title: data.title || "",
+        link: data.link || "",
+        isActive: data.isActive || true,
+        showTo: data.showTo ? dayjs(data.showTo, "YYYY-MM-DD") : null,
+        showFrom: data.showFrom ? dayjs(data.showTo, "YYYY-MM-DD") : null,
+        images: data.imageUrls || null,
       });
     }
   }, [data, form, params.id]);

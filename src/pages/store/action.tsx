@@ -30,31 +30,33 @@ const StoreAction = () => {
   const [imageUrls, setImageUrls] = useState([]);
   const [linkUrls, setLinkUrls] = useState([]);
   const [isAvatar, setIsAvatar] = useState(false);
-  const { data = { data: {} } } = useQuery({
+  const { data } = useQuery({
     queryKey: ["storeDetail", params.id],
-    queryFn: () => StoreApi.getById(params.id as any),
+    queryFn: async () => {
+      const res: any = await StoreApi.getById(params.id as any);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
 
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
-      setImageUrls(value.imageUrls);
-      setImageUrl(value.avatar);
-      setLinkUrls(value.imageUrls);
+    if (params.id && data) {
+      setImageUrls(data.imageUrls);
+      setImageUrl(data.avatar);
+      setLinkUrls(data.imageUrls);
       form.setFieldsValue({
-        storeName: value.storeName || "",
-        hotline: value.hotline || "",
-        openTime: value.openTime ? dayjs(value.openTime, "HH:mm") : null,
-        closeTime: value.closeTime ? dayjs(value.closeTime, "HH:mm") : null,
-        addressStore: value.addressStore || "",
-        lng: value.lng || "",
-        lat: value.lat || "",
-        ownerId: value.ownerId || "",
-        googleReviewLink: value.googleReviewLink || "",
-        ratingStar: value.ratingStar || "",
-        images: value.imageUrls || null,
-        userIds: value.userIds?.length > 0 ? value.userIds : null,
+        storeName: data.storeName || "",
+        hotline: data.hotline || "",
+        openTime: data.openTime ? dayjs(data.openTime, "HH:mm") : null,
+        closeTime: data.closeTime ? dayjs(data.closeTime, "HH:mm") : null,
+        addressStore: data.addressStore || "",
+        lng: data.lng || "",
+        lat: data.lat || "",
+        ownerId: data.ownerId || "",
+        googleReviewLink: data.googleReviewLink || "",
+        ratingStar: data.ratingStar || "",
+        images: data.imageUrls || null,
+        userIds: data.userIds?.length > 0 ? data.userIds : null,
       });
     }
   }, [data, form, params.id]);

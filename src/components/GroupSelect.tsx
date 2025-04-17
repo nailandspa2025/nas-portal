@@ -3,50 +3,68 @@
 import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DropdownApi } from "../apis/dropdown/dropdown";
 import { useTranslation } from "react-i18next";
+import { debounce, uniqBy } from "lodash-es";
 interface GroupSelectProps {
   value?: string;
-  onChange?: (value: string) => void;
+  onChange?: (value: any) => void;
   placeholder?: string;
-  mode?: any;
+  mode?: "multiple" | "tags" | "";
+  roleType?: number;
 }
 const GroupSelect: React.FC<GroupSelectProps> = ({
   value,
   onChange,
   placeholder = "Please choose",
   mode = "",
+  roleType = 0,
 }) => {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
-  const { data, isLoading } = useQuery({
+  const { data = [], isLoading } = useQuery({
     queryKey: ["userOption", searchText],
-    queryFn: () =>
-      DropdownApi.getGroups(
-        queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
-      ),
+    queryFn: async () => {
+      const res: any = await DropdownApi.getGroups(
+        queryString.stringify({
+          page: 1,
+          pageSize: 20,
+          roleType: roleType,
+          searchText: searchText,
+        })
+      );
+      return res?.data?.items || [];
+    },
   });
-  const isUserInList = (data as any)?.data?.items?.some(
-    (u: { id: string }) => u.id == value
+  const valuesArray = Array.isArray(value) ? value : value ? [value] : [];
+  const isDataInList = valuesArray.every((id) =>
+    data.some((u: { id: string }) => u.id === id)
   );
-  const { data: singleUserData } = useQuery({
-    queryKey: ["singleUser", value],
-    queryFn: () =>
-      value ? DropdownApi.getGroupById(value) : Promise.resolve(null),
-    enabled: !!value && !isUserInList,
+  const { data: extraData } = useQuery({
+    queryKey: ["singleGroup", valuesArray],
+    queryFn: async () => {
+      if (!valuesArray.length || isDataInList) return [];
+      if (valuesArray.length === 1) {
+        const res: any = await DropdownApi.getGroupById(valuesArray[0]);
+        return res?.data ? [res.data] : [];
+      } else {
+        const res: any = await DropdownApi.getGroupByIds(valuesArray.join(","));
+        return res?.data || [];
+      }
+    },
+    enabled: !!valuesArray.length && !isDataInList,
   });
-  const userList = (data as any)?.data?.items || [];
-  const mergedUsers = [...userList];
-  if ((singleUserData as any)?.succeeded && !isUserInList) {
-    mergedUsers.push((singleUserData as any).data);
-  }
-  const onSearch = (event: string) => {
-    setSearchText(event);
-  };
+  const mergedData = useMemo(() => {
+    if (searchText) return data;
+    return uniqBy([...data, ...(extraData || [])], "id");
+  }, [data, extraData, searchText]);
+  const onSearch = debounce((value: string) => {
+    setSearchText(value);
+  }, 500);
   return (
     <Select
-      mode={mode}
+      mode={mode || undefined}
       showSearch
       placeholder={t(placeholder)}
       value={value || undefined}
@@ -55,7 +73,7 @@ const GroupSelect: React.FC<GroupSelectProps> = ({
       onChange={onChange}
       filterOption={false}
       allowClear
-      options={mergedUsers.map((user: any) => ({
+      options={mergedData.map((user: any) => ({
         label: `${user.name} `,
         value: user.id,
       }))}

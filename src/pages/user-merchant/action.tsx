@@ -36,29 +36,31 @@ const MerchantUserActions = () => {
   const [isAvatar, setIsAvatar] = useState(false);
   const { data = { data: {} } } = useQuery({
     queryKey: ["userDetail", params.id],
-    queryFn: () => UserMerchantApi.getById(params.id as string),
+    queryFn: async () => {
+      const res: any = await UserMerchantApi.getById(params.id as string);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
 
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
-      setImageUrl(value.avatar);
+    if (params.id && data) {
+      setImageUrl(data.avatar);
       form.setFieldsValue({
-        fullName: value.fullName || "",
-        isActive: value.isActive ?? true,
-        email: value.email || "",
-        phoneNumber: value.phoneNumber || "",
-        dateOfBirth: value.dateOfBirth
-          ? dayjs(value.dateOfBirth, "YYYY-MM-DD")
+        fullName: data.fullName || "",
+        isActive: data.isActive ?? true,
+        email: data.email || "",
+        phoneNumber: data.phoneNumber || "",
+        dateOfBirth: data.dateOfBirth
+          ? dayjs(data.dateOfBirth, "YYYY-MM-DD")
           : null,
-        gender: value.gender ?? null,
-        street: value.street || "",
-        wardId: value.wardId || null,
-        districtId: value.districtId || null,
-        cityId: value.cityId || null,
-        groupIds: value.groupIds?.length > 0 ? value.groupIds : null,
-        storeIds: value.storeIds ?? null,
+        gender: data.gender ?? null,
+        street: data.street || "",
+        wardId: data.wardId || null,
+        districtId: data.districtId || null,
+        cityId: data.cityId || null,
+        groupIds: data.groupIds || null,
+        storeIds: data.storeIds || null,
       });
     }
   }, [data, form, params.id]);
@@ -202,7 +204,11 @@ const MerchantUserActions = () => {
                 </Select>
               </Form.Item>
               <Form.Item label={t("Group")} name={"groupIds"}>
-                <GroupSelect mode="multiple" placeholder={t("Choose group")} />
+                <GroupSelect
+                  roleType={1}
+                  mode="multiple"
+                  placeholder={t("Choose group")}
+                />
               </Form.Item>
               <Form.Item label={t("Store")} name={"storeIds"}>
                 <StoreSelect mode="multiple" placeholder={t("Choose group")} />
