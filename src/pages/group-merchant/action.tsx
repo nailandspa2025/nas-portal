@@ -40,7 +40,7 @@ const accessRights = [
         name: "User",
       },
       {
-        id: "group",
+        id: "groupmerchant",
         name: "Access rights",
       },
     ],
