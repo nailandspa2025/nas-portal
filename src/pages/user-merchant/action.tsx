@@ -34,7 +34,7 @@ const MerchantUserActions = () => {
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isAvatar, setIsAvatar] = useState(false);
-  const { data = { data: {} } } = useQuery({
+  const { data } = useQuery({
     queryKey: ["userDetail", params.id],
     queryFn: async () => {
       const res: any = await UserMerchantApi.getById(params.id as string);

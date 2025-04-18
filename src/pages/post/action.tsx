@@ -23,7 +23,7 @@ const PostActions = () => {
   const [imageList, setImageList] = useState<File[]>([]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isAvatar, setIsAvatar] = useState(false);
-  const { data = { data: {} } } = useQuery({
+  const { data } = useQuery({
     queryKey: ["postDetail", params.id],
     queryFn: async () => {
       const res: any = await PostApi.getById(params.id as any);
