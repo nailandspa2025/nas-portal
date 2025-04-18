@@ -9,11 +9,14 @@ import queryString from "query-string";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { BookingApi } from "../../apis/booking/booking";
+import { BookingApi } from "../../apis/order/booking";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 import { useTranslation } from "react-i18next";
 import ModalConfirm from "../../components/ModalConfirm";
+import ModalPayment from "../../components/ModalPayment";
+import { PaymentApi } from "../../apis/order/payment";
+import { buildFormData } from "../../utils/common/buildFormData";
 const Bookings = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -29,7 +32,8 @@ const Bookings = () => {
   const [actionType, setActionType] = useState<"delete" | "cancel" | null>(
     null
   );
-
+  const [openModalPayment, setOpenModalPayment] = useState<boolean>(false);
+  const [paymentData, setPaymentData] = useState<object>({});
   const handleItemTable = {
     handleEdit: (record: any) => {
       navigate(`/booking/${record.id}`);
@@ -43,6 +47,10 @@ const Bookings = () => {
       setRowId(record.id);
       setActionType("cancel");
       setOpenModal(true);
+    },
+    handlePayment: (record: any) => {
+      setOpenModalPayment(true);
+      setPaymentData(record);
     },
   };
   const { data, refetch } = useQuery({
@@ -114,14 +122,37 @@ const Bookings = () => {
     if (type === "delete") mutationDelete.mutate(id);
     else if (type == "cancel") mutationCancel.mutate(id);
   };
+  const mutationPayment = useMutation({
+    mutationFn: async (values) => {
+      const formD = new FormData();
+      buildFormData(formD, values);
+      return await PaymentApi.create(formD);
+    },
+    onSuccess: (res: any) => {
+      if (res.succeeded) {
+        toast.success("Save successfully");
+        refetch();
+      } else toast.error(t(res.message));
+      setOpenModalPayment(false);
+    },
+    onError: () => {
+      toast.error(t("An error occurred"));
+      setOpenModalPayment(false);
+    },
+  });
+  const handlePaymentSubmit = async (values: any) => {
+    mutationPayment.mutate(values);
+  };
   const columns = useMemo(() => {
     return utils.columns({
       hasEditPermission: checkAccessRight(accesses, "update", "booking"),
       hasDeletePermission: checkAccessRight(accesses, "delete", "booking"),
+      hasPaymentPermission: checkAccessRight(accesses, "payment", "booking"),
       t,
       handleEdit: handleItemTable.handleEdit,
       handleDelete: handleItemTable.handleDelete,
       handleCancel: handleItemTable.handleCancel,
+      handlePayment: handleItemTable.handlePayment,
     });
   }, [accesses]);
   return (
@@ -159,6 +190,13 @@ const Bookings = () => {
         openModal={openModal}
         setOpenModal={setOpenModal}
         onChange={() => onConfirm(rowId, actionType)}
+      />
+
+      <ModalPayment
+        data={paymentData}
+        openModal={openModalPayment}
+        setOpenModal={setOpenModalPayment}
+        onSubmit={handlePaymentSubmit}
       />
     </Card>
   );

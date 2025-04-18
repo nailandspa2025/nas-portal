@@ -188,6 +188,7 @@ const AppAccountActions = () => {
                 <Select
                   style={{ width: "100%" }}
                   showSearch
+                  allowClear
                   placeholder={t("Choose gender")}
                 >
                   <Select.Option value={1}>{t("Male")}</Select.Option>

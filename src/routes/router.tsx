@@ -25,6 +25,7 @@ import MerchantUsers from "../pages/user-merchant/user-merchant";
 import MerchantUserActions from "../pages/user-merchant/action";
 import MerchantGroups from "../pages/group-merchant/group-merchant";
 import MerchantGroupActions from "../pages/group-merchant/action";
+import Payments from "../pages/payment/payment";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -181,6 +182,11 @@ const routes: RouteType[] = [
     path: "/groupmerchant/:id",
     name: "Update group merchant",
     element: <MerchantGroupActions />,
+  },
+  {
+    path: "/payment",
+    name: "History payment",
+    element: <Payments />,
   },
 ];
 

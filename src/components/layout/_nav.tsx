@@ -9,6 +9,7 @@ import {
   // ShareAltOutlined,
   FormOutlined,
   PictureOutlined,
+  BankOutlined,
 } from "@ant-design/icons";
 
 const _nav = [
@@ -96,6 +97,12 @@ const _nav = [
       },
     ],
   },
+  {
+    id: "payment",
+    icon: <BankOutlined />,
+    name: "History payment",
+    route: "/payment",
+  },
 ];
 
 export default _nav;
@@ -129,12 +136,5 @@ export const defaultRights = [
 export const customRightsMap: {
   [key: string]: { name: string; value: string }[];
 } = {
-  // post: [
-  //   { name: "Gửi duyệt", value: "submitForApproval" },
-  //   { name: "Xét duyệt của trưởng nhóm", value: "approvel1" },
-  // ],
-  // booking: [
-  //   { name: "Duyệt lịch hẹn", value: "approveBooking" },
-  //   { name: "Hủy lịch hẹn", value: "cancelBooking" },
-  // ],
+  booking: [{ name: "Payment", value: "payment" }],
 };

@@ -24,7 +24,7 @@ import { buildFormData } from "../../utils/common/buildFormData";
 import StoreSelect from "../../components/StoreSelect";
 import ProductSelect from "../../components/ProductSelect";
 import AppAccuntSelect from "../../components/AppAccountSelect";
-import { BookingApi } from "../../apis/booking/booking";
+import { BookingApi } from "../../apis/order/booking";
 import { validatePhoneNumber } from "../../utils/common/validate";
 import TechnicianSelect from "../../components/TechnicianSelect";
 const BookingActions = () => {
@@ -179,6 +179,7 @@ const BookingActions = () => {
                 rules={[
                   {
                     type: "email",
+                    message: t("Invalid email"),
                   },
                 ]}
               >
