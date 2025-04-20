@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./layouts/default";
 import SignUp from "./pages/auth/sign-in";
 import "./assets/css/custom.scss";
-
+import "./assets/css/app.scss";
 import "./assets/css/layout.scss";
 import routes from "./routes/router";
 import NotFound from "./pages/NotFound";
