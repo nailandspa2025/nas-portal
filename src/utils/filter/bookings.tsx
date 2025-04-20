@@ -142,7 +142,7 @@ export const columns = ({
             <Tooltip title={t("Payment")}>
               <Button
                 className="button-none-style "
-                disabled={record.status == 2}
+                disabled={record.status == 2 || record.status == 3}
                 onClick={() => handlePayment(record)}
                 style={{ color: "#1890ff" }}
               >
