@@ -8,7 +8,7 @@ import { DropdownApi } from "../apis/dropdown/dropdown";
 import { useTranslation } from "react-i18next";
 import { debounce, uniqBy } from "lodash-es";
 interface UserSelectProps {
-  value?: string;
+  value?: any;
   onChange?: (value: any) => void;
   placeholder?: string;
   mode?: "multiple" | "tags" | "";
@@ -57,12 +57,14 @@ const UserSelect: React.FC<UserSelectProps> = ({
   const onSearch = debounce((value: string) => {
     setSearchText(value);
   }, 500);
+
+  console.log("canhlv", value);
   return (
     <Select
       mode={mode || undefined}
       showSearch
       placeholder={t(placeholder)}
-      value={value || undefined}
+      value={value || null}
       loading={isLoading}
       onSearch={onSearch}
       onChange={onChange}

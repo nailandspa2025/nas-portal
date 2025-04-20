@@ -54,9 +54,9 @@ const StoreAction = () => {
         lat: data.lat || "",
         ownerId: data.ownerId || "",
         googleReviewLink: data.googleReviewLink || "",
-        ratingStar: data.ratingStar || "",
+        ratingStar: data.ratingStar || null,
         images: data.imageUrls || null,
-        userIds: data.userIds?.length > 0 ? data.userIds : null,
+        userIds: data.userIds || null,
       });
     }
   }, [data, form, params.id]);
@@ -81,6 +81,7 @@ const StoreAction = () => {
   const onFinish = (values: any) => {
     const payload = {
       ...values,
+      userIds: values.userIds ?? null,
     };
     if (params.id) {
       payload.id = params.id;
@@ -89,6 +90,7 @@ const StoreAction = () => {
       );
       payload.isAvatar = isAvatar;
     }
+    console.log("canhlv", payload);
     mutation.mutate(payload);
   };
   const handleSubmit = () => {
