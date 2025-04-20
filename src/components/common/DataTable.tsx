@@ -38,7 +38,7 @@ const DataTable = <T extends Record<string, unknown>>({
       tableLayout="fixed"
       rowKey="id"
       scroll={{
-        y: !isMobile ? `calc(61vh - ${heightTable}px)` : "100%",
+        y: !isMobile ? `calc(66.8vh - ${heightTable}px)` : "100%",
         x: "max-content",
       }}
       locale={{
