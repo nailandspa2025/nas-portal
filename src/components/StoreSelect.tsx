@@ -25,7 +25,7 @@ const StoreSelect: React.FC<StoreSelectProps> = ({
     queryKey: ["storeOption", searchText],
     queryFn: async () => {
       const res: any = await DropdownApi.getStores(
-        queryString.stringify({ page: 1, pageSize: 1, searchText: searchText })
+        queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
       );
       return res?.data?.items || [];
     },
