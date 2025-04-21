@@ -46,8 +46,8 @@ const accessRights = [
     ],
   },
   {
-    id: "Payment",
-    name: "payment",
+    id: "payment",
+    name: "Payment",
   },
 ];
 const defaultRights = [
