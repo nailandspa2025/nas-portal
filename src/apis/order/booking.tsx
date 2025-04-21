@@ -27,4 +27,8 @@ export const BookingApi = {
     const endpoint = `/order/api/v1/bookings/cancel/${id}`;
     return await apiCall(API_METHOD.PUT, endpoint);
   },
+  payment: async (payload: any) => {
+    const endpoint = `/order/api/v1/bookings/payment`;
+    return await apiCall(API_METHOD.POST, endpoint, payload);
+  },
 };

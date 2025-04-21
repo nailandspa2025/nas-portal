@@ -22,7 +22,7 @@ const DataTable = <T extends Record<string, unknown>>({
   total = 0,
   pageSize = 10,
   onChange = () => {},
-  pageSizeOptions = ["20", "30", "50", "100", "200", "500"],
+  pageSizeOptions = ["10", "20", "30", "50", "100", "200"],
   heightTable = 0,
   rowSelection = null,
   bordered = true,

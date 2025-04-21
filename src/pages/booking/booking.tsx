@@ -15,7 +15,6 @@ import { checkAccessRight } from "../../utils/common/accessUtils";
 import { useTranslation } from "react-i18next";
 import ModalConfirm from "../../components/ModalConfirm";
 import ModalPayment from "../../components/ModalPayment";
-import { PaymentApi } from "../../apis/order/payment";
 import { buildFormData } from "../../utils/common/buildFormData";
 const Bookings = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
@@ -126,7 +125,7 @@ const Bookings = () => {
     mutationFn: async (values) => {
       const formD = new FormData();
       buildFormData(formD, values);
-      return await PaymentApi.create(formD);
+      return await BookingApi.payment(formD);
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {

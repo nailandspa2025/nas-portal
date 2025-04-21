@@ -45,6 +45,10 @@ const accessRights = [
       },
     ],
   },
+  {
+    id: "Payment",
+    name: "payment",
+  },
 ];
 const defaultRights = [
   {
@@ -75,14 +79,7 @@ const defaultRights = [
 const customRightsMap: {
   [key: string]: { name: string; value: string }[];
 } = {
-  // post: [
-  //   { name: "Gửi duyệt", value: "submitForApproval" },
-  //   { name: "Xét duyệt của trưởng nhóm", value: "approvel1" },
-  // ],
-  // booking: [
-  //   { name: "Duyệt lịch hẹn", value: "approveBooking" },
-  //   { name: "Hủy lịch hẹn", value: "cancelBooking" },
-  // ],
+  booking: [{ name: "Payment", value: "payment" }],
 };
 const GroupMerchantActions = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
