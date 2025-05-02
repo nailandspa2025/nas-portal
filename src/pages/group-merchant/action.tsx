@@ -49,6 +49,10 @@ const accessRights = [
     id: "payment",
     name: "Payment",
   },
+  {
+    id: "calendar",
+    name: "Calendar",
+  },
 ];
 const defaultRights = [
   {
