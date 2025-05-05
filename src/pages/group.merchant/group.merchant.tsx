@@ -2,7 +2,7 @@
 import { Card, Row } from "antd";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import queryString from "query-string";
-import * as utils from "../../utils/filter/group-merchants";
+import * as utils from "../../utils/filter/group.merchants";
 import FilterData from "../../components/common/FilterData";
 import DataTable from "../../components/common/DataTable";
 import useElementHeight from "../../utils/useElementHeight";

@@ -21,11 +21,12 @@ import Groups from "../pages/group/group";
 import GroupActions from "../pages/group/action";
 import Banners from "../pages/banner/banner";
 import BannerActions from "../pages/banner/acion";
-import MerchantUsers from "../pages/user-merchant/user-merchant";
-import MerchantUserActions from "../pages/user-merchant/action";
-import MerchantGroups from "../pages/group-merchant/group-merchant";
-import MerchantGroupActions from "../pages/group-merchant/action";
+import MerchantUsers from "../pages/user.merchant/user.merchant";
+import MerchantUserActions from "../pages/user.merchant/action";
+import MerchantGroups from "../pages/group.merchant/group.merchant";
+import MerchantGroupActions from "../pages/group.merchant/action";
 import Payments from "../pages/payment/payment";
+import BookingCancelReasons from "../pages/booking.cancel.reason/booking.cancel.reason";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -187,6 +188,11 @@ const routes: RouteType[] = [
     path: "/payment",
     name: "History payment",
     element: <Payments />,
+  },
+  {
+    path: "/config-reason",
+    name: "Config Reason",
+    element: <BookingCancelReasons />,
   },
 ];
 

@@ -3,7 +3,7 @@ import useElementHeight from "../../utils/useElementHeight";
 import { useRef, useState, useMemo } from "react";
 import { Row, Card } from "antd";
 import DataTable from "../../components/common/DataTable";
-import * as utils from "../../utils/filter/userMerchants";
+import * as utils from "../../utils/filter/user.merchants";
 import FilterData from "../../components/common/FilterData";
 import { UserMerchantApi } from "../../apis/auth/userMerchant";
 import queryString from "query-string";

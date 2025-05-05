@@ -10,6 +10,7 @@ import {
   FormOutlined,
   PictureOutlined,
   BankOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 
 const _nav = [
@@ -102,6 +103,20 @@ const _nav = [
     icon: <BankOutlined />,
     name: "History payment",
     route: "/payment",
+  },
+  {
+    d: "config",
+    name: "Config",
+    icon: <SettingOutlined />,
+    children: [
+      {
+        id: "config-reason",
+        children: "config",
+        name: "Config reason",
+        icon: "",
+        route: "/config-reason",
+      },
+    ],
   },
 ];
 
