@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import ModalConfirm from "../../components/ModalConfirm";
 import ModalPayment from "../../components/ModalPayment";
 import { buildFormData } from "../../utils/common/buildFormData";
+import ModalCancelBooking from "../../components/ModalCancelBooking";
 const Bookings = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -28,24 +29,20 @@ const Bookings = () => {
   const [filteredColumns, setFilteredColumns] = useState();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [rowId, setRowId] = useState<number>(0);
-  const [actionType, setActionType] = useState<"delete" | "cancel" | null>(
-    null
-  );
   const [openModalPayment, setOpenModalPayment] = useState<boolean>(false);
   const [paymentData, setPaymentData] = useState<object>({});
+  const [openModalCancel, setOpenModalCancel] = useState<boolean>(false);
   const handleItemTable = {
     handleEdit: (record: any) => {
       navigate(`/booking/${record.id}`);
     },
     handleDelete: (record: any) => {
       setRowId(record.id);
-      setActionType("delete");
       setOpenModal(true);
     },
     handleCancel: (record: any) => {
       setRowId(record.id);
-      setActionType("cancel");
-      setOpenModal(true);
+      setOpenModalCancel(true);
     },
     handlePayment: (record: any) => {
       setOpenModalPayment(true);
@@ -70,12 +67,6 @@ const Bookings = () => {
     createNew: () => {
       navigate("/booking/none");
     },
-    importExcel: () => {
-      toast.success("Đang phát triển");
-    },
-    exportExcel: () => {
-      toast.success("Đang phát triển");
-    },
   };
   const mutationDelete = useMutation({
     mutationFn: async (id: number) => {
@@ -98,8 +89,10 @@ const Bookings = () => {
     },
   });
   const mutationCancel = useMutation({
-    mutationFn: async (id: number) => {
-      return BookingApi.cancel(id);
+    mutationFn: async (values: any) => {
+      const formD = new FormData();
+      buildFormData(formD, values);
+      return BookingApi.cancel(rowId, formD);
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
@@ -109,17 +102,16 @@ const Bookings = () => {
         toast.error(t(res.message));
       }
       setRowId(0);
-      setOpenModal(false);
+      setOpenModalCancel(false);
     },
     onError: (error) => {
       setRowId(0);
-      setOpenModal(false);
+      setOpenModalCancel(false);
       toast.error(t(error.message));
     },
   });
-  const onConfirm = (id: any, type: any) => {
-    if (type === "delete") mutationDelete.mutate(id);
-    else if (type == "cancel") mutationCancel.mutate(id);
+  const onConfirmDelate = (id: number) => {
+    mutationDelete.mutate(id);
   };
   const mutationPayment = useMutation({
     mutationFn: async (values) => {
@@ -141,6 +133,13 @@ const Bookings = () => {
   });
   const handlePaymentSubmit = async (values: any) => {
     mutationPayment.mutate(values);
+  };
+  const handleCancelSubmit = (values: any) => {
+    const payload = {
+      ...values,
+      id: rowId,
+    };
+    mutationCancel.mutate(payload);
   };
   const columns = useMemo(() => {
     return utils.columns({
@@ -180,15 +179,9 @@ const Bookings = () => {
         }}
       />
       <ModalConfirm
-        title={actionType == "delete" ? "Delete" : "Cancel"}
-        content={
-          actionType == "delete"
-            ? "Are you sure you want to delete the data?"
-            : "Are you sure you want to update the data?"
-        }
         openModal={openModal}
         setOpenModal={setOpenModal}
-        onChange={() => onConfirm(rowId, actionType)}
+        onChange={() => onConfirmDelate(rowId)}
       />
 
       <ModalPayment
@@ -196,6 +189,11 @@ const Bookings = () => {
         openModal={openModalPayment}
         setOpenModal={setOpenModalPayment}
         onSubmit={handlePaymentSubmit}
+      />
+      <ModalCancelBooking
+        openModal={openModalCancel}
+        setOpenModal={setOpenModalCancel}
+        onSubmit={handleCancelSubmit}
       />
     </Card>
   );

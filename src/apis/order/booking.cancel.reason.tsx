@@ -23,4 +23,8 @@ export const BookingCancelReasonApi = {
     const endpoint = `/order/api/v1/bookingcancelreasons/${id}`;
     return await apiCall(API_METHOD.DELETE, endpoint);
   },
+  getAll: async () => {
+    const endpoint = `/order/api/v1/bookingcancelreasons/mobile-all`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
 };

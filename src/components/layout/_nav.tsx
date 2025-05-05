@@ -105,7 +105,7 @@ const _nav = [
     route: "/payment",
   },
   {
-    d: "config",
+    id: "config",
     name: "Config",
     icon: <SettingOutlined />,
     children: [
