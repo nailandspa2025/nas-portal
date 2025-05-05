@@ -28,7 +28,6 @@ const ModalCancelBooking: React.FC<ModalCancelBookingProps> = ({
       return response.data;
     },
   });
-  console.log("data", data);
   useEffect(() => {
     if (!openModal) {
       form.resetFields();
