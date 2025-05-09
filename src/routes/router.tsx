@@ -27,6 +27,8 @@ import MerchantGroups from "../pages/group.merchant/group.merchant";
 import MerchantGroupActions from "../pages/group.merchant/action";
 import Payments from "../pages/payment/payment";
 import BookingCancelReasons from "../pages/booking.cancel.reason/booking.cancel.reason";
+import Merchants from "../pages/merchant/merchant";
+import MerchantActions from "../pages/merchant/action";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -193,6 +195,21 @@ const routes: RouteType[] = [
     path: "/config-reason",
     name: "Config Reason",
     element: <BookingCancelReasons />,
+  },
+  {
+    path: "/merchant",
+    name: "Merchants",
+    element: <Merchants />,
+  },
+  {
+    path: "/merchant/none",
+    name: "Create merchant",
+    element: <MerchantActions />,
+  },
+  {
+    path: "/merchant/:id",
+    name: "Update merchant",
+    element: <MerchantActions />,
   },
 ];
 

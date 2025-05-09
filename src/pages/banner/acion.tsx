@@ -117,7 +117,7 @@ const BannerActions = () => {
                     validator: (_, value) => {
                       if (!value) return Promise.resolve();
                       try {
-                        new URL(value); // Đây sẽ tự xử lý cả IP, port, domain, v.v.
+                        new URL(value);
                         return Promise.resolve();
                       } catch {
                         return Promise.reject(new Error(t("Invalid URL")));

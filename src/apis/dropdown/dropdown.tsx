@@ -87,4 +87,16 @@ export const DropdownApi = {
     const endpoint = `/user/api/v1/dropdownlist/user-merchant-ids/${ids}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
+  getMerchants: async (queryString: any) => {
+    const endpoint = `/user/api/v1/dropdownlist/merchants?${queryString}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getMerchantById: async (id: string) => {
+    const endpoint = `/user/api/v1/dropdownlist/merchant/${id}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getMerchantByIds: async (ids: string) => {
+    const endpoint = `/user/api/v1/dropdownlist/merchant-ids/${ids}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
 };

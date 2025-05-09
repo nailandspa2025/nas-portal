@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const validatePhoneNumber = (_: any, value: any) => {
   const phoneRegex = /^[0-9]{10}$/;
+  if (!value) {
+    return Promise.resolve();
+  }
+
   if (value) {
     if (!value.startsWith("0")) {
       return Promise.reject("Phone number must start with a 0");

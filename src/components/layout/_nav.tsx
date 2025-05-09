@@ -11,6 +11,7 @@ import {
   PictureOutlined,
   BankOutlined,
   SettingOutlined,
+  ShopOutlined,
 } from "@ant-design/icons";
 
 const _nav = [
@@ -19,6 +20,12 @@ const _nav = [
     icon: <DashboardOutlined />,
     name: "Dashboard",
     route: "/",
+  },
+  {
+    id: "merchant",
+    icon: <ShopOutlined />,
+    name: "Merchant",
+    route: "/merchant",
   },
   {
     id: "store",

@@ -90,7 +90,6 @@ const StoreAction = () => {
       );
       payload.isAvatar = isAvatar;
     }
-    console.log("canhlv", payload);
     mutation.mutate(payload);
   };
   const handleSubmit = () => {
