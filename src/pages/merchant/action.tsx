@@ -11,8 +11,16 @@ import {
   Divider,
   DatePicker,
   Button,
+  Switch,
+  Space,
 } from "antd";
-import { DeleteOutlined, PlusOutlined, EditOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  PlusOutlined,
+  EditOutlined,
+  CloseOutlined,
+  CheckOutlined,
+} from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { MerchantApi } from "../../apis/catalog/merchant";
@@ -72,7 +80,7 @@ const MerchantActions = () => {
   const [brands, setBrands] = useState<any>([]);
   const [selectedBrand, setSelectedBrand] = useState<any>({});
   const { data } = useQuery({
-    queryKey: ["storeDetail", params.id],
+    queryKey: ["merchantDetail", params.id],
     queryFn: async () => {
       const res: any = await MerchantApi.getById(params.id as any);
       return res?.data || {};
@@ -84,6 +92,13 @@ const MerchantActions = () => {
       setImageUrls(data.imageUrls);
       setImageUrl(data.logo);
       setLinkUrls(data.imageUrls);
+      setBrands(
+        data?.brands.map((item: any) => ({
+          name: item.name,
+          logoLink: item.logo,
+          logo: item.logo,
+        }))
+      );
       form.setFieldsValue({
         name: data.name || "",
         shortName: data.shortName || "",
@@ -117,6 +132,13 @@ const MerchantActions = () => {
     mutationFn: async (values) => {
       const formD = new FormData();
       buildFormData(formD, values);
+      brands.forEach((item: any, index: number) => {
+        formD.append(`brands[${index}].name`, item.name);
+        formD.append(`brands[${index}].logoLink`, item.logoLink);
+        if (item.logo instanceof File) {
+          formD.append(`brands[${index}].logo`, item.logo);
+        }
+      });
       return params.id
         ? await MerchantApi.update(params.id as any, formD)
         : await MerchantApi.create(formD);
@@ -151,7 +173,7 @@ const MerchantActions = () => {
       );
       payload.isAvatar = isAvatar;
     }
-    console.log("canhlv", payload);
+    //console.log("canhlv", brands);
     mutation.mutate(payload);
   };
   const handleSubmit = () => {
@@ -430,6 +452,16 @@ const MerchantActions = () => {
                   }}
                 />
               </Form.Item>
+              <Space align="center">
+                <Form.Item name="isActive" valuePropName="checked" noStyle>
+                  <Switch
+                    checkedChildren={<CheckOutlined />}
+                    unCheckedChildren={<CloseOutlined />}
+                    defaultChecked={true}
+                  />
+                </Form.Item>
+                <span>{t("Active")}</span>
+              </Space>
             </Col>
           </Row>
           <Divider />
@@ -460,7 +492,11 @@ const MerchantActions = () => {
                   cover={
                     <img
                       alt={brand.name}
-                      src={URL.createObjectURL(brand.logo)}
+                      src={
+                        typeof brand.logo === "string"
+                          ? brand.logo
+                          : URL.createObjectURL(brand.logo)
+                      }
                       style={{ height: 150, objectFit: "cover" }}
                     />
                   }
