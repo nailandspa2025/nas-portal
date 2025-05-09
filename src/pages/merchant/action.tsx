@@ -173,7 +173,6 @@ const MerchantActions = () => {
       );
       payload.isAvatar = isAvatar;
     }
-    //console.log("canhlv", brands);
     mutation.mutate(payload);
   };
   const handleSubmit = () => {

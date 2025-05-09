@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card, Form, Row, Col, Input, Rate, TimePicker } from "antd";
+import { Card, Form, Row, Col, Input, Rate, TimePicker, Select } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { StoreApi } from "../../apis/catalog/store";
@@ -19,7 +19,8 @@ import {
 } from "../../utils/common/validate";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
-
+import MerchantSelect from "../../components/MerchantSelect";
+import { DropdownApi } from "../../apis/dropdown/dropdown";
 const StoreAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -30,6 +31,7 @@ const StoreAction = () => {
   const [imageUrls, setImageUrls] = useState([]);
   const [linkUrls, setLinkUrls] = useState([]);
   const [isAvatar, setIsAvatar] = useState(false);
+  const [brands, setBrands] = useState<any>([]);
   const { data } = useQuery({
     queryKey: ["storeDetail", params.id],
     queryFn: async () => {
@@ -38,7 +40,21 @@ const StoreAction = () => {
     },
     enabled: !!params.id,
   });
-
+  const { data: merchantDetail } = useQuery({
+    queryKey: ["merchantDetail", data?.merchantId],
+    queryFn: async () => {
+      const res: any = await DropdownApi.getMerchantById(
+        data?.merchantId as any
+      );
+      return res?.data || {};
+    },
+    enabled: !!data?.merchantId,
+  });
+  useEffect(() => {
+    if (merchantDetail) {
+      setBrands(merchantDetail?.brands || []);
+    }
+  }, [merchantDetail]);
   useEffect(() => {
     if (params.id && data) {
       setImageUrls(data.imageUrls);
@@ -57,6 +73,8 @@ const StoreAction = () => {
         ratingStar: data.ratingStar || null,
         images: data.imageUrls || null,
         userIds: data.userIds || null,
+        merchantId: data.merchantId || null,
+        brandId: data.brandId || null,
       });
     }
   }, [data, form, params.id]);
@@ -120,6 +138,37 @@ const StoreAction = () => {
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Row gutter={32}>
             <Col xs={24} sm={24} md={12} lg={12}>
+              <Form.Item
+                label={t("Merchant")}
+                name={"merchantId"}
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please choose merchant!"),
+                  },
+                ]}
+              >
+                <MerchantSelect
+                  onChange={(_: any, merchant: any) => {
+                    setBrands(merchant?.brands || []);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item shouldUpdate>
+                {({ getFieldValue }) => (
+                  <Form.Item label={t("Brand")} name="brandId">
+                    <Select
+                      allowClear
+                      placeholder={t("Choose brand")}
+                      disabled={!getFieldValue("merchantId")}
+                      options={brands?.map((item: any) => ({
+                        label: `${item.name}`,
+                        value: item.id,
+                      }))}
+                    />
+                  </Form.Item>
+                )}
+              </Form.Item>
               <Form.Item
                 label={t("Store name")}
                 name="storeName"
@@ -254,17 +303,10 @@ const StoreAction = () => {
               >
                 <Input placeholder={t("Enter longitude")} />
               </Form.Item>
+            </Col>
 
-              <Form.Item
-                label={t("User")}
-                name="userIds"
-                // rules={[
-                //   {
-                //     required: true,
-                //     message: t("Please choose user!"),
-                //   },
-                // ]}
-              >
+            <Col xs={24} sm={24} md={12} lg={12}>
+              <Form.Item label={t("User")} name="userIds">
                 <UserMerchnatSelect
                   mode={"multiple"}
                   placeholder={t("Please choose user")}
@@ -276,9 +318,6 @@ const StoreAction = () => {
               >
                 <Input placeholder={t("Enter google review link")} />
               </Form.Item>
-            </Col>
-
-            <Col xs={24} sm={24} md={12} lg={12}>
               <Form.Item label={t("Rating star")} name="ratingStar">
                 <Rate />
               </Form.Item>

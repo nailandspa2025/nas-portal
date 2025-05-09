@@ -57,8 +57,6 @@ const UserSelect: React.FC<UserSelectProps> = ({
   const onSearch = debounce((value: string) => {
     setSearchText(value);
   }, 500);
-
-  console.log("canhlv", value);
   return (
     <Select
       mode={mode || undefined}

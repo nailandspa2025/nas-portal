@@ -9,17 +9,15 @@ import { useTranslation } from "react-i18next";
 import { debounce, uniqBy } from "lodash-es";
 interface MerchantSelectProps {
   value?: string;
-  onChange?: (value: any) => void;
+  onChange?: (value: any, merchant: any) => void;
   placeholder?: string;
   mode?: "multiple" | "tags" | "";
-  roleType?: number;
 }
 const MerchantSelect: React.FC<MerchantSelectProps> = ({
   value,
   onChange,
   placeholder = "Please choose",
   mode = "",
-  roleType = 0,
 }) => {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
@@ -30,7 +28,6 @@ const MerchantSelect: React.FC<MerchantSelectProps> = ({
         queryString.stringify({
           page: 1,
           pageSize: 50,
-          roleType: roleType,
           searchText: searchText,
         })
       );
@@ -64,6 +61,13 @@ const MerchantSelect: React.FC<MerchantSelectProps> = ({
   const onSearch = debounce((value: string) => {
     setSearchText(value);
   }, 500);
+  const handleChange = (selectedValue: any) => {
+    const selectedMerchant = Array.isArray(selectedValue)
+      ? mergedData.filter((item: any) => selectedValue.includes(item.id))
+      : mergedData.find((item: any) => item.id === selectedValue);
+
+    onChange?.(selectedValue, selectedMerchant);
+  };
   return (
     <Select
       mode={mode || undefined}
@@ -72,7 +76,7 @@ const MerchantSelect: React.FC<MerchantSelectProps> = ({
       value={value || undefined}
       loading={isLoading}
       onSearch={onSearch}
-      onChange={onChange}
+      onChange={handleChange}
       filterOption={false}
       allowClear
       options={mergedData.map((item: any) => ({
