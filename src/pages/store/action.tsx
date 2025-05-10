@@ -20,7 +20,6 @@ import {
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 import MerchantSelect from "../../components/MerchantSelect";
-import { DropdownApi } from "../../apis/dropdown/dropdown";
 const StoreAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -40,21 +39,7 @@ const StoreAction = () => {
     },
     enabled: !!params.id,
   });
-  const { data: merchantDetail } = useQuery({
-    queryKey: ["merchantDetail", data?.merchantId],
-    queryFn: async () => {
-      const res: any = await DropdownApi.getMerchantById(
-        data?.merchantId as any
-      );
-      return res?.data || {};
-    },
-    enabled: !!data?.merchantId,
-  });
-  useEffect(() => {
-    if (merchantDetail) {
-      setBrands(merchantDetail?.brands || []);
-    }
-  }, [merchantDetail]);
+
   useEffect(() => {
     if (params.id && data) {
       setImageUrls(data.imageUrls);
@@ -149,7 +134,10 @@ const StoreAction = () => {
                 ]}
               >
                 <MerchantSelect
-                  onChange={(_: any, merchant: any) => {
+                  onChange={(selectedValue: any, merchant: any) => {
+                    if (selectedValue != data?.merchantId) {
+                      form.setFieldsValue({ brandId: null });
+                    }
                     setBrands(merchant?.brands || []);
                   }}
                 />

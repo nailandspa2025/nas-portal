@@ -3,7 +3,7 @@
 import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Spin } from "antd";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DropdownApi } from "../apis/dropdown/dropdown";
 import { useTranslation } from "react-i18next";
 import { debounce, uniqBy } from "lodash-es";
@@ -12,6 +12,7 @@ interface MerchantSelectProps {
   onChange?: (value: any, merchant: any) => void;
   placeholder?: string;
   mode?: "multiple" | "tags" | "";
+  selected?: any;
 }
 const MerchantSelect: React.FC<MerchantSelectProps> = ({
   value,
@@ -68,6 +69,16 @@ const MerchantSelect: React.FC<MerchantSelectProps> = ({
 
     onChange?.(selectedValue, selectedMerchant);
   };
+  useEffect(() => {
+    if (!value) return;
+    const selectedMerchant = Array.isArray(value)
+      ? mergedData.filter((item: any) => value.includes(item.id))
+      : mergedData.find((item: any) => item.id === value);
+
+    if (selectedMerchant) {
+      onChange?.(value, selectedMerchant);
+    }
+  }, [mergedData, value]);
   return (
     <Select
       mode={mode || undefined}
