@@ -123,7 +123,7 @@ const FilterData: React.FC<FilterDataProps> = ({
     if (f.actionName) {
       const data = await getDataForFilter(f.actionName);
       setDialogFilterOptions(
-        data.map((item) => ({ ...item, value: item.value.toString() }))
+        data.map((item: any) => ({ ...item, value: item.value.toString() }))
       );
     }
     setDialogFilterValue({

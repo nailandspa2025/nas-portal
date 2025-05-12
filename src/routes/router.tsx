@@ -29,6 +29,9 @@ import Payments from "../pages/payment/payment";
 import BookingCancelReasons from "../pages/booking.cancel.reason/booking.cancel.reason";
 import Merchants from "../pages/merchant/merchant";
 import MerchantActions from "../pages/merchant/action";
+
+import Rewards from "../pages/reward/reward";
+import RewardActions from "../pages/reward/action";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -210,6 +213,21 @@ const routes: RouteType[] = [
     path: "/merchant/:id",
     name: "Update merchant",
     element: <MerchantActions />,
+  },
+  {
+    path: "/reward",
+    name: "Rewards",
+    element: <Rewards />,
+  },
+  {
+    path: "/reward/none",
+    name: "Create reward",
+    element: <RewardActions />,
+  },
+  {
+    path: "/reward/:id",
+    name: "Update reward",
+    element: <RewardActions />,
   },
 ];
 

@@ -12,6 +12,7 @@ import {
   BankOutlined,
   SettingOutlined,
   ShopOutlined,
+  AppstoreAddOutlined,
 } from "@ant-design/icons";
 
 const _nav = [
@@ -32,6 +33,12 @@ const _nav = [
     icon: <AppstoreOutlined />,
     name: "Store",
     route: "/store",
+  },
+  {
+    id: "reward",
+    icon: <AppstoreAddOutlined />,
+    name: "Reward",
+    route: "/reward",
   },
   {
     id: "product",
