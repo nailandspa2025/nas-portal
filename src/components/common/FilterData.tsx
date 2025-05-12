@@ -24,7 +24,7 @@ import { getDataForFilter } from "../../utils/common/getDataForFilter";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
-import { intersection } from "lodash-es";
+import { debounce, intersection } from "lodash-es";
 type FilterDataProps = {
   onFilterChange?: (filters: any) => void;
   onColumnChange?: (columns: any) => void;
@@ -227,6 +227,19 @@ const FilterData: React.FC<FilterDataProps> = ({
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
+
+  const handleSearchFilterOption = debounce(
+    async (actionName: string, value: string) => {
+      if (actionName) {
+        const data = await getDataForFilter(actionName, value);
+        setDialogFilterOptions(
+          data.map((item: any) => ({ ...item, value: item.value.toString() }))
+        );
+      }
+    },
+    500
+  );
+
   return (
     <>
       <Row gutter={[0, 10]} style={{ width: "100%" }}>
@@ -514,13 +527,13 @@ const FilterData: React.FC<FilterDataProps> = ({
                 placeholder={t(`Choose ${dialogFilterSelected.name}`)}
                 value={dialogFilterValue.value ?? dialogFilterSelected.value}
                 onChange={handleSelectChange}
-                optionFilterProp="label"
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toString()
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
+                onSearch={(inputValue) =>
+                  handleSearchFilterOption(
+                    dialogFilterSelected.actionName,
+                    inputValue
+                  )
                 }
+                filterOption={false} // Tắt lọc client
                 options={dialogFilterOptions.map((item: any) => ({
                   label: `${item.label}`,
                   value: item.value,
