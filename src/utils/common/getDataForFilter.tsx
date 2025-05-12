@@ -1,7 +1,7 @@
 /* eslint-disable no-case-declarations */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MerchantApi } from "../../apis/catalog/merchant";
 import queryString from "query-string";
+import { DropdownApi } from "../../apis/dropdown/dropdown";
 export const getDataForFilter = async (actionName: string, searchText = "") => {
   switch (actionName) {
     case "userType":
@@ -31,7 +31,7 @@ export const getDataForFilter = async (actionName: string, searchText = "") => {
         },
       ];
     case "merchant":
-      const response: any = await MerchantApi.getWithPagination(
+      const response: any = await DropdownApi.getMerchants(
         queryString.stringify({
           page: 1,
           pageSize: 50,
