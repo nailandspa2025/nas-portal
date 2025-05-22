@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Layout, Image, Menu } from "antd";
-import Logo from "../../assets/images/icons/logo.svg";
 import _nav from "./_nav";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -97,14 +96,9 @@ const SiderBarLeft = () => {
         transition: "all 0.3s ease-in-out",
       }}
     >
-      <div
-        className="brand"
-        style={{
-          height: 62,
-        }}
-      >
+      <div className="brand">
         <div className="logo">
-          <Image alt="logo" src={Logo} preview={false} />
+          <Image alt="logo" src="/logo.png" preview={false} />
           {!collapsed && <h1>Nas prortal</h1>}
         </div>
       </div>
