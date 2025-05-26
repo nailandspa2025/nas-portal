@@ -29,11 +29,21 @@ export const columns = ({
         />
       ),
     },
+
     {
       title: t("Title"),
       dataIndex: "title",
       key: "title",
       width: 150,
+    },
+    {
+      title: t("Type"),
+      dataIndex: "type",
+      key: "type",
+      width: 150,
+      render: (type: number) => {
+        return type === 1 ? t("Normal") : t("Trend");
+      },
     },
     {
       title: t("Description"),
