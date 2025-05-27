@@ -60,4 +60,4 @@ jobs:
             docker network inspect nas-net >/dev/null 2>&1 || docker network create nas-net
             docker stop nas-portal || true
             docker rm nas-portal || true
-            docker run -d --restart=always --pull=always --name nas-portal --network nas-net -p 80:80 docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.sha }}
+            docker run -d --restart=always --pull=always --name nas-portal --network nas-net -p 8080:80 docker.io/${{ secrets.REGISTRY_USERNAME }}/nas-reposetory:${{ github.sha }}
