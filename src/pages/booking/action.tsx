@@ -24,7 +24,7 @@ import { buildFormData } from "../../utils/common/buildFormData";
 import StoreSelect from "../../components/StoreSelect";
 import ProductSelect from "../../components/ProductSelect";
 import AppAccuntSelect from "../../components/AppAccountSelect";
-import { BookingApi } from "../../apis/booking/booking";
+import { BookingApi } from "../../apis/order/booking";
 import { validatePhoneNumber } from "../../utils/common/validate";
 import TechnicianSelect from "../../components/TechnicianSelect";
 const BookingActions = () => {
@@ -35,30 +35,30 @@ const BookingActions = () => {
   const [form] = Form.useForm();
   const { data } = useQuery({
     queryKey: ["bookingDetail", params.id],
-    queryFn: () => BookingApi.getById(params.id as any),
+    queryFn: async () => {
+      const res: any = await BookingApi.getById(params.id as any);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
+    if (params.id && data) {
       form.setFieldsValue({
-        fullName: value.fullName || "",
-        email: value.email || "",
-        phone: value.phone || "",
-        bookingDate: value.bookingDate
-          ? dayjs(value.bookingDate, "YYYY-MM-DD")
+        fullName: data.fullName || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        bookingDate: data.bookingDate
+          ? dayjs(data.bookingDate, "YYYY-MM-DD")
           : null,
-        bookingTime: value.bookingTime
-          ? dayjs(value.bookingTime, "HH:mm")
-          : null,
-        gender: value.gender ?? null,
-        note: value.note || "",
-        address: value.address || "",
-        userId: (value.userId ? Number(value.userId) : null) as number | null,
-        productId: value.productId || null,
-        technicianId: value.technicianId || null,
-        storeId: value.storeId || null,
-        number: value.number ?? null,
+        bookingTime: data.bookingTime ? dayjs(data.bookingTime, "HH:mm") : null,
+        gender: data.gender ?? null,
+        note: data.note || "",
+        address: data.address || "",
+        userId: (data.userId ? Number(data.userId) : null) as number | null,
+        productId: data.productId || null,
+        technicianId: data.technicianId || null,
+        storeId: data.storeId || null,
+        number: data.number ?? null,
       });
     }
   }, [data, form, params.id]);
@@ -114,9 +114,7 @@ const BookingActions = () => {
               "update",
               "booking"
             )}
-            disabled={
-              (data as any)?.data.status == 2 || (data as any)?.data.status == 3
-            }
+            disabled={data?.status == 2 || data?.status == 3}
           />
         </Col>
       </Row>
@@ -181,6 +179,7 @@ const BookingActions = () => {
                 rules={[
                   {
                     type: "email",
+                    message: t("Invalid email"),
                   },
                 ]}
               >
@@ -198,7 +197,7 @@ const BookingActions = () => {
               >
                 <AppAccuntSelect
                   placeholder="Please choose user"
-                  disabled={!!params.id}
+                  //disabled={!!params.id}
                 />
               </Form.Item>
             </Col>
@@ -301,9 +300,7 @@ const BookingActions = () => {
         backUrl="/booking"
         onSubmit={handleSubmit}
         hasSubmitPermission={checkAccessRight(accesses, "update", "booking")}
-        disabled={
-          (data as any)?.data.status == 2 || (data as any)?.data.status == 3
-        }
+        disabled={data?.status == 2 || data?.status == 3}
       />
     </>
   );

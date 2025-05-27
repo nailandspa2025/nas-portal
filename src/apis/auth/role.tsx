@@ -19,7 +19,7 @@ export const RoleApi = {
     const endpoint = `/user/api/v1/roles/${id}`;
     return await apiCall(API_METHOD.PUT, endpoint, payload);
   },
-  delete: async (id: number) => {
+  delete: async (id: string) => {
     const endpoint = `/user/api/v1/roles/${id}`;
     return await apiCall(API_METHOD.DELETE, endpoint);
   },

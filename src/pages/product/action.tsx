@@ -23,20 +23,22 @@ const ProdutActions = () => {
   const [description, setDescription] = useState("");
   const [imageList, setImageList] = useState<File[]>([]);
 
-  const { data = { data: {} } } = useQuery({
+  const { data } = useQuery({
     queryKey: ["productDetail", params.id],
-    queryFn: () => ProductApi.getById(params.id as any),
+    queryFn: async () => {
+      const res: any = await ProductApi.getById(params.id as any);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
-      setDescription(value.description ?? "");
+    if (params.id && data) {
+      setDescription(data.description ?? "");
       form.setFieldsValue({
-        productName: value.productName || "",
-        price: value.price || "",
-        description: value.description || "",
-        storeId: value.storeId || null,
+        productName: data.productName || "",
+        price: data.price || "",
+        description: data.description || "",
+        storeId: data.storeId || null,
       });
     }
   }, [data, form, params.id]);

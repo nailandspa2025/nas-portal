@@ -22,7 +22,17 @@ import GroupActions from "../pages/group/action";
 import Banners from "../pages/banner/banner";
 import BannerActions from "../pages/banner/acion";
 import ChatBox from "../pages/chat/chat";
-import GroupChat from "../pages/chat/GroupChat";
+import MerchantUsers from "../pages/user.merchant/user.merchant";
+import MerchantUserActions from "../pages/user.merchant/action";
+import MerchantGroups from "../pages/group.merchant/group.merchant";
+import MerchantGroupActions from "../pages/group.merchant/action";
+import Payments from "../pages/payment/payment";
+import BookingCancelReasons from "../pages/booking.cancel.reason/booking.cancel.reason";
+import Merchants from "../pages/merchant/merchant";
+import MerchantActions from "../pages/merchant/action";
+
+import Rewards from "../pages/reward/reward";
+import RewardActions from "../pages/reward/action";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -156,9 +166,74 @@ const routes: RouteType[] = [
     element: <ChatBox />,
   },
   {
-    path: "/chatgroup",
-    name: "Chat",
-    element: <GroupChat />,
+    path: "/usermerchant",
+    name: "User merchant",
+    element: <MerchantUsers />,
+  },
+  {
+    path: "/usermerchant/none",
+    name: "Create user merchant",
+    element: <MerchantUserActions />,
+  },
+  {
+    path: "/usermerchant/:id",
+    name: "Update user merchant",
+    element: <MerchantUserActions />,
+  },
+  {
+    path: "/groupmerchant",
+    name: "User merchant",
+    element: <MerchantGroups />,
+  },
+  {
+    path: "/groupmerchant/none",
+    name: "Create group merchant",
+    element: <MerchantGroupActions />,
+  },
+  {
+    path: "/groupmerchant/:id",
+    name: "Update group merchant",
+    element: <MerchantGroupActions />,
+  },
+  {
+    path: "/payment",
+    name: "History payment",
+    element: <Payments />,
+  },
+  {
+    path: "/config-reason",
+    name: "Config Reason",
+    element: <BookingCancelReasons />,
+  },
+  {
+    path: "/merchant",
+    name: "Merchants",
+    element: <Merchants />,
+  },
+  {
+    path: "/merchant/none",
+    name: "Create merchant",
+    element: <MerchantActions />,
+  },
+  {
+    path: "/merchant/:id",
+    name: "Update merchant",
+    element: <MerchantActions />,
+  },
+  {
+    path: "/reward",
+    name: "Rewards",
+    element: <Rewards />,
+  },
+  {
+    path: "/reward/none",
+    name: "Create reward",
+    element: <RewardActions />,
+  },
+  {
+    path: "/reward/:id",
+    name: "Update reward",
+    element: <RewardActions />,
   },
 ];
 

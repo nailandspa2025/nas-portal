@@ -24,26 +24,28 @@ const TechnicianAction = () => {
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isAvatar, setIsAvatar] = useState(false);
-  const { data = { data: {} } } = useQuery({
+  const { data } = useQuery({
     queryKey: ["technicianDetail", params.id],
-    queryFn: () => TechnicianApi.getById(params.id as any),
+    queryFn: async () => {
+      const res: any = await TechnicianApi.getById(params.id as any);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
 
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
-      setImageUrl(value.avatar);
+    if (params.id && data) {
+      setImageUrl(data.avatar);
       form.setFieldsValue({
-        technicianName: value.technicianName || "",
-        technicianAddress: value.technicianAddress || "",
-        phone: value.phone || "",
-        ratingStar: value.ratingStar || "",
-        workingSchedule: value.workingSchedule
-          ? dayjs(value.workingSchedule, "YYYY-MM-DD")
+        technicianName: data.technicianName || "",
+        technicianAddress: data.technicianAddress || "",
+        phone: data.phone || "",
+        ratingStar: data.ratingStar || "",
+        workingSchedule: data.workingSchedule
+          ? dayjs(data.workingSchedule, "YYYY-MM-DD")
           : null,
-        accountId: value.accountId || "",
-        storeId: value.storeId || "",
+        accountId: data.accountId || "",
+        storeId: data.storeId || "",
       });
     }
   }, [data, form, params.id]);
@@ -136,10 +138,7 @@ const TechnicianAction = () => {
                 <Input placeholder={t("Enter phone number")} maxLength={10} />
               </Form.Item>
               <Form.Item label={t("User")} name="accountId">
-                <AppAccountSelect
-                  value={(data as any)?.data?.accountId}
-                  placeholder={t("Choose user")}
-                />
+                <AppAccountSelect placeholder={t("Choose user")} />
               </Form.Item>
               <Form.Item label={t("Store")} name="storeId">
                 <StoreSelect

@@ -24,6 +24,7 @@ import TopActionButtons from "../../components/common/TopActionButtons";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
+import GroupSelect from "../../components/GroupSelect";
 const UserAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -32,29 +33,32 @@ const UserAction = () => {
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isAvatar, setIsAvatar] = useState(false);
-  const { data = { data: {} } } = useQuery({
+  const { data } = useQuery({
     queryKey: ["userDetail", params.id],
-    queryFn: () => AuthApi.getById(params.id as string),
+    queryFn: async () => {
+      const res: any = await AuthApi.getById(params.id as string);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
 
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
-      setImageUrl(value.avatar);
+    if (params.id && data) {
+      setImageUrl(data.avatar);
       form.setFieldsValue({
-        fullName: value.fullName || "",
-        isActive: value.isActive ?? true,
-        email: value.email || "",
-        phoneNumber: value.phoneNumber || "",
-        dateOfBirth: value.dateOfBirth
-          ? dayjs(value.dateOfBirth, "YYYY-MM-DD")
+        fullName: data.fullName || "",
+        isActive: data.isActive ?? true,
+        email: data.email || "",
+        phoneNumber: data.phoneNumber || "",
+        dateOfBirth: data.dateOfBirth
+          ? dayjs(data.dateOfBirth, "YYYY-MM-DD")
           : null,
-        gender: value.gender ?? null,
-        street: value.street || "",
-        wardId: value.wardId || null,
-        districtId: value.districtId || null,
-        cityId: value.cityId || null,
+        gender: data.gender ?? null,
+        street: data.street || "",
+        wardId: data.wardId || null,
+        districtId: data.districtId || null,
+        cityId: data.cityId || null,
+        groupIds: data.groupIds || null,
       });
     }
   }, [data, form, params.id]);
@@ -192,6 +196,9 @@ const UserAction = () => {
                   <Select.Option value={2}>{t("Female")}</Select.Option>
                   <Select.Option value={3}>{t("Other")}</Select.Option>
                 </Select>
+              </Form.Item>
+              <Form.Item label={t("Group")} name={"groupIds"}>
+                <GroupSelect mode="multiple" placeholder={t("Choose group")} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12} lg={12}>

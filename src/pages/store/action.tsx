@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card, Form, Row, Col, Input, Rate, TimePicker } from "antd";
+import { Card, Form, Row, Col, Input, Rate, TimePicker, Select } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { StoreApi } from "../../apis/catalog/store";
@@ -9,7 +9,7 @@ import { buildFormData } from "../../utils/common/buildFormData";
 import TopActionButtons from "../../components/common/TopActionButtons";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
-import UserSelect from "../../components/UserSelect";
+import UserMerchnatSelect from "../../components/UserMerchantSelect";
 import AvatarUploader from "../../components/AvatarUploader";
 import ImagesUploader from "../../components/ImagesUploader";
 import {
@@ -19,7 +19,7 @@ import {
 } from "../../utils/common/validate";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
-
+import MerchantSelect from "../../components/MerchantSelect";
 const StoreAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -30,30 +30,36 @@ const StoreAction = () => {
   const [imageUrls, setImageUrls] = useState([]);
   const [linkUrls, setLinkUrls] = useState([]);
   const [isAvatar, setIsAvatar] = useState(false);
-  const { data = { data: {} } } = useQuery({
+  const [brands, setBrands] = useState<any>([]);
+  const { data } = useQuery({
     queryKey: ["storeDetail", params.id],
-    queryFn: () => StoreApi.getById(params.id as any),
+    queryFn: async () => {
+      const res: any = await StoreApi.getById(params.id as any);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
 
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
-      setImageUrls(value.imageUrls);
-      setImageUrl(value.avatar);
-      setLinkUrls(value.imageUrls);
+    if (params.id && data) {
+      setImageUrls(data.imageUrls);
+      setImageUrl(data.avatar);
+      setLinkUrls(data.imageUrls);
       form.setFieldsValue({
-        storeName: value.storeName || "",
-        hotline: value.hotline || "",
-        openTime: value.openTime ? dayjs(value.openTime, "HH:mm") : null,
-        closeTime: value.closeTime ? dayjs(value.closeTime, "HH:mm") : null,
-        addressStore: value.addressStore || "",
-        lng: value.lng || "",
-        lat: value.lat || "",
-        ownerId: value.ownerId || "",
-        googleReviewLink: value.googleReviewLink || "",
-        ratingStar: value.ratingStar || "",
-        images: value.imageUrls || null,
+        storeName: data.storeName || "",
+        hotline: data.hotline || "",
+        openTime: data.openTime ? dayjs(data.openTime, "HH:mm") : null,
+        closeTime: data.closeTime ? dayjs(data.closeTime, "HH:mm") : null,
+        addressStore: data.addressStore || "",
+        lng: data.lng || "",
+        lat: data.lat || "",
+        ownerId: data.ownerId || "",
+        googleReviewLink: data.googleReviewLink || "",
+        ratingStar: data.ratingStar || null,
+        images: data.imageUrls || null,
+        userIds: data.userIds || null,
+        merchantId: data.merchantId || null,
+        brandId: data.brandId || null,
       });
     }
   }, [data, form, params.id]);
@@ -78,6 +84,7 @@ const StoreAction = () => {
   const onFinish = (values: any) => {
     const payload = {
       ...values,
+      userIds: values.userIds ?? null,
     };
     if (params.id) {
       payload.id = params.id;
@@ -116,6 +123,40 @@ const StoreAction = () => {
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Row gutter={32}>
             <Col xs={24} sm={24} md={12} lg={12}>
+              <Form.Item
+                label={t("Merchant")}
+                name={"merchantId"}
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please choose merchant!"),
+                  },
+                ]}
+              >
+                <MerchantSelect
+                  onChange={(selectedValue: any, merchant: any) => {
+                    if (selectedValue != data?.merchantId) {
+                      form.setFieldsValue({ brandId: null });
+                    }
+                    setBrands(merchant?.brands || []);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item shouldUpdate>
+                {({ getFieldValue }) => (
+                  <Form.Item label={t("Brand")} name="brandId">
+                    <Select
+                      allowClear
+                      placeholder={t("Choose brand")}
+                      disabled={!getFieldValue("merchantId")}
+                      options={brands?.map((item: any) => ({
+                        label: `${item.name}`,
+                        value: item.id,
+                      }))}
+                    />
+                  </Form.Item>
+                )}
+              </Form.Item>
               <Form.Item
                 label={t("Store name")}
                 name="storeName"
@@ -250,18 +291,14 @@ const StoreAction = () => {
               >
                 <Input placeholder={t("Enter longitude")} />
               </Form.Item>
+            </Col>
 
-              <Form.Item
-                label={t("User")}
-                name="ownerId"
-                rules={[
-                  {
-                    required: true,
-                    message: t("Please choose user!"),
-                  },
-                ]}
-              >
-                <UserSelect placeholder={t("Please choose user")} />
+            <Col xs={24} sm={24} md={12} lg={12}>
+              <Form.Item label={t("User")} name="userIds">
+                <UserMerchnatSelect
+                  mode={"multiple"}
+                  placeholder={t("Please choose user")}
+                />
               </Form.Item>
               <Form.Item
                 label={t("Google review link")}
@@ -269,9 +306,6 @@ const StoreAction = () => {
               >
                 <Input placeholder={t("Enter google review link")} />
               </Form.Item>
-            </Col>
-
-            <Col xs={24} sm={24} md={12} lg={12}>
               <Form.Item label={t("Rating star")} name="ratingStar">
                 <Rate />
               </Form.Item>

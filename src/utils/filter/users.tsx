@@ -71,7 +71,8 @@ export const columns = ({
       dataIndex: "dateOfBirth",
       key: "dateOfBirth",
       width: 120,
-      render: (created: string) => dayjs(created).format("DD/MM/YYYY"),
+      render: (created: string | null | undefined) =>
+        created ? dayjs(created).format("DD/MM/YYYY") : "Unknown",
     },
     {
       title: t("Status"),

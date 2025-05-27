@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card, Form, Row, Col, Input } from "antd";
+import { Card, Form, Row, Col, Input, Select } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import UseEditor from "../../components/common/UserEditor";
@@ -23,20 +23,23 @@ const PostActions = () => {
   const [imageList, setImageList] = useState<File[]>([]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isAvatar, setIsAvatar] = useState(false);
-  const { data = { data: {} } } = useQuery({
+  const { data } = useQuery({
     queryKey: ["postDetail", params.id],
-    queryFn: () => PostApi.getById(params.id as any),
+    queryFn: async () => {
+      const res: any = await PostApi.getById(params.id as any);
+      return res?.data || {};
+    },
     enabled: !!params.id,
   });
   useEffect(() => {
-    if (params.id && (data as any)?.data) {
-      const value = (data as any).data;
-      setImageUrl(value.avatar);
-      setContent(value.content ?? "");
+    if (params.id && data) {
+      setImageUrl(data.avatar);
+      setContent(data.content ?? "");
       form.setFieldsValue({
-        title: value.title || "",
-        content: value.content || "",
-        description: value.description || "",
+        title: data.title || "",
+        content: data.content || "",
+        description: data.description || "",
+        type: data.type || null,
       });
     }
   }, [data, form, params.id]);
@@ -111,6 +114,21 @@ const PostActions = () => {
                 ]}
               >
                 <Input placeholder={t("Enter title")} />
+              </Form.Item>
+              <Form.Item
+                label={t("Type")}
+                name="type"
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please enter type!"),
+                  },
+                ]}
+              >
+                <Select placeholder={t("Select type")}>
+                  <Select.Option value={1}>{t("Normal")}</Select.Option>
+                  <Select.Option value={2}>{t("Trend")}</Select.Option>
+                </Select>
               </Form.Item>
               <Form.Item
                 label={t("Description")}

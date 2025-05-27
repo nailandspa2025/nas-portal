@@ -1,7 +1,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CloseOutlined, DeleteOutlined, FormOutlined } from "@ant-design/icons";
-import { Space, Tooltip } from "antd";
+import {
+  BankOutlined,
+  CloseOutlined,
+  DeleteOutlined,
+  FormOutlined,
+} from "@ant-design/icons";
+import { Button, Space, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 export const filters = [
@@ -16,17 +21,21 @@ export const filters = [
 export const columns = ({
   hasEditPermission,
   hasDeletePermission,
+  hasPaymentPermission,
   t,
   handleEdit,
   handleDelete,
   handleCancel,
+  handlePayment,
 }: {
   hasEditPermission: boolean;
   hasDeletePermission: boolean;
+  hasPaymentPermission: boolean;
   t: any;
   handleEdit: (record: any) => void;
   handleDelete: (record: any) => void;
   handleCancel: (record: any) => void;
+  handlePayment: (record: any) => void;
 }) => {
   return [
     {
@@ -99,6 +108,22 @@ export const columns = ({
       width: 80,
     },
     {
+      title: t("Store name"),
+      dataIndex: "store",
+      key: "store",
+      width: 190,
+      render: (_: any, record: any) => <span> {record?.store?.storeName}</span>,
+    },
+    {
+      title: t("Technician"),
+      dataIndex: "technician",
+      key: "technician",
+      width: 190,
+      render: (_: any, record: any) => (
+        <span> {record?.technician?.technicianName}</span>
+      ),
+    },
+    {
       title: t("Note"),
       dataIndex: "note",
       key: "note",
@@ -113,34 +138,49 @@ export const columns = ({
       width: 60,
       render: (_: any, record: any) => (
         <Space>
+          {hasPaymentPermission && (
+            <Tooltip title={t("Payment")}>
+              <Button
+                className="button-none-style "
+                disabled={record.status == 2 || record.status == 3}
+                onClick={() => handlePayment(record)}
+                style={{ color: "#1890ff" }}
+              >
+                <BankOutlined style={{ fontSize: 16 }} />
+              </Button>
+            </Tooltip>
+          )}
           {hasEditPermission && (
             <Tooltip title={t("Edit")}>
-              <a
+              <Button
+                className="button-none-style "
                 onClick={() => handleEdit(record)}
                 style={{ color: "#1890ff" }}
               >
                 <FormOutlined style={{ fontSize: 16 }} />
-              </a>
+              </Button>
             </Tooltip>
           )}
           {hasDeletePermission && (
             <Tooltip title={t("Delete")}>
-              <a
+              <Button
+                className="button-none-style "
                 onClick={() => handleDelete(record)}
                 style={{ color: "#ff4d4f" }}
               >
                 <DeleteOutlined style={{ fontSize: 16 }} />
-              </a>
+              </Button>
             </Tooltip>
           )}
           {hasEditPermission && (
             <Tooltip title={t("Cancel")}>
-              <a
+              <Button
+                className="button-none-style "
                 onClick={() => handleCancel(record)}
                 style={{ color: "#1890ff" }}
               >
                 <CloseOutlined style={{ fontSize: 16 }} />
-              </a>
+              </Button>
             </Tooltip>
           )}
         </Space>

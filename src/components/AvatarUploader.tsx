@@ -5,7 +5,7 @@ import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 
 interface AvatarUploaderProps {
-  data?: string;
+  data?: any;
   onChange?: (value: any) => void;
   placeholder?: string;
 }

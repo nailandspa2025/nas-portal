@@ -53,7 +53,7 @@
         align-items: center;
         justify-content: center;
         img {
-        width: 36px;
+        width: 65px;
         margin-right: 8px;
     }
     h1 {
@@ -65,7 +65,7 @@
   }
 }
 .menuContainer {
-    height: calc(100vh - 65px);
+    height: calc(100vh);
     overflow-x: hidden;
     flex: 1;
     padding: 24px 0;
@@ -80,10 +80,11 @@
      margin-left: 80px !important;
 }
 //content
+
 .container-content {
     padding-top: 89px;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
+    //padding-bottom: 20px;
+    //margin-bottom: 20px;
     .content {
         margin-left: 256px;
     }
@@ -95,7 +96,7 @@
     }
     .contentInner {
         padding: 20px 20px 0px 20px;
-        min-height: calc(100vh - 100px);
+        min-height: calc(100vh - 130px);
         position: relative;
     }
     .bread-rum {
@@ -103,7 +104,7 @@
     }
 }
 .fixed-footer {
-  position: fixed;
+  //position: fixed;
   bottom: 0;
   width: 100%;
   text-align: right;

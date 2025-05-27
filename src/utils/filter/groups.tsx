@@ -32,9 +32,9 @@ export const columns = ({
       dataIndex: "count",
       key: "count",
       width: 180,
-      render: (count: number) => (
+      render: (_: any, record: any) => (
         <span>
-          {t("Have")} {count?.toString()} {t("members")}
+          {t("Have")} {record.userIds?.length?.toString()} {t("members")}
         </span>
       ),
     },

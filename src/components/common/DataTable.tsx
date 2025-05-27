@@ -22,7 +22,7 @@ const DataTable = <T extends Record<string, unknown>>({
   total = 0,
   pageSize = 10,
   onChange = () => {},
-  pageSizeOptions = ["20", "30", "50", "100", "200", "500"],
+  pageSizeOptions = ["10", "20", "30", "50", "100", "200"],
   heightTable = 0,
   rowSelection = null,
   bordered = true,
@@ -38,7 +38,7 @@ const DataTable = <T extends Record<string, unknown>>({
       tableLayout="fixed"
       rowKey="id"
       scroll={{
-        y: !isMobile ? `calc(65vh - ${heightTable}px)` : "100%",
+        y: !isMobile ? `calc(66.8vh - ${heightTable}px)` : "100%",
         x: "max-content",
       }}
       locale={{

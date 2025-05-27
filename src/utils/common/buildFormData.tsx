@@ -26,22 +26,27 @@ export const buildFormData = (
       formData.append(parentKey!, formattedValue);
     } else {
       Object.keys(data).forEach((key) => {
+        const value = data[key];
+        if (value === null || value === undefined) return;
+
         const newKey = Array.isArray(data)
           ? parentKey
           : parentKey
           ? `${parentKey}.${key}`
           : key;
-        buildFormData(formData, data[key], newKey);
+
+        buildFormData(formData, value, newKey);
       });
     }
   } else {
+    if (data === null || data === undefined) return;
     let value: string | Blob = "";
     if (data instanceof Date) {
       value = data.toISOString();
     } else if (data instanceof File) {
       value = data;
     } else {
-      value = data == null ? "" : data;
+      value = data;
     }
     if (parentKey) {
       formData.append(parentKey, value);

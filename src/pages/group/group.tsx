@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, Row } from "antd";
-import { ProductApi } from "../../apis/catalog/product";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import queryString from "query-string";
 import * as utils from "../../utils/filter/groups";
@@ -25,7 +24,7 @@ const Groups = () => {
   const [pageSize, setPageSize] = useState<number>(20);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const [rowId, setRowId] = useState<number>(0);
+  const [rowId, setRowId] = useState<string>("");
   const handleItemTable = {
     handleEdit: (record: any) => {
       navigate(`/group/${record.id}`);
@@ -56,11 +55,11 @@ const Groups = () => {
     },
   };
   const mutationDelete = useMutation({
-    mutationFn: async (id: number) => {
-      ProductApi.delete(id);
+    mutationFn: async (id: string) => {
+      return RoleApi.delete(id);
     },
     onSuccess: (res: any) => {
-      setRowId(0);
+      setRowId("");
       setOpenModal(false);
       if (res.succeeded) {
         refetch();
@@ -70,12 +69,12 @@ const Groups = () => {
       }
     },
     onError: (error) => {
-      setRowId(0);
+      setRowId("");
       setOpenModal(false);
       toast.error(t(error.message));
     },
   });
-  const confirmDelete = (id: number) => {
+  const confirmDelete = (id: string) => {
     mutationDelete.mutate(id);
   };
   const [filteredColumns, setFilteredColumns] = useState<any[]>([]);

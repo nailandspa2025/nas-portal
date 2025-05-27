@@ -37,7 +37,7 @@ export const columns = ({
       key: "fullName",
       width: 180,
       render: (text: string, record: { id: string }) => (
-        <Link to={`/user/${record.id}`}>{text}</Link>
+        <Link to={`/appaccount/${record.id}`}>{text}</Link>
       ),
     },
     {

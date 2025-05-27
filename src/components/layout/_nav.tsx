@@ -9,6 +9,10 @@ import {
   // ShareAltOutlined,
   FormOutlined,
   PictureOutlined,
+  BankOutlined,
+  SettingOutlined,
+  ShopOutlined,
+  AppstoreAddOutlined,
 } from "@ant-design/icons";
 
 const _nav = [
@@ -19,10 +23,22 @@ const _nav = [
     route: "/",
   },
   {
+    id: "merchant",
+    icon: <ShopOutlined />,
+    name: "Merchant",
+    route: "/merchant",
+  },
+  {
     id: "store",
     icon: <AppstoreOutlined />,
     name: "Store",
     route: "/store",
+  },
+  {
+    id: "reward",
+    icon: <AppstoreAddOutlined />,
+    name: "Reward",
+    route: "/reward",
   },
   {
     id: "product",
@@ -76,9 +92,43 @@ const _nav = [
       {
         id: "group",
         children: "groupuser",
-        name: "Group rights",
+        name: "Access rights",
         icon: "",
         route: "/group",
+      },
+      {
+        id: "usermerchant",
+        children: "groupuser",
+        name: "User merchant",
+        icon: "",
+        route: "/usermerchant",
+      },
+      {
+        id: "groupmerchant",
+        children: "groupuser",
+        name: "Merchant access",
+        icon: "",
+        route: "/groupmerchant",
+      },
+    ],
+  },
+  {
+    id: "payment",
+    icon: <BankOutlined />,
+    name: "History payment",
+    route: "/payment",
+  },
+  {
+    id: "config",
+    name: "Config",
+    icon: <SettingOutlined />,
+    children: [
+      {
+        id: "config-reason",
+        children: "config",
+        name: "Config reason",
+        icon: "",
+        route: "/config-reason",
       },
     ],
   },
@@ -115,12 +165,5 @@ export const defaultRights = [
 export const customRightsMap: {
   [key: string]: { name: string; value: string }[];
 } = {
-  // post: [
-  //   { name: "Gửi duyệt", value: "submitForApproval" },
-  //   { name: "Xét duyệt của trưởng nhóm", value: "approvel1" },
-  // ],
-  // booking: [
-  //   { name: "Duyệt lịch hẹn", value: "approveBooking" },
-  //   { name: "Hủy lịch hẹn", value: "cancelBooking" },
-  // ],
+  booking: [{ name: "Payment", value: "payment" }],
 };
