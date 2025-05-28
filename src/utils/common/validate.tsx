@@ -1,19 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const validatePhoneNumber = (_: any, value: any) => {
-  const phoneRegex = /^[0-9]{10}$/;
+  // const phoneRegex = /^[0-9]{10}$/;
+  // if (!value) {
+  //   return Promise.resolve();
+  // }
+
+  // if (value) {
+  //   if (!value.startsWith("0")) {
+  //     return Promise.reject("Phone number must start with a 0");
+  //   }
+  //   if (!phoneRegex.test(value)) {
+  //     return Promise.reject("Invalid phone number");
+  //   }
+  // } else {
+  //   return Promise.reject("");
+  // }
+  const phoneRegex = /^\+?[0-9]{1,14}$/;
+
   if (!value) {
     return Promise.resolve();
   }
 
-  if (value) {
-    if (!value.startsWith("0")) {
-      return Promise.reject("Phone number must start with a 0");
-    }
-    if (!phoneRegex.test(value)) {
-      return Promise.reject("Invalid phone number");
-    }
-  } else {
-    return Promise.reject("");
+  if (value.length > 15) {
+    return Promise.reject("Phone number must be 15 characters or less");
+  }
+
+  if (!phoneRegex.test(value)) {
+    return Promise.reject(
+      "Phone number must contain only digits and optional leading +"
+    );
   }
   return Promise.resolve();
 };
