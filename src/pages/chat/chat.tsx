@@ -19,12 +19,20 @@ import {
   SendOutlined,
 } from "@ant-design/icons";
 import { useEffect, useState, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { DropdownApi } from "../../apis/dropdown/dropdown";
 import queryString from "query-string";
-import { Content } from "antd/es/layout/layout";
+import { buildFormData } from "../../utils/common/buildFormData";
 import { toast } from "react-toastify";
-import { connection } from "../../utils/signalr";
+import { ChatApi } from "../../apis/chat/chat";
+import {
+  connection,
+  createGroup,
+  sendMessageToGroup,
+  onReceiveMessage,
+  startConnection,
+  sendMessage,
+} from "../../utils/signalr";
 import { useSelector } from "react-redux";
 const { Title, Text } = Typography;
 
@@ -53,37 +61,16 @@ const ChatBox = () => {
   const messageEndRef = useRef<HTMLDivElement | null>(null);
   const currentUser = useSelector((state: any) => state.auth.user);
   const [typingUser, setTypingUser] = useState<string | null>(null);
-  // Connect SignalR
   useEffect(() => {
-    if (connection.state === "Disconnected") {
-      connection.on("Typing", (fromUserId: string) => {
-        setTypingUser(fromUserId);
-      });
-      connection.on("StopTyping", (fromUserId: string) => {
-        console.log(`${fromUserId} ngừng gõ`);
-        setTypingUser(null);
-      });
-      connection
-        .start()
-        .then(() => console.log("SignalR connected"))
-        .catch((err) => console.error("SignalR connection error: ", err));
-    }
-
-    return () => {
-      connection.stop();
-    };
+    startConnection();
   }, []);
-
-  // Receive messages
   useEffect(() => {
     const onPrivateMessage = (message: Message) => {
       // Cập nhật danh sách tin nhắn
       setMessages((prev) => [...prev, message]);
-
       const conversationId = message.isGroup
         ? message.groupId
         : message.senderId;
-
       setConversations((prev) => {
         // Kiểm tra xem conversation đã tồn tại chưa
         const exists = prev.find((conv) => conv.id === conversationId);
@@ -99,7 +86,6 @@ const ChatBox = () => {
             return conv;
           });
         }
-
         // Nếu chưa tồn tại, thêm mới conversation
         return [
           ...prev,
@@ -113,22 +99,12 @@ const ChatBox = () => {
         ];
       });
     };
-
     // Lắng nghe sự kiện nhận tin nhắn
-    connection.on("ReceiveMessage", onPrivateMessage);
-
-    // Cleanup
+    onReceiveMessage(onPrivateMessage);
     return () => {
       connection.off("ReceiveMessage", onPrivateMessage);
     };
   }, []);
-
-  // Scroll to bottom when new messages arrive
-  useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // Fetch users
   const { data: users } = useQuery({
     queryKey: ["userOption", searchText],
     queryFn: () =>
@@ -136,7 +112,6 @@ const ChatBox = () => {
         queryString.stringify({ page: 1, pageSize: 20, searchText })
       ),
   });
-
   useEffect(() => {
     if ((users as any)?.data?.items) {
       const map = (users as any).data.items.reduce((acc: any, u: any) => {
@@ -146,51 +121,12 @@ const ChatBox = () => {
       setUserMap(map);
     }
   }, [users]);
+  // Fetch users
 
   const handleSelectUser = (user: any) => {
-    setSelectedUser(user);
     setShowUserModal(false);
-    setConversations((prev) =>
-      prev.map((conv) =>
-        conv.id === user.id ? { ...conv, unreadCount: 0 } : conv
-      )
-    );
+    setSelectedUser(user);
   };
-  const handleCreateGroup = async () => {
-    if (groupMembers.length > 1) {
-      const groupId = `group-${Date.now()}`;
-      const name =
-        groupName.trim() || groupMembers.map((u) => u.fullName).join(", ");
-      const members = [
-        ...groupMembers,
-        {
-          id: currentUser.id,
-          fullName: currentUser.fullName,
-        },
-      ];
-      const newGroup = {
-        id: groupId,
-        fullName: name,
-        isGroup: true,
-        members,
-        groupId,
-      };
-      if (connection.state === "Connected") {
-        try {
-          await connection.invoke("JoinGroup", groupId);
-        } catch (err) {
-          console.error("Failed to join group:", err);
-        }
-      }
-      setSelectedUser(newGroup);
-      setGroupName("");
-      setGroupMembers([]);
-      setShowGroupModal(false);
-    } else {
-      toast.error("Chọn ít nhất 2 người để tạo nhóm");
-    }
-  };
-
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedUser) return;
 
@@ -244,48 +180,33 @@ const ChatBox = () => {
         return;
       }
     }
-
     try {
-      //   if (selectedUser?.isGroup) {
-      //     await connection.invoke("JoinGroup", selectedUser.groupId);
-      //   }
-      //   if (selectedUser?.isGroup) {
-      //     const joinPromises = selectedUser.members.map(async (item: any) => {
-      //       try {
-      //         await connection.invoke("JoinGroup", item.id); // Tham gia nhóm cho từng thành viên
-      //         console.log(`${item.fullName} joined the group.`);
-      //       } catch (err) {
-      //         console.error(`Failed to join group for ${item.fullName}:`, err);
-      //       }
-      //     });
-      //     // Đợi tất cả các lời gọi JoinGroup hoàn tất
-      //     await Promise.all(joinPromises);
-      //   }
-      await connection.invoke("SendMessage", message);
+      await sendMessage(message);
       setMessageInput("");
+      mutation.mutate({
+        receiverId: selectedUser?.id,
+        isGroup: selectedUser?.isGroup || false,
+        content: messageInput.trim(),
+        groupId: selectedUser?.isGroup ? selectedUser?.id : null,
+      });
     } catch (error) {
       console.error("Send message failed:", error);
       toast.error("Gửi tin nhắn thất bại");
     }
   };
 
-  console.log("select", selectedUser);
-  const handleToggleGroupUser = (user: any) => {
-    setGroupMembers((prev) => {
-      const exists = prev.find((u) => u.id === user.id);
-      return exists ? prev.filter((u) => u.id !== user.id) : [...prev, user];
-    });
-  };
-  let typingTimeout: NodeJS.Timeout;
-  const handleTyping = () => {
-    if (connection && selectedUser.id) {
-      connection.invoke("Typing", selectedUser.id);
-      clearTimeout(typingTimeout);
-      typingTimeout = setTimeout(() => {
-        connection.invoke("StopTyping", selectedUser.id);
-      }, 5000);
+  const mutation = useMutation({
+    mutationFn: async (values: any) => {
+      const formD = new FormData();
+      buildFormData(formD, values);
+      return ChatApi.sendPrivate(formD);
+    },
+  });
+  useEffect(() => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  };
+  }, [messages]);
   const renderMessages = () => {
     if (!messages.length) {
       return <Text type="secondary">Không có nội dung</Text>;
@@ -312,6 +233,7 @@ const ChatBox = () => {
             marginBottom: 8,
           }}
         >
+          {!isMe && <Avatar style={{ marginRight: 8 }} />}
           <div
             style={{
               maxWidth: "80%",
@@ -332,15 +254,19 @@ const ChatBox = () => {
       );
     });
   };
-
   return (
     <>
-      <Layout>
+      <Layout style={{ height: "calc(100vh - 150px)" }}>
         <Layout.Sider
           width={300}
           theme="light"
-          style={{ borderRight: "1px solid #f0f0f0", padding: 10 }}
+          style={{
+            borderRight: "1px solid #f0f0f0",
+            padding: 10,
+            overflowY: "auto",
+          }}
         >
+          {/* Sider Header */}
           <div
             style={{
               display: "flex",
@@ -369,72 +295,77 @@ const ChatBox = () => {
               />
             </Tooltip>
           </div>
+
+          {/* Tabs and List */}
           <Tabs defaultActiveKey="1" size="small">
             <Tabs.TabPane tab="Tất cả" key="1">
               <List
                 dataSource={conversations}
-                renderItem={(user) => {
-                  return (
-                    <List.Item
-                      onClick={() => handleSelectUser(user)}
-                      style={{
-                        paddingLeft: 10,
-
-                        cursor: "pointer",
-                        background:
-                          selectedUser?.id === user.id ? "#f0f0f0" : undefined,
-                      }}
-                    >
-                      <List.Item.Meta
-                        style={{ paddingRight: 10 }}
-                        avatar={<Avatar icon={<UserOutlined />} />}
-                        title={
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                            }}
+                renderItem={(user) => (
+                  <List.Item
+                    onClick={() => handleSelectUser(user)}
+                    style={{
+                      paddingLeft: 10,
+                      cursor: "pointer",
+                      background:
+                        selectedUser?.id === user.id ? "#f0f0f0" : undefined,
+                    }}
+                  >
+                    <List.Item.Meta
+                      style={{ paddingRight: 10 }}
+                      avatar={<Avatar icon={<UserOutlined />} />}
+                      title={
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Badge
+                            count={
+                              user.unreadCount > 0 && currentUser.id !== user.id
+                                ? user.unreadCount
+                                : 0
+                            }
+                            offset={[8, 0]}
                           >
-                            <Badge
-                              count={
-                                user.unreadCount > 0 &&
-                                currentUser.id !== user.id
-                                  ? user.unreadCount
-                                  : 0
-                              }
-                              offset={[8, 0]}
-                            >
-                              <span>{userMap[user.id]}</span>
-                            </Badge>
-                            <span style={{ fontSize: 12, color: "#888" }}>
-                              {user.timestamp}
-                            </span>
-                          </div>
-                        }
-                        description={
-                          <span
-                            style={{
-                              color: "#555",
-                              fontSize: 12,
-                              display: "-webkit-box",
-                              WebkitLineClamp: 1,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                            }}
-                          >
-                            {user.lastMessage?.content || user.message}
+                            <span>{userMap[user.id]}</span>
+                          </Badge>
+                          <span style={{ fontSize: 12, color: "#888" }}>
+                            {user.timestamp}
                           </span>
-                        }
-                      />
-                    </List.Item>
-                  );
-                }}
+                        </div>
+                      }
+                      description={
+                        <span
+                          style={{
+                            color: "#555",
+                            fontSize: 12,
+                            display: "-webkit-box",
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {user.lastMessage?.content || user.message}
+                        </span>
+                      }
+                    />
+                  </List.Item>
+                )}
               />
             </Tabs.TabPane>
           </Tabs>
         </Layout.Sider>
 
-        <Content style={{ background: "#fff" }}>
+        <Layout.Content
+          style={{
+            background: "#fff",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          {/* Header */}
           <div style={{ padding: 16, borderBottom: "1px solid #f0f0f0" }}>
             {selectedUser ? (
               <Title level={5} style={{ margin: 0 }}>
@@ -458,10 +389,11 @@ const ChatBox = () => {
             )}
           </div>
 
+          {/* Message Content */}
           <div
             style={{
+              flex: 1,
               padding: 16,
-              height: "calc(100vh - 150px)",
               overflowY: "auto",
             }}
           >
@@ -473,13 +405,12 @@ const ChatBox = () => {
             <div ref={messageEndRef} />
           </div>
 
+          {/* Input */}
           <div
             style={{
               borderTop: "1px solid #eee",
-              padding: "10px",
+              padding: 10,
               background: "#fff",
-              position: "sticky",
-              bottom: 40,
             }}
           >
             {typingUser && (
@@ -487,26 +418,33 @@ const ChatBox = () => {
                 {typingUser} {"typing..."}
               </Typography.Text>
             )}
-            <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "flex-end",
+                marginTop: 8,
+              }}
+            >
               <Input.TextArea
                 placeholder={"Enter message"}
-                autoSize={{ minRows: 2, maxRows: 4 }}
+                autoSize={{ minRows: 3, maxRows: 8 }}
                 value={messageInput}
                 onChange={(e) => {
                   setMessageInput(e.target.value);
-                  handleTyping();
+                  //handleTyping();
                 }}
                 disabled={!selectedUser}
               />
               <Button
                 type="primary"
                 icon={<SendOutlined />}
-                onClick={handleSendMessage}
                 disabled={!messageInput.trim() || !selectedUser}
+                onClick={handleSendMessage}
               />
             </div>
           </div>
-        </Content>
+        </Layout.Content>
       </Layout>
 
       {/* Modal chọn người */}
@@ -534,7 +472,9 @@ const ChatBox = () => {
               }}
             >
               <List.Item.Meta
-                avatar={<Avatar>{user.fullName[0]}</Avatar>}
+                avatar={
+                  <Avatar src={user.avatar}>{user.fullName?.charAt(0)}</Avatar>
+                }
                 title={user.fullName}
               />
             </List.Item>
@@ -547,7 +487,7 @@ const ChatBox = () => {
         title="Tạo nhóm"
         open={showGroupModal}
         onCancel={() => setShowGroupModal(false)}
-        onOk={handleCreateGroup}
+        //onOk={handleCreateGroup}
         okText="Tạo nhóm"
       >
         <Input
