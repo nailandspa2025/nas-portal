@@ -4,20 +4,29 @@ import { API_METHOD } from "../../constants/application.constant";
 
 export const ChatApi = {
   getWithPagination: async (queryString: any) => {
-    const endpoint = `/catalog/api/v1/banners/pagingation?${queryString}`;
+    const endpoint = `/socket/api/v1/chats/pagingation?${queryString}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
 
   sendAll: async (payload: any) => {
-    const endpoint = `/chat/api/v1/chats/send-all`;
+    const endpoint = `/socket/api/v1/chats/send-all`;
     return await apiCall(API_METHOD.POST, endpoint, payload);
   },
   sendPrivate: async (payload: any) => {
-    const endpoint = `/chat/api/v1/chats/send-private`;
+    const endpoint = `/socket/api/v1/chats/send-private`;
     return await apiCall(API_METHOD.POST, endpoint, payload);
   },
   sendGroup: async (payload: any) => {
-    const endpoint = `/chat/api/v1/chats/send-group`;
+    const endpoint = `/socket/api/v1/chats/send-group`;
     return await apiCall(API_METHOD.POST, endpoint, payload);
+  },
+  createGroup: async (payload: any) => {
+    const endpoint = `/socket/api/v1/chats`;
+    return await apiCall(API_METHOD.POST, endpoint, payload);
+  },
+
+  detail: async (queryString: any) => {
+    const endpoint = `/socket/api/v1/chats/detail?${queryString}`;
+    return await apiCall(API_METHOD.GET, endpoint);
   },
 };

@@ -24,7 +24,8 @@ import { DropdownApi } from "../../apis/dropdown/dropdown";
 import queryString from "query-string";
 import { buildFormData } from "../../utils/common/buildFormData";
 import { toast } from "react-toastify";
-import { ChatApi } from "../../apis/chat/chat";
+import { ChatApi } from "../../apis/socket/chat";
+import dayjs from "dayjs";
 import {
   connection,
   createGroup,
@@ -61,50 +62,21 @@ const ChatBox = () => {
   const messageEndRef = useRef<HTMLDivElement | null>(null);
   const currentUser = useSelector((state: any) => state.auth.user);
   const [typingUser, setTypingUser] = useState<string | null>(null);
+  const [chatId, setChatId] = useState<string | null>(null);
+
   useEffect(() => {
     startConnection();
   }, []);
-  useEffect(() => {
-    const onPrivateMessage = (message: Message) => {
-      // Cập nhật danh sách tin nhắn
-      setMessages((prev) => [...prev, message]);
-      const conversationId = message.isGroup
-        ? message.groupId
-        : message.senderId;
-      setConversations((prev) => {
-        // Kiểm tra xem conversation đã tồn tại chưa
-        const exists = prev.find((conv) => conv.id === conversationId);
-        if (exists) {
-          return prev.map((conv) => {
-            if (conv.id === conversationId) {
-              return {
-                ...conv,
-                unreadCount: conv.unreadCount + 1,
-                lastMessage: message,
-              };
-            }
-            return conv;
-          });
-        }
-        // Nếu chưa tồn tại, thêm mới conversation
-        return [
-          ...prev,
-          {
-            id: conversationId,
-            message: message.content,
-            timestamp: new Date().toLocaleTimeString(),
-            unreadCount: 1,
-            receiverId: message.receiverId,
-          },
-        ];
-      });
-    };
-    // Lắng nghe sự kiện nhận tin nhắn
-    onReceiveMessage(onPrivateMessage);
-    return () => {
-      connection.off("ReceiveMessage", onPrivateMessage);
-    };
-  }, []);
+  const { data: fetchMessages, refetch } = useQuery({
+    queryKey: ["fetchMessages", searchText],
+    queryFn: async () => {
+      const res: any = await ChatApi.getWithPagination(
+        queryString.stringify({ page: 1, pageSize: 100 })
+      );
+      return res?.data?.items || [];
+    },
+  });
+
   const { data: users } = useQuery({
     queryKey: ["userOption", searchText],
     queryFn: () =>
@@ -112,6 +84,29 @@ const ChatBox = () => {
         queryString.stringify({ page: 1, pageSize: 20, searchText })
       ),
   });
+  const { data: messageDetail } = useQuery({
+    queryKey: ["messageDetail", chatId],
+    queryFn: async () => {
+      const res: any = await ChatApi.detail(
+        queryString.stringify({
+          senderId: selectedUser?.senderId,
+          receiverId: selectedUser?.receiverId,
+          groupId: selectedUser?.groupId,
+        })
+      );
+      return res?.data || [];
+    },
+    enabled: !!chatId,
+  });
+
+  useEffect(() => {
+    if (fetchMessages) {
+      setConversations(fetchMessages);
+    }
+    if (messageDetail) {
+      setMessages(messageDetail);
+    }
+  }, [fetchMessages, messageDetail]);
   useEffect(() => {
     if ((users as any)?.data?.items) {
       const map = (users as any).data.items.reduce((acc: any, u: any) => {
@@ -122,17 +117,27 @@ const ChatBox = () => {
     }
   }, [users]);
   // Fetch users
-
   const handleSelectUser = (user: any) => {
     setShowUserModal(false);
-    setSelectedUser(user);
+    setSelectedUser({ ...user, receiverId: user.id, senderId: currentUser.id });
+  };
+  const handleDetail = (item: any) => {
+    setChatId(item.id);
+    setSelectedUser(item);
+    if (item.isGroup) {
+      createGroup(item.groupId, item.userIds);
+    }
   };
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedUser) return;
+    const isMeSender = selectedUser.senderId === currentUser?.id;
+
+    console.log("selectedUser", selectedUser);
+    console.log("selectedUser", isMeSender);
 
     const message = {
       content: messageInput.trim(),
-      receiverId: selectedUser?.isGroup ? null : selectedUser?.id,
+      receiverId: selectedUser?.isGroup ? null : selectedUser?.receiverId,
       groupId: selectedUser?.isGroup ? selectedUser?.id : null,
       timestamp: new Date().toLocaleTimeString(),
       senderId: currentUser.id,
@@ -140,35 +145,36 @@ const ChatBox = () => {
       isGroup: selectedUser?.isGroup || false,
     };
     setMessages((prev) => [...prev, message]);
+    onReceiveMessage(onPrivateMessage);
 
-    setConversations((prev) => {
-      const receiverId = selectedUser?.isGroup ? null : selectedUser?.id;
-      const exists = prev.find((conv) => conv.id === receiverId);
-      if (exists) {
-        return prev.map((conv) => {
-          if (conv.id === receiverId) {
-            return {
-              ...conv,
-              message: messageInput.trim(),
-              timestamp: new Date().toLocaleTimeString(),
-            };
-          }
-          return conv;
-        });
-      }
-      return [
-        ...prev,
-        {
-          id: receiverId,
-          sendName: currentUser.fullName,
-          isGroup: selectedUser?.isGroup ? selectedUser?.id : null,
-          unreadCount: 0,
-          message: messageInput.trim(),
-          timestamp: new Date().toLocaleTimeString(),
-          senderId: currentUser.id,
-        },
-      ];
-    });
+    // setConversations((prev) => {
+    //   const receiverId = selectedUser?.isGroup ? null : selectedUser?.id;
+    //   const exists = prev.find((conv) => conv.id === receiverId);
+    //   if (exists) {
+    //     return prev.map((conv) => {
+    //       if (conv.id === receiverId) {
+    //         return {
+    //           ...conv,
+    //           message: messageInput.trim(),
+    //           timestamp: new Date().toLocaleTimeString(),
+    //         };
+    //       }
+    //       return conv;
+    //     });
+    //   }
+    //   return [
+    //     ...prev,
+    //     {
+    //       id: receiverId,
+    //       sendName: currentUser.fullName,
+    //       isGroup: selectedUser?.isGroup ? selectedUser?.id : null,
+    //       unreadCount: 0,
+    //       message: messageInput.trim(),
+    //       timestamp: new Date().toLocaleTimeString(),
+    //       senderId: currentUser.id,
+    //     },
+    //   ];
+    // });
 
     if (connection.state !== "Connected") {
       toast.error("Không thể gửi tin nhắn: Kết nối chưa sẵn sàng.");
@@ -181,13 +187,15 @@ const ChatBox = () => {
       }
     }
     try {
-      await sendMessage(message);
+      //await sendMessage(message);
       setMessageInput("");
       mutation.mutate({
-        receiverId: selectedUser?.id,
+        receiverId: isMeSender
+          ? selectedUser.receiverId
+          : selectedUser.senderId,
         isGroup: selectedUser?.isGroup || false,
         content: messageInput.trim(),
-        groupId: selectedUser?.isGroup ? selectedUser?.id : null,
+        groupId: selectedUser?.groupId ? selectedUser?.groupId : null,
       });
     } catch (error) {
       console.error("Send message failed:", error);
@@ -202,6 +210,48 @@ const ChatBox = () => {
       return ChatApi.sendPrivate(formD);
     },
   });
+  const mutationGroup = useMutation({
+    mutationFn: async (values: any) => {
+      const formD = new FormData();
+      buildFormData(formD, values);
+      return ChatApi.createGroup(formD);
+    },
+    onSuccess: (res: any) => {
+      if (res.succeeded) {
+        const newGroup = {
+          id: res.data.id,
+          name: res.data.name,
+          fullName: res.data.name,
+          isGroup: true,
+          members: res.data.userIds,
+          groupId: res.data.id,
+        };
+        setSelectedUser(newGroup);
+        setGroupName("");
+        setGroupMembers([]);
+        setShowGroupModal(false);
+      }
+    },
+  });
+
+  const handleCreateGroup = async () => {
+    if (groupMembers.length > 1) {
+      const payload = {
+        groupName:
+          groupName.trim() || groupMembers.map((u) => u.fullName).join(", "),
+        userIds: groupMembers.map((m) => m.id),
+      };
+      mutationGroup.mutate(payload);
+    } else {
+      toast.error("Chọn ít nhất 2 người để tạo nhóm");
+    }
+  };
+  const handleToggleGroupUser = (user: any) => {
+    setGroupMembers((prev) => {
+      const exists = prev.find((u) => u.id === user.id);
+      return exists ? prev.filter((u) => u.id !== user.id) : [...prev, user];
+    });
+  };
   useEffect(() => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -211,18 +261,8 @@ const ChatBox = () => {
     if (!messages.length) {
       return <Text type="secondary">Không có nội dung</Text>;
     }
-    const filteredMessages = messages.filter(
-      (msg) =>
-        (msg.senderId === currentUser?.id &&
-          msg.receiverId === selectedUser?.id) ||
-        (msg.senderId === selectedUser?.id &&
-          msg.receiverId === currentUser?.id)
-    );
-
-    if (!filteredMessages.length) {
-      return <Text type="secondary">Không có nội dung</Text>;
-    }
-    return filteredMessages.map((msg, idx) => {
+    console.log("renderMessages", messages);
+    return messages.map((msg, idx) => {
       const isMe = msg.senderId === currentUser?.id;
       return (
         <div
@@ -239,7 +279,9 @@ const ChatBox = () => {
               maxWidth: "80%",
             }}
           >
-            {msg.isGroup && <div>{userMap[msg.senderId] || msg.senderId}</div>}
+            {msg.isGroup && !isMe && (
+              <div>{userMap[msg.senderId] || msg.senderId}</div>
+            )}
             <div
               style={{
                 padding: 10,
@@ -303,7 +345,7 @@ const ChatBox = () => {
                 dataSource={conversations}
                 renderItem={(user) => (
                   <List.Item
-                    onClick={() => handleSelectUser(user)}
+                    onClick={() => handleDetail(user)}
                     style={{
                       paddingLeft: 10,
                       cursor: "pointer",
@@ -313,7 +355,24 @@ const ChatBox = () => {
                   >
                     <List.Item.Meta
                       style={{ paddingRight: 10 }}
-                      avatar={<Avatar icon={<UserOutlined />} />}
+                      avatar={
+                        user.isGroup ? (
+                          <Avatar icon={<UserOutlined />} />
+                        ) : (
+                          <Avatar
+                            src={
+                              currentUser.id === user.senderId
+                                ? user.receiverInfo?.avatar
+                                : user.senderInfo?.avatar
+                            }
+                          >
+                            {(currentUser.id === user.senderId
+                              ? user.receiverInfo?.fullName
+                              : user.senderInfo?.fullName
+                            )?.charAt(0)}
+                          </Avatar>
+                        )
+                      }
                       title={
                         <div
                           style={{
@@ -329,10 +388,22 @@ const ChatBox = () => {
                             }
                             offset={[8, 0]}
                           >
-                            <span>{userMap[user.id]}</span>
+                            {user.isGroup ? (
+                              <>
+                                <span>{user.groupName}</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>
+                                  {currentUser.id === user.senderId
+                                    ? user?.receiverInfo?.fullName
+                                    : user?.senderInfo?.fullName}
+                                </span>
+                              </>
+                            )}
                           </Badge>
                           <span style={{ fontSize: 12, color: "#888" }}>
-                            {user.timestamp}
+                            {dayjs(user.created).format("DD/MM/YYYY")}
                           </span>
                         </div>
                       }
@@ -347,7 +418,7 @@ const ChatBox = () => {
                             overflow: "hidden",
                           }}
                         >
-                          {user.lastMessage?.content || user.message}
+                          {user.content}
                         </span>
                       }
                     />
@@ -369,18 +440,29 @@ const ChatBox = () => {
           <div style={{ padding: 16, borderBottom: "1px solid #f0f0f0" }}>
             {selectedUser ? (
               <Title level={5} style={{ margin: 0 }}>
-                {selectedUser.fullName}
-                {selectedUser.isGroup && selectedUser.members?.length ? (
-                  <span
-                    style={{
-                      fontWeight: "normal",
-                      marginLeft: 8,
-                      fontSize: 14,
-                    }}
-                  >
-                    ({selectedUser.members.length} thành viên)
-                  </span>
-                ) : null}
+                {selectedUser.isGroup ? (
+                  <>
+                    {selectedUser.groupName || "Nhóm không tên"}
+                    {selectedUser.userIds?.length ? (
+                      <span
+                        style={{
+                          fontWeight: "normal",
+                          marginLeft: 8,
+                          fontSize: 14,
+                        }}
+                      >
+                        ({selectedUser.userIds.length} thành viên)
+                      </span>
+                    ) : null}
+                  </>
+                ) : (
+                  // Nếu là trò chuyện cá nhân
+                  <>
+                    {selectedUser.senderId === currentUser.id
+                      ? selectedUser.receiverInfo?.fullName
+                      : selectedUser.senderInfo?.fullName}
+                  </>
+                )}
               </Title>
             ) : (
               <Title level={5} style={{ margin: 0 }}>
@@ -487,7 +569,7 @@ const ChatBox = () => {
         title="Tạo nhóm"
         open={showGroupModal}
         onCancel={() => setShowGroupModal(false)}
-        //onOk={handleCreateGroup}
+        onOk={handleCreateGroup}
         okText="Tạo nhóm"
       >
         <Input
