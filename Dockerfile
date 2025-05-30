@@ -16,27 +16,9 @@ RUN npm run build && ls -lah /app/dist
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
+
+COPY ssl/nasshine.com.crt /etc/nginx/certs/nasshine.com.crt
+COPY ssl/nasshine.com.key /etc/nginx/certs/nasshine.com.key
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
-
-
-# # Development environment
-# FROM node:lts AS build
-
-# WORKDIR /app
-
-# # Install dependencies including devDependencies
-# COPY package*.json ./
-# RUN npm ci
-
-# # Copy source code
-# COPY . .
-
-# # Build application with development settings
-# RUN npm run build
-
-# # Expose development port
-# EXPOSE 3000
-
-# # Start development server
-# CMD ["npm", "run", "dev"]
