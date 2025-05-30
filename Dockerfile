@@ -20,5 +20,5 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY ssl/nasshine.com.crt /etc/nginx/certs/nasshine.com.crt
 COPY ssl/nasshine.com.key /etc/nginx/certs/nasshine.com.key
 
-EXPOSE 80
+EXPOSE 8081
 CMD ["nginx", "-g", "daemon off;"]
