@@ -9,14 +9,16 @@ import {
   List,
   Modal,
   Tabs,
-  Tooltip,
   Typography,
+  Upload,
+  Image,
+  Space,
 } from "antd";
 import {
   UserOutlined,
   SearchOutlined,
-  TeamOutlined,
   SendOutlined,
+  PictureOutlined,
 } from "@ant-design/icons";
 import { useEffect, useState, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -29,24 +31,13 @@ import dayjs from "dayjs";
 import {
   connection,
   createGroup,
-  sendMessageToGroup,
   onReceiveMessage,
   startConnection,
   sendMessage,
+  handleTyping,
 } from "../../utils/signalr";
 import { useSelector } from "react-redux";
 const { Title, Text } = Typography;
-
-interface Message {
-  content: string;
-  senderId: string;
-  receiverId?: string;
-  groupId?: string;
-  timestamp?: string;
-  isGroup?: false;
-  fullName?: string;
-}
-
 const ChatBox = () => {
   const [searchText, setSearchText] = useState<string>("");
   const [showUserModal, setShowUserModal] = useState(false);
@@ -55,20 +46,41 @@ const ChatBox = () => {
   const [messageInput, setMessageInput] = useState("");
   const [groupMembers, setGroupMembers] = useState<any[]>([]);
   const [groupName, setGroupName] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [userMap, setUserMap] = useState<Record<string, string>>({});
+  const [messages, setMessages] = useState<any[]>([]);
+  const [activeKey, setActiveKey] = useState("1");
   const [conversations, setConversations] = useState<any[]>([]);
-
   const messageEndRef = useRef<HTMLDivElement | null>(null);
   const currentUser = useSelector((state: any) => state.auth.user);
   const [typingUser, setTypingUser] = useState<string | null>(null);
   const [chatId, setChatId] = useState<string | null>(null);
-
+  const [uploadKey, setUploadKey] = useState(0);
   useEffect(() => {
     startConnection();
+    onReceiveMessage(onPrivateMessage);
   }, []);
-  const { data: fetchMessages, refetch } = useQuery({
-    queryKey: ["fetchMessages", searchText],
+  useEffect(() => {
+    setTypingUser(null);
+    const handlerTyping = (fromUserId: string, conversationId: string) => {
+      if (conversationId === selectedUser?.conversationId) {
+        setTypingUser(fromUserId);
+      }
+    };
+    const handlerStopTyping = (fromUserId: string, conversationId: string) => {
+      if (conversationId == selectedUser?.conversationId) {
+        setTypingUser(null);
+        console.log("canhlv", fromUserId);
+      }
+    };
+    connection.on("Typing", handlerTyping);
+    connection.on("StopTyping", handlerStopTyping);
+    return () => {
+      connection.off("Typing", handlerTyping);
+      connection.off("StopTyping", handlerStopTyping);
+    };
+  }, [selectedUser?.conversationId]);
+
+  const { data: dataConversations } = useQuery({
+    queryKey: ["dataConversations", searchText],
     queryFn: async () => {
       const res: any = await ChatApi.getWithPagination(
         queryString.stringify({ page: 1, pageSize: 100 })
@@ -79,10 +91,14 @@ const ChatBox = () => {
 
   const { data: users } = useQuery({
     queryKey: ["userOption", searchText],
-    queryFn: () =>
-      DropdownApi.getUsers(
-        queryString.stringify({ page: 1, pageSize: 20, searchText })
-      ),
+    queryFn: async () => {
+      const res: any = await DropdownApi.getUsers(
+        queryString.stringify({ page: 1, pageSize: 100, searchText })
+      );
+      const items = res?.data?.items || [];
+      return items.filter((user: any) => user.id !== currentUser.id);
+    },
+    //enabled: !!currentUser.id,
   });
   const { data: messageDetail } = useQuery({
     queryKey: ["messageDetail", chatId],
@@ -98,97 +114,161 @@ const ChatBox = () => {
     },
     enabled: !!chatId,
   });
-
+  const mutation = useMutation({
+    mutationFn: async (values: any) => {
+      const formD = new FormData();
+      buildFormData(formD, values);
+      return ChatApi.sendPrivate(formD);
+    },
+    onSuccess: (res: any) => {
+      console.log("res", res);
+      handleSendMessageSingR({
+        files: res.data.files,
+        content: res.data.content,
+      });
+    },
+  });
   useEffect(() => {
-    if (fetchMessages) {
-      setConversations(fetchMessages);
+    if (dataConversations) {
+      setConversations(dataConversations);
     }
     if (messageDetail) {
       setMessages(messageDetail);
     }
-  }, [fetchMessages, messageDetail]);
-  useEffect(() => {
-    if ((users as any)?.data?.items) {
-      const map = (users as any).data.items.reduce((acc: any, u: any) => {
-        acc[u.id] = u.fullName;
-        return acc;
-      }, {});
-      setUserMap(map);
-    }
-  }, [users]);
+  }, [dataConversations, messageDetail]);
   // Fetch users
   const handleSelectUser = (user: any) => {
     setShowUserModal(false);
-    setSelectedUser({ ...user, receiverId: user.id, senderId: currentUser.id });
+    setActiveKey("1");
+    setSelectedUser({
+      ...user,
+      receiverId: user.id,
+      senderId: currentUser.id,
+      receiverInfo: {
+        avatar: user?.avatar,
+        fullName: user?.fullName,
+        id: user.id,
+      },
+      senderInfo: {
+        avatar: currentUser?.avatar,
+        fullName: currentUser.fullName,
+        id: currentUser.id,
+      },
+      conversationId: getConversationKey(currentUser.id, user.id),
+    });
   };
   const handleDetail = (item: any) => {
-    setChatId(item.id);
-    setSelectedUser(item);
+    const isMeSender = item.senderId === currentUser?.id;
+    const senderId = currentUser.id;
+    const receiverId = isMeSender ? item.receiverId : item.senderId;
+    const senderInfo = isMeSender ? item.senderInfo : item.receiverInfo;
+    const receiverInfo = isMeSender ? item.receiverInfo : item.senderInfo;
+    const conversationId =
+      item.conversationId ?? getConversationKey(senderId, receiverId);
+    setSelectedUser({
+      ...item,
+      senderId,
+      receiverId,
+      senderInfo,
+      receiverInfo,
+      conversationId,
+    });
+    setChatId(conversationId);
     if (item.isGroup) {
       createGroup(item.groupId, item.userIds);
     }
   };
+  const getConversationKey = (senderId: string, receiverId: string) => {
+    return [senderId, receiverId].sort().join("_");
+  };
+  const handleConversation = (item: any) => {
+    const isGroup = item.isGroup || false;
+    const isMeSender = item.senderId === currentUser.id;
+    const id = isGroup
+      ? item.groupId
+      : getConversationKey(item.senderId, item.receiverId);
+    setConversations((prev) => {
+      const exists = prev.find((conv) => conv.conversationId === id);
+      if (exists) {
+        return prev.map((conv) =>
+          conv.conversationId === id
+            ? {
+                ...conv,
+                unreadCount: !isMeSender
+                  ? conv.unreadCount + 1
+                  : conv.unreadCount,
+                content: item.content,
+                created: new Date(),
+              }
+            : conv
+        );
+      }
+      return [
+        ...prev,
+        {
+          id: item.id,
+          conversationId: id,
+          content: item.content,
+          created: new Date(),
+          unreadCount: !isMeSender ? 1 : 0,
+          receiverId: item.receiverId,
+          senderId: item.senderId,
+          receiverInfo: item.receiverInfo,
+          senderInfo: item.senderInfo,
+          isGroup: item.isGroup || false,
+        },
+      ];
+    });
+  };
+  const handleMessage = (item: any) => {
+    const isMeSender = selectedUser.senderId === currentUser?.id;
+    const data = {
+      ...selectedUser,
+      content: item.message,
+      receiverId: isMeSender ? selectedUser.receiverId : selectedUser.senderId,
+      groupId: selectedUser?.isGroup ? selectedUser?.id : null,
+      creted: new Date(),
+      senderId: currentUser.id,
+      files: item?.files,
+      conversationId:
+        selectedUser?.conversationId ??
+        getConversationKey(currentUser.id, selectedUser.receiverId),
+    };
+    setMessages((prev) => [...prev, data]);
+  };
+
+  const onPrivateMessage = (message: any) => {
+    setMessages((prev) => [...prev, message]);
+    handleConversation(message);
+  };
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedUser) return;
     const isMeSender = selectedUser.senderId === currentUser?.id;
-
-    console.log("selectedUser", selectedUser);
-    console.log("selectedUser", isMeSender);
-
     const message = {
+      ...selectedUser,
       content: messageInput.trim(),
-      receiverId: selectedUser?.isGroup ? null : selectedUser?.receiverId,
+      receiverId: isMeSender ? selectedUser.receiverId : selectedUser.senderId,
       groupId: selectedUser?.isGroup ? selectedUser?.id : null,
-      timestamp: new Date().toLocaleTimeString(),
+      creted: new Date().toLocaleTimeString(),
       senderId: currentUser.id,
-      sendName: currentUser.fullName,
-      isGroup: selectedUser?.isGroup || false,
+      conversationId:
+        selectedUser?.conversationId ??
+        getConversationKey(currentUser.id, selectedUser.receiverId),
     };
     setMessages((prev) => [...prev, message]);
-    onReceiveMessage(onPrivateMessage);
-
-    // setConversations((prev) => {
-    //   const receiverId = selectedUser?.isGroup ? null : selectedUser?.id;
-    //   const exists = prev.find((conv) => conv.id === receiverId);
-    //   if (exists) {
-    //     return prev.map((conv) => {
-    //       if (conv.id === receiverId) {
-    //         return {
-    //           ...conv,
-    //           message: messageInput.trim(),
-    //           timestamp: new Date().toLocaleTimeString(),
-    //         };
-    //       }
-    //       return conv;
-    //     });
-    //   }
-    //   return [
-    //     ...prev,
-    //     {
-    //       id: receiverId,
-    //       sendName: currentUser.fullName,
-    //       isGroup: selectedUser?.isGroup ? selectedUser?.id : null,
-    //       unreadCount: 0,
-    //       message: messageInput.trim(),
-    //       timestamp: new Date().toLocaleTimeString(),
-    //       senderId: currentUser.id,
-    //     },
-    //   ];
-    // });
-
+    handleConversation(message);
     if (connection.state !== "Connected") {
       toast.error("Không thể gửi tin nhắn: Kết nối chưa sẵn sàng.");
       try {
         await connection.start();
-        console.log("Reconnected to SignalR");
       } catch (err) {
         console.error("Reconnect failed:", err);
         return;
       }
     }
     try {
-      //await sendMessage(message);
       setMessageInput("");
+      handleInputChange("");
       mutation.mutate({
         receiverId: isMeSender
           ? selectedUser.receiverId
@@ -196,20 +276,39 @@ const ChatBox = () => {
         isGroup: selectedUser?.isGroup || false,
         content: messageInput.trim(),
         groupId: selectedUser?.groupId ? selectedUser?.groupId : null,
+        files: null,
       });
     } catch (error) {
       console.error("Send message failed:", error);
       toast.error("Gửi tin nhắn thất bại");
     }
   };
+  const handleSendMessageSingR = async (item: any) => {
+    const isMeSender = selectedUser.senderId === currentUser?.id;
+    const data = {
+      receiverInfo: {
+        avatar: selectedUser.receiverInfo.avatar,
+        fullName: selectedUser.receiverInfo.fullName,
+        id: selectedUser.receiverInfo.id,
+      },
+      senderInfo: {
+        avatar: selectedUser.senderInfo.avatar,
+        fullName: selectedUser.senderInfo.fullName,
+        id: selectedUser.senderInfo.id,
+      },
+      receiverId: isMeSender ? selectedUser.receiverId : selectedUser.senderId,
+      isGroup: selectedUser?.isGroup || false,
+      content: item?.content,
+      files: item?.files,
+      groupId: selectedUser?.groupId ? selectedUser?.groupId : null,
+      senderId: currentUser.id,
+      conversationId:
+        selectedUser?.conversationId ??
+        getConversationKey(currentUser.id, selectedUser.receiverId),
+    };
+    await sendMessage(data);
+  };
 
-  const mutation = useMutation({
-    mutationFn: async (values: any) => {
-      const formD = new FormData();
-      buildFormData(formD, values);
-      return ChatApi.sendPrivate(formD);
-    },
-  });
   const mutationGroup = useMutation({
     mutationFn: async (values: any) => {
       const formD = new FormData();
@@ -233,6 +332,14 @@ const ChatBox = () => {
       }
     },
   });
+  const handleInputChange = (message: any) => {
+    const targetUserId =
+      currentUser?.id === selectedUser.senderId
+        ? selectedUser.receiverId
+        : selectedUser.senderId;
+    const conversationId = selectedUser.conversationId;
+    handleTyping(targetUserId, conversationId, message);
+  };
 
   const handleCreateGroup = async () => {
     if (groupMembers.length > 1) {
@@ -256,13 +363,52 @@ const ChatBox = () => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, [messages, selectedUser]);
+  const getPreviewUrl = (file: string | File) =>
+    typeof file === "string" ? file : URL.createObjectURL(file);
+  let timeout: NodeJS.Timeout;
+  const handleFilesChange = (info: any) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      const images = info.fileList
+        .map((file: any) => file.originFileObj)
+        .filter(
+          (file: File | undefined) => file && file.type.startsWith("image/")
+        );
+      if (!images.length) {
+        toast.error("Vui lòng chọn ảnh");
+        return;
+      }
+      console.log("Gọi 1 lần sau khi chọn xong:", images);
+      const previewUrls = images.map((file: any) => getPreviewUrl(file));
+      handleMessage({ files: previewUrls });
+      const isMeSender = selectedUser.senderId === currentUser?.id;
+      const payload = {
+        receiverId: isMeSender
+          ? selectedUser.receiverId
+          : selectedUser.senderId,
+        isGroup: selectedUser?.isGroup || false,
+        content: "test",
+        groupId: selectedUser?.groupId ? selectedUser?.groupId : null,
+        files: images,
+      };
+      console.log("payload", payload);
+      mutation.mutate(payload);
+      setUploadKey((prev) => prev + 1);
+    }, 100);
+  };
+  //console.log("messs", messages);
   const renderMessages = () => {
     if (!messages.length) {
       return <Text type="secondary">Không có nội dung</Text>;
     }
-    console.log("renderMessages", messages);
-    return messages.map((msg, idx) => {
+    const filteredMessages = messages.filter((msg: any) => {
+      return msg?.conversationId === selectedUser?.conversationId;
+    });
+    if (!filteredMessages.length) {
+      return <Text type="secondary">Không có nội dung</Text>;
+    }
+    return messages.map((msg: any, idx: number) => {
       const isMe = msg.senderId === currentUser?.id;
       return (
         <div
@@ -273,24 +419,47 @@ const ChatBox = () => {
             marginBottom: 8,
           }}
         >
-          {!isMe && <Avatar style={{ marginRight: 8 }} />}
+          {!isMe && (
+            <Avatar src={msg?.senderInfo?.avatar} style={{ marginRight: 8 }} />
+          )}
           <div
             style={{
               maxWidth: "80%",
             }}
           >
-            {msg.isGroup && !isMe && (
-              <div>{userMap[msg.senderId] || msg.senderId}</div>
+            {msg.isGroup && !isMe && <div>{msg?.senderInfo?.fullName}</div>}
+            {msg.content && (
+              <>
+                <div
+                  style={{
+                    padding: 10,
+                    marginBottom: 10,
+                    borderRadius: 8,
+                    background: isMe ? "#d9f7be" : "#f0f0f0",
+                  }}
+                >
+                  {msg.content}
+                </div>
+              </>
             )}
-            <div
-              style={{
-                padding: 10,
-                borderRadius: 8,
-                background: isMe ? "#d9f7be" : "#f0f0f0",
-              }}
-            >
-              {msg.content}
-            </div>
+            <Space wrap style={{ display: "flex", gap: "10px" }}>
+              {msg?.files?.map((file: string, index: number) => {
+                return (
+                  <div
+                    key={index}
+                    style={{
+                      position: "relative",
+                      borderRadius: 8,
+                      overflow: "hidden",
+                      border: "1px solid #f0f0f0",
+                      boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
+                    }}
+                  >
+                    <Image src={file} width={120} height={120} />
+                  </div>
+                );
+              })}
+            </Space>
           </div>
         </div>
       );
@@ -324,7 +493,7 @@ const ChatBox = () => {
               onChange={(e) => setSearchText(e.target.value)}
               style={{ flex: 1 }}
             />
-            <Tooltip title="User">
+            {/* <Tooltip title="User">
               <Button
                 icon={<UserOutlined />}
                 onClick={() => setShowUserModal(true)}
@@ -335,40 +504,42 @@ const ChatBox = () => {
                 icon={<TeamOutlined />}
                 onClick={() => setShowGroupModal(true)}
               />
-            </Tooltip>
+            </Tooltip> */}
           </div>
 
           {/* Tabs and List */}
-          <Tabs defaultActiveKey="1" size="small">
-            <Tabs.TabPane tab="Tất cả" key="1">
+          <Tabs activeKey={activeKey} onChange={setActiveKey} size="small">
+            <Tabs.TabPane tab="Tin nhắn" key="1">
               <List
                 dataSource={conversations}
-                renderItem={(user) => (
+                renderItem={(item) => (
                   <List.Item
-                    onClick={() => handleDetail(user)}
+                    onClick={() => handleDetail(item)}
                     style={{
                       paddingLeft: 10,
                       cursor: "pointer",
                       background:
-                        selectedUser?.id === user.id ? "#f0f0f0" : undefined,
+                        selectedUser?.conversationId === item.conversationId
+                          ? "#f0f0f0"
+                          : undefined,
                     }}
                   >
                     <List.Item.Meta
                       style={{ paddingRight: 10 }}
                       avatar={
-                        user.isGroup ? (
+                        item.isGroup ? (
                           <Avatar icon={<UserOutlined />} />
                         ) : (
                           <Avatar
                             src={
-                              currentUser.id === user.senderId
-                                ? user.receiverInfo?.avatar
-                                : user.senderInfo?.avatar
+                              currentUser.id === item.senderId
+                                ? item.receiverInfo?.avatar
+                                : item.senderInfo?.avatar
                             }
                           >
-                            {(currentUser.id === user.senderId
-                              ? user.receiverInfo?.fullName
-                              : user.senderInfo?.fullName
+                            {(currentUser.id === item.senderId
+                              ? item.receiverInfo?.fullName
+                              : item.senderInfo?.fullName
                             )?.charAt(0)}
                           </Avatar>
                         )
@@ -382,28 +553,30 @@ const ChatBox = () => {
                         >
                           <Badge
                             count={
-                              user.unreadCount > 0 && currentUser.id !== user.id
-                                ? user.unreadCount
+                              item.unreadCount > 0 &&
+                              item.conversationId !==
+                                selectedUser?.conversationId
+                                ? item.unreadCount
                                 : 0
                             }
                             offset={[8, 0]}
                           >
-                            {user.isGroup ? (
+                            {item.isGroup ? (
                               <>
-                                <span>{user.groupName}</span>
+                                <span>{item.groupName}</span>
                               </>
                             ) : (
                               <>
                                 <span>
-                                  {currentUser.id === user.senderId
-                                    ? user?.receiverInfo?.fullName
-                                    : user?.senderInfo?.fullName}
+                                  {currentUser.id === item.senderId
+                                    ? item?.receiverInfo?.fullName
+                                    : item?.senderInfo?.fullName}
                                 </span>
                               </>
                             )}
                           </Badge>
                           <span style={{ fontSize: 12, color: "#888" }}>
-                            {dayjs(user.created).format("DD/MM/YYYY")}
+                            {dayjs(item.created).format("DD/MM/YYYY")}
                           </span>
                         </div>
                       }
@@ -418,9 +591,35 @@ const ChatBox = () => {
                             overflow: "hidden",
                           }}
                         >
-                          {user.content}
+                          {item.content}
                         </span>
                       }
+                    />
+                  </List.Item>
+                )}
+              />
+            </Tabs.TabPane>
+            <Tabs.TabPane tab={"Danh bạ"} key="2">
+              <List
+                dataSource={users?.filter(
+                  (user: any) => user.id !== currentUser.id
+                )}
+                renderItem={(user: any) => (
+                  <List.Item
+                    onClick={() => handleSelectUser(user)}
+                    style={{
+                      cursor: "pointer",
+                      padding: "10px",
+                      borderBottom: "1px solid #f0f0f0",
+                    }}
+                  >
+                    <List.Item.Meta
+                      avatar={
+                        <Avatar src={user.avatar}>
+                          {user.fullName?.charAt(0)}
+                        </Avatar>
+                      }
+                      title={user.fullName}
                     />
                   </List.Item>
                 )}
@@ -500,31 +699,48 @@ const ChatBox = () => {
                 {typingUser} {"typing..."}
               </Typography.Text>
             )}
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                alignItems: "flex-end",
-                marginTop: 8,
-              }}
-            >
-              <Input.TextArea
-                placeholder={"Enter message"}
-                autoSize={{ minRows: 3, maxRows: 8 }}
-                value={messageInput}
-                onChange={(e) => {
-                  setMessageInput(e.target.value);
-                  //handleTyping();
-                }}
-                disabled={!selectedUser}
-              />
-              <Button
-                type="primary"
-                icon={<SendOutlined />}
-                disabled={!messageInput.trim() || !selectedUser}
-                onClick={handleSendMessage}
-              />
-            </div>
+            {selectedUser && (
+              <>
+                <div>
+                  <Upload
+                    key={uploadKey}
+                    name="avatar"
+                    showUploadList={false}
+                    multiple
+                    beforeUpload={() => false}
+                    onChange={handleFilesChange}
+                    accept="image/png, image/jpeg, image/gif"
+                  >
+                    <PictureOutlined style={{ fontSize: 20 }} />
+                  </Upload>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "flex-end",
+                    marginTop: 5,
+                  }}
+                >
+                  <Input.TextArea
+                    placeholder={"Enter message"}
+                    autoSize={{ minRows: 3, maxRows: 8 }}
+                    value={messageInput}
+                    onChange={(e) => {
+                      setMessageInput(e.target.value);
+                      handleInputChange(e.target.value);
+                    }}
+                    disabled={!selectedUser}
+                  />
+                  <Button
+                    type="primary"
+                    icon={<SendOutlined />}
+                    disabled={!messageInput.trim() || !selectedUser}
+                    onClick={handleSendMessage}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </Layout.Content>
       </Layout>
@@ -543,7 +759,7 @@ const ChatBox = () => {
           style={{ marginBottom: 10 }}
         />
         <List
-          dataSource={(users as any)?.data?.items || []}
+          dataSource={users?.filter((user: any) => user.id !== currentUser.id)}
           renderItem={(user: any) => (
             <List.Item
               onClick={() => handleSelectUser(user)}
@@ -579,7 +795,7 @@ const ChatBox = () => {
           style={{ marginBottom: 10 }}
         />
         <List
-          dataSource={(users as any)?.data?.items || []}
+          dataSource={users}
           renderItem={(user: any) => (
             <List.Item
               onClick={() => handleToggleGroupUser(user)}

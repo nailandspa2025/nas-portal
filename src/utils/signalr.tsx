@@ -42,6 +42,57 @@ export const sendMessageToUser = (userId: string, message: string) => {
 };
 
 export const sendMessage = (data: any) => {
-  console.log("sendMessage", data);
   return connection.invoke("SendMessage", data);
 };
+let hasRegisteredTypingEvents = false;
+export const subscribeTypingEvents = (
+  onTyping: (fromUserId: string, conversationId: string) => void,
+  onStopTyping: (fromUserId: string, conversationId: string) => void
+) => {
+  if (!hasRegisteredTypingEvents) {
+    connection.on("Typing", onTyping);
+    connection.on("StopTyping", onStopTyping);
+    hasRegisteredTypingEvents = true;
+  }
+};
+let typingTimeout: NodeJS.Timeout | null = null;
+export const handleTyping = (
+  toUserId: string,
+  conversationId: string,
+  messageInput: string
+) => {
+  if (
+    !toUserId ||
+    !conversationId ||
+    connection.state !== signalR.HubConnectionState.Connected
+  )
+    return;
+
+  if (!messageInput || messageInput.trim() === "") {
+    connection.invoke("StopTyping", toUserId, conversationId);
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+      typingTimeout = null;
+    }
+  } else {
+    connection.invoke("Typing", toUserId, conversationId);
+    if (typingTimeout) clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      connection.invoke("StopTyping", toUserId, conversationId);
+    }, 10000);
+  }
+};
+
+// export const handleTyping = (toUserId: string, conversationId: string) => {
+//   if (
+//     !toUserId ||
+//     !conversationId ||
+//     connection.state !== signalR.HubConnectionState.Connected
+//   )
+//     return;
+//   connection.invoke("Typing", toUserId, conversationId);
+//   if (typingTimeout) clearTimeout(typingTimeout);
+//   typingTimeout = setTimeout(() => {
+//     connection.invoke("StopTyping", toUserId, conversationId);
+//   }, 3000);
+// };
