@@ -14,7 +14,7 @@ export const ChatApi = {
   },
   sendPrivate: async (payload: any) => {
     const endpoint = `/socket/api/v1/chats/send-private`;
-    return await apiCall(API_METHOD.POST, endpoint, payload);
+    return await apiCall(API_METHOD.POST, endpoint, payload, false);
   },
   sendGroup: async (payload: any) => {
     const endpoint = `/socket/api/v1/chats/send-group`;

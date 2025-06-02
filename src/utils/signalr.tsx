@@ -2,7 +2,7 @@
 import * as signalR from "@microsoft/signalr";
 
 export const connection = new signalR.HubConnectionBuilder()
-  .withUrl(import.meta.env.VITE_API_CHAT, {
+  .withUrl(import.meta.env.VITE_API_SOCKET, {
     withCredentials: true,
     accessTokenFactory: () => localStorage.getItem("ACCESS_TOKEN") || "",
   })
@@ -24,7 +24,9 @@ export const startConnection = async () => {
 export const onReceiveMessage = (callback: any) => {
   connection.on("ReceiveMessage", callback);
 };
-
+export const offReceiveMessage = (callback: any) => {
+  connection.off("ReceiveMessage", callback);
+};
 export const createGroup = (groupName: string, userIds: string[]) => {
   return connection.invoke("CreateGroup", groupName, userIds);
 };

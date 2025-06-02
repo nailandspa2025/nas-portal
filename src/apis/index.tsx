@@ -9,11 +9,13 @@ const apiCall = async <T,>(
   method: Method,
   endpoint: string,
   data?: unknown,
+  showLoading?: boolean,
   headers: RawAxiosRequestHeaders = {},
   baseUrl: string = API_URL
 ): Promise<T> => {
+  const isLoading = showLoading !== false;
   try {
-    store.dispatch(toggleLoading(true));
+    store.dispatch(toggleLoading(isLoading));
     const authToken = localStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
     if (authToken) {
       headers["Authorization"] = `Bearer ${authToken}`;
