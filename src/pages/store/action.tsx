@@ -60,6 +60,8 @@ const StoreAction = () => {
         userIds: data.userIds || null,
         merchantId: data.merchantId || null,
         brandId: data.brandId || null,
+        email: data.email || "",
+        description: data.description || "",
       });
     }
   }, [data, form, params.id]);
@@ -266,6 +268,22 @@ const StoreAction = () => {
                 <Input placeholder={t("Enter address")} />
               </Form.Item>
               <Form.Item
+                label={t("Email")}
+                name="email"
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please enter email!"),
+                  },
+                  {
+                    type: "email",
+                    message: t("Invalid email"),
+                  },
+                ]}
+              >
+                <Input placeholder={t("Enter email")} />
+              </Form.Item>
+              <Form.Item
                 label={t("Latitude")}
                 name="lat"
                 rules={[
@@ -290,6 +308,9 @@ const StoreAction = () => {
                 ]}
               >
                 <Input placeholder={t("Enter longitude")} />
+              </Form.Item>
+              <Form.Item label={t("Description")} name={"description"}>
+                <Input.TextArea rows={5} placeholder={t("Enter description")} />
               </Form.Item>
             </Col>
 
