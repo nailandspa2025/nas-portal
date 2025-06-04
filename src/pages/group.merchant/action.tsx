@@ -53,6 +53,10 @@ const accessRights = [
     id: "calendar",
     name: "Calendar",
   },
+  {
+    id: "messenger",
+    name: "Messenger",
+  },
 ];
 const defaultRights = [
   {
