@@ -15,7 +15,7 @@ import { RootState } from "./redux/reducers";
 import ForgotPassword from "./pages/auth/forgotpassword";
 import ResetPassword from "./pages/auth/resetpassword";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+
 //import { listenForMessages } from "./firebase/firebaseConfig";
 import {
   startConnection,
@@ -23,7 +23,6 @@ import {
   offReceiveMessage,
 } from "./utils/signalr";
 function App() {
-  const location = useLocation();
   const collapsed = useSelector((state: RootState) => state.global.status);
   const { isAuthorized } = useSelector((state: RootState) => ({
     isAuthorized: state.auth.authToken != null,
@@ -33,13 +32,12 @@ function App() {
     const setupConnection = async () => {
       await startConnection();
       const handler = (data: any) => {
-        const isInChatPage = location.pathname.startsWith("/chat");
-        if (isInChatPage)
-          toast.info(
-            `Tin nhắn từ ${data?.senderInfo?.fullName}: ${
-              data?.content || "gửi tin nhắn cho bạn"
-            }`
-          );
+        // const isInChatPage = location.pathname.startsWith("/chat");
+        toast.info(
+          `Tin nhắn từ ${data?.senderInfo?.fullName}: ${
+            data?.content || "gửi tin nhắn cho bạn"
+          }`
+        );
       };
       onReceiveMessage(handler);
       // Clean up khi unmount hoặc user logout

@@ -37,6 +37,7 @@ import {
   handleTyping,
 } from "../../utils/signalr";
 import { useSelector } from "react-redux";
+import { Content } from "antd/es/layout/layout";
 const { Title, Text } = Typography;
 const ChatBox = () => {
   const [searchText, setSearchText] = useState<string>("");
@@ -118,6 +119,7 @@ const ChatBox = () => {
     mutationFn: async (values: any) => {
       const formD = new FormData();
       buildFormData(formD, values);
+
       return ChatApi.sendPrivate(formD);
     },
     onSuccess: (res: any) => {
