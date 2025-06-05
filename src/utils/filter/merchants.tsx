@@ -56,7 +56,7 @@ export const columns = ({
       key: "name",
       width: 150,
       render: (text: string, record: { id: number }) => (
-        <Link to={`/merchant/${record.id}`}>{text}</Link>
+        <Link to={`/groupmerchant/${record.id}`}>{text}</Link>
       ),
     },
     {
