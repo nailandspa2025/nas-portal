@@ -5,23 +5,18 @@ import {
   DownloadOutlined,
   UserOutlined,
   FormOutlined,
-  DeleteOutlined,
 } from "@ant-design/icons";
 import { Avatar, Space, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 export const columns = ({
   hasEditPermission,
-  hasDeletePermission,
   t,
   handleEdit,
-  handleDelete,
 }: {
   hasEditPermission: boolean;
-  hasDeletePermission: boolean;
   t: any;
   handleEdit: (record: any) => void;
-  handleDelete: (record: any) => void;
 }) => {
   return [
     {
@@ -110,7 +105,7 @@ export const columns = ({
               </a>
             </Tooltip>
           )}
-          {hasDeletePermission && (
+          {/* {hasDeletePermission && (
             <Tooltip title={t("Delete")}>
               <a
                 onClick={() => handleDelete(record)}
@@ -119,7 +114,7 @@ export const columns = ({
                 <DeleteOutlined style={{ fontSize: 16 }} />
               </a>
             </Tooltip>
-          )}
+          )} */}
         </Space>
       ),
     },

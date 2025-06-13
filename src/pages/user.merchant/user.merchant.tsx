@@ -56,12 +56,10 @@ const UserMerchants = () => {
   const columns = useMemo(() => {
     return utils.columns({
       hasEditPermission: checkAccessRight(accesses, "update", "usermerchant"),
-      hasDeletePermission: checkAccessRight(accesses, "delete", "usermerchant"),
       t,
       handleEdit: handleItemTable.handleEdit,
-      handleDelete: handleItemTable.handleDelete,
     });
-  }, [accesses]);
+  }, [accesses, t]);
 
   return (
     <Card className="ant-custom-pagination">
