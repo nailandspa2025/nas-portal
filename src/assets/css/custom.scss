@@ -130,3 +130,20 @@ textarea.ant-input {
   border: none !important;
   background: transparent !important;
 }
+
+.customTable .ant-table-body {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #c1c1c1 transparent; /* Firefox */
+}
+
+.customTable .ant-table-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.customTable .ant-table-body::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 4px;
+}
+.customTable .ant-table-body::-webkit-scrollbar-track {
+  background-color: transparent;
+}

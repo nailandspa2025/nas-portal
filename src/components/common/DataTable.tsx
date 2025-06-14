@@ -2,6 +2,7 @@
 import { Table, Empty, TableProps } from "antd";
 import { useTranslation } from "react-i18next";
 import useIsMobile from "../../utils/useIsMobile";
+
 interface DataTableProps<T> {
   dataSource?: T[];
   columns?: any;
@@ -31,14 +32,19 @@ const DataTable = <T extends Record<string, unknown>>({
 }: DataTableProps<T>) => {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
+
   return (
     <Table<T>
+      className="customTable"
       columns={columns.filter((col: any) => !col.hidden)}
       dataSource={dataSource}
       tableLayout="fixed"
       rowKey="id"
       scroll={{
-        y: !isMobile ? `calc(66.8vh - ${heightTable}px)` : "100%",
+        y:
+          !isMobile && dataSource.length > 5
+            ? `calc(100vh - ${300 + heightTable}px)`
+            : undefined,
         x: "max-content",
       }}
       locale={{
