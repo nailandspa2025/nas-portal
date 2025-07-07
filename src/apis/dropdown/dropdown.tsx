@@ -112,4 +112,17 @@ export const DropdownApi = {
     const endpoint = `/catalog/api/v1/dropdownlist/rewards-ids/${ids}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
+
+  getServices: async (queryString: any) => {
+    const endpoint = `/catalog/api/v1/dropdownlist/services?${queryString}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getServiceById: async (id: string) => {
+    const endpoint = `/catalog/api/v1/dropdownlist/service/${id}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getServiceByIds: async (ids: string) => {
+    const endpoint = `/catalog/api/v1/dropdownlist/service-ids/${ids}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
 };

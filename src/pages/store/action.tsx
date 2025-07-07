@@ -20,6 +20,7 @@ import {
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 import MerchantSelect from "../../components/MerchantSelect";
+import PackageSelect from "../../components/PackageSelect";
 const StoreAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -62,6 +63,7 @@ const StoreAction = () => {
         brandId: data.brandId || null,
         email: data.email || "",
         description: data.description || "",
+        servicePackageId: data.servicePackageId || null,
       });
     }
   }, [data, form, params.id]);
@@ -315,6 +317,9 @@ const StoreAction = () => {
             </Col>
 
             <Col xs={24} sm={24} md={12} lg={12}>
+              <Form.Item label={t("Package")} name="servicePackageId">
+                <PackageSelect placeholder={t("Please choose package")} />
+              </Form.Item>
               <Form.Item label={t("User")} name="userIds">
                 <UserMerchnatSelect
                   mode={"multiple"}

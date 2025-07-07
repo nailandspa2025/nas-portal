@@ -32,6 +32,10 @@ import MerchantActions from "../pages/merchant/action";
 
 import Rewards from "../pages/reward/reward";
 import RewardActions from "../pages/reward/action";
+import Services from "../pages/service/service";
+import ServiceActions from "../pages/service/action";
+import Package from "../pages/package/package";
+import PackageActions from "../pages/package/action";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -228,6 +232,36 @@ const routes: RouteType[] = [
     path: "/reward/:id",
     name: "Update reward",
     element: <RewardActions />,
+  },
+  {
+    path: "/service",
+    name: "Services",
+    element: <Services />,
+  },
+  {
+    path: "/service/none",
+    name: "Create service",
+    element: <ServiceActions />,
+  },
+  {
+    path: "/service/:id",
+    name: "Update service",
+    element: <ServiceActions />,
+  },
+  {
+    path: "/package",
+    name: "Package",
+    element: <Package />,
+  },
+  {
+    path: "/package/none",
+    name: "Create package",
+    element: <PackageActions />,
+  },
+  {
+    path: "/package/:id",
+    name: "Update package",
+    element: <PackageActions />,
   },
 ];
 

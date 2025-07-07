@@ -14,6 +14,7 @@ import {
   ShopOutlined,
   AppstoreAddOutlined,
 } from "@ant-design/icons";
+import { Children } from "react";
 
 const _nav = [
   {
@@ -75,6 +76,27 @@ const _nav = [
     icon: <PictureOutlined />,
     name: "Banner",
     route: "/banner",
+  },
+  {
+    id: "groupservice",
+    name: "Service & Package",
+    icon: <UsergroupAddOutlined />,
+    children: [
+      {
+        id: "service",
+        children: "groupservice",
+        name: "Service",
+        icon: "",
+        route: "/service",
+      },
+      {
+        id: "package",
+        children: "groupservice",
+        name: "Package",
+        icon: "",
+        route: "/package",
+      },
+    ],
   },
   //nhóm & người dùng
   {

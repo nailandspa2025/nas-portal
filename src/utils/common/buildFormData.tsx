@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export const buildFormData = (
   formData: FormData,
   data: any,
@@ -24,17 +23,17 @@ export const buildFormData = (
         formattedValue = data.toISOString();
       }
       formData.append(parentKey!, formattedValue);
+    } else if (Array.isArray(data)) {
+      data.forEach((item) => {
+        // 👇 Append with [] in key for array handling in ASP.NET
+        formData.append(`${parentKey}[]`, item);
+      });
     } else {
       Object.keys(data).forEach((key) => {
         const value = data[key];
         if (value === null || value === undefined) return;
 
-        const newKey = Array.isArray(data)
-          ? parentKey
-          : parentKey
-          ? `${parentKey}.${key}`
-          : key;
-
+        const newKey = parentKey ? `${parentKey}.${key}` : key;
         buildFormData(formData, value, newKey);
       });
     }
