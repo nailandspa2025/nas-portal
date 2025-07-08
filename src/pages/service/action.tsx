@@ -1,4 +1,4 @@
-import { Card, Form, Row, Col, Input } from "antd";
+import { Card, Form, Row, Col, Input, Rate, InputNumber } from "antd";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 import TopActionButtons from "../../components/common/TopActionButtons";
@@ -35,6 +35,9 @@ const ServiceActions = () => {
         code: data.code || "",
         description: data.description || "",
         urlImage: data.urlImage || "",
+        priceFrom: data.priceFrom || 0,
+        priceTo: data.priceTo || 0,
+        rating: data.rating || 0,
       });
     }
   }, [data, form, params.id]);
@@ -126,8 +129,75 @@ const ServiceActions = () => {
               <Form.Item label={t("Description")} name="description">
                 <Input.TextArea rows={4} placeholder={t("Enter description")} />
               </Form.Item>
+              <Form.Item name="rating" label={t("Rating")}>
+                <Rate />
+              </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12} lg={12}>
+              <Form.Item label={t("Price from")} name="priceFrom">
+                <InputNumber
+                  placeholder={t("Enter price from")}
+                  style={{ width: "100%" }}
+                  min={0}
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  onChange={() => {
+                    // Khi priceFrom thay đổi, validate lại priceTo
+                    form.validateFields(["priceTo"]);
+                  }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                label={t("Price to")}
+                name="priceTo"
+                dependencies={["priceFrom"]}
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      const priceFrom = form.getFieldValue("priceFrom");
+
+                      if (
+                        priceFrom != null &&
+                        (value == null || value === "")
+                      ) {
+                        return Promise.reject(
+                          new Error(
+                            t("Please enter Price to when Price from is filled")
+                          )
+                        );
+                      }
+
+                      if (
+                        priceFrom != null &&
+                        value != null &&
+                        value < priceFrom
+                      ) {
+                        return Promise.reject(
+                          new Error(
+                            t(
+                              "Price to must be greater than or equal to Price from"
+                            )
+                          )
+                        );
+                      }
+
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
+                <InputNumber
+                  placeholder={t("Enter price to")}
+                  style={{ width: "100%" }}
+                  min={0}
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                />
+              </Form.Item>
+
               <Form.Item label={t("Image")} name="image">
                 <AvatarUploader
                   data={imageUrl || undefined}

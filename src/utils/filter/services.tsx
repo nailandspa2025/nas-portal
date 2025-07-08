@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeleteOutlined, FormOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Tooltip, Space } from "antd";
+import { Avatar, Tooltip, Space, Rate } from "antd";
 import { Link } from "react-router-dom";
 export const columns = ({
   hasEditPermission,
@@ -42,6 +42,29 @@ export const columns = ({
       dataIndex: "code",
       key: "code",
       width: 120,
+    },
+    {
+      title: t("Price from"),
+      dataIndex: "priceFrom",
+      key: "priceFrom",
+      width: 180,
+      render: (price: number) => <span>{price?.toLocaleString()}</span>,
+    },
+    {
+      title: t("Price to"),
+      dataIndex: "priceTo",
+      key: "priceTo",
+      width: 180,
+      render: (price: number) => <span>{price?.toLocaleString()}</span>,
+    },
+    {
+      title: t("Rating"),
+      dataIndex: "rating",
+      key: "rating",
+      width: 180,
+      render: (rating: number) => (
+        <Rate allowHalf disabled defaultValue={rating} />
+      ),
     },
     {
       title: t("Description"),
