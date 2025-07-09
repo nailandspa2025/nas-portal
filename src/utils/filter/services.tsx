@@ -123,6 +123,6 @@ export const buttons = [
     label: "Create",
     funcName: "createNew",
     color: "primary",
-    accessRight: ["store.import", "store.admin", "admin"],
+    accessRight: ["service.import", "service.admin", "admin"],
   },
 ];

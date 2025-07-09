@@ -36,6 +36,8 @@ import Services from "../pages/service/service";
 import ServiceActions from "../pages/service/action";
 import Package from "../pages/package/package";
 import PackageActions from "../pages/package/action";
+import BankAccounts from "../pages/bank/bank";
+import BankActions from "../pages/bank/action";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -262,6 +264,21 @@ const routes: RouteType[] = [
     path: "/package/:id",
     name: "Update package",
     element: <PackageActions />,
+  },
+  {
+    path: "/bank",
+    name: "Bank Accounts",
+    element: <BankAccounts />,
+  },
+  {
+    path: "/bank/none",
+    name: "Create Bank Account",
+    element: <BankActions />,
+  },
+  {
+    path: "/bank/:id",
+    name: "Update Bank Account",
+    element: <BankActions />,
   },
 ];
 

@@ -17,47 +17,33 @@ export const columns = ({
 }) => {
   return [
     {
-      title: t("Name"),
-      dataIndex: "name",
-      key: "name",
+      title: t("Account Name"),
+      dataIndex: "accountName",
+      key: "accountName",
       width: 210,
-      render: (text: string, record: { id: number }) => (
-        <Link to={`/package/${record.id}`}>{text}</Link>
+      render: (text: string, record: { id: string }) => (
+        <Link to={`/bank/${record.id}`}>{text}</Link>
       ),
     },
     {
-      title: t("Price"),
-      dataIndex: "price",
-      key: "price",
+      title: t("Account Number"),
+      dataIndex: "accountNumber",
+      key: "accountNumber",
+      width: 120,
+    },
+    {
+      title: t("Bank Name"),
+      dataIndex: "bankName",
+      key: "bankName",
       width: 180,
-      render: (price: number) => <span>{price?.toLocaleString()}</span>,
-    },
-    // {
-    //   title: t(""),
-    //   dataIndex: "durationDays",
-    //   key: "durationDays",
-    //   width: 180,
-    //   render: (durationDays: number) => (
-    //     <span>{durationDays?.toLocaleString()}</span>
-    //   ),
-    // },
-    {
-      title: t("Description"),
-      dataIndex: "description",
-      key: "description",
-      width: 250,
+      render: (name: string) => <span>{name}</span>,
     },
     {
-      title: t("Status"),
-      dataIndex: "isActive",
-      key: "isActive",
-      render: (isActive: boolean) => (
-        <span style={{ color: isActive ? "green" : "red" }}>
-          {isActive ? t("Active") : t("Inactive")}
-        </span>
-      ),
-      width: 100,
-      hidden: false,
+      title: t("Branch Name"),
+      dataIndex: "branchName",
+      key: "branchName",
+      width: 180,
+      render: (name: string) => <span>{name}</span>,
     },
     {
       align: "center",
@@ -110,6 +96,6 @@ export const buttons = [
     label: "Create",
     funcName: "createNew",
     color: "primary",
-    accessRight: ["package.import", "package.admin", "admin"],
+    accessRight: ["bank.import", "bank.admin", "admin"],
   },
 ];

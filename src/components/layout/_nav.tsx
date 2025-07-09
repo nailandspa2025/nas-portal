@@ -76,6 +76,12 @@ const _nav = [
     route: "/banner",
   },
   {
+    id: "bank",
+    icon: <BankOutlined />,
+    name: "Bank",
+    route: "/bank",
+  },
+  {
     id: "groupservice",
     name: "Service & Package",
     icon: <UsergroupAddOutlined />,

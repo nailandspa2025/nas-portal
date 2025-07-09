@@ -89,11 +89,13 @@ const SiderBarLeft = () => {
       trigger={null}
       collapsible
       collapsed={collapsed}
-      className="sider"
+      className="sider custom-scrollbar"
       style={{
         position: "fixed",
+        height: "100vh",
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         transition: "all 0.3s ease-in-out",
+        backgroundColor: "#fff",
       }}
     >
       <div className="brand">
@@ -102,7 +104,7 @@ const SiderBarLeft = () => {
           {!collapsed && <h1>Nas prortal</h1>}
         </div>
       </div>
-      <div className="menuContainer">
+      <div className="menuContainer custom-scrollbar">
         <Menu
           onOpenChange={onOpenChange}
           openKeys={openKeys}

@@ -1,4 +1,4 @@
-import { Card, Form, Row, Col, Input, Space, Switch, InputNumber } from "antd";
+import { Card, Form, Row, Col, Input, InputNumber } from "antd";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 import TopActionButtons from "../../components/common/TopActionButtons";
@@ -7,20 +7,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { buildFormData } from "../../utils/common/buildFormData";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { PackageApi } from "../../apis/catalog/package";
 import { useEffect } from "react";
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
-import ServiceSelect from "../../components/ServiceSelect";
-const PackageActions = () => {
+import { BankAccountApi } from "../../apis/catalog/bank";
+const BankActions = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const params = useParams();
   const { data } = useQuery({
-    queryKey: ["servicePackageDetail", params.id],
+    queryKey: ["bankAccountDetail", params.id],
     queryFn: async () => {
-      const res: any = await PackageApi.getById(params.id as any);
+      const res: any = await BankAccountApi.getById(params.id as any);
       return res?.data || {};
     },
     enabled: !!params.id,
@@ -28,12 +26,12 @@ const PackageActions = () => {
   useEffect(() => {
     if (params.id && data) {
       form.setFieldsValue({
-        name: data.name || "",
-        description: data.description || "",
-        price: data.price || 0,
-        serviceIds: data.serviceIds || null,
-        durationDays: data.durationDays || 0,
-        isActive: data.isActive || true,
+        accountName: data.accountName || "",
+        accountNumber: data.accountNumber || "",
+        bankName: data.bankName || "",
+        branchName: data.branchName || "",
+        swiftCode: data.swiftCode || "",
+        currencyCode: data.currencyCode || "",
       });
     }
   }, [data, form, params.id]);
@@ -42,13 +40,13 @@ const PackageActions = () => {
       const formD = new FormData();
       buildFormData(formD, values);
       return params.id
-        ? await PackageApi.update(params.id as any, formD)
-        : await PackageApi.create(formD);
+        ? await BankAccountApi.update(params.id as any, formD)
+        : await BankAccountApi.create(formD);
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
         toast.success(t("Save successfully"));
-        navigate("/package");
+        navigate("/bank");
       } else toast.error(t(res.message));
     },
     onError: () => {
@@ -78,18 +76,16 @@ const PackageActions = () => {
       >
         <Col flex="auto">
           <div className="custom-title">
-            {params?.id ? t("Update package") : t("Create package")}
+            {params?.id
+              ? t("Update a bank account")
+              : t("Create a bank account")}
           </div>
         </Col>
         <Col flex="auto">
           <TopActionButtons
-            backUrl="/package"
+            backUrl="/bank"
             onSubmit={handleSubmit}
-            hasSubmitPermission={checkAccessRight(
-              accesses,
-              "update",
-              "package"
-            )}
+            hasSubmitPermission={checkAccessRight(accesses, "update", "bank")}
           />
         </Col>
       </Row>
@@ -98,20 +94,29 @@ const PackageActions = () => {
           <Row gutter={32}>
             <Col xs={24} sm={24} md={12} lg={12}>
               <Form.Item
-                label={t("Name")}
-                name="name"
+                label={t("Account Name")}
+                name="accountName"
                 rules={[
                   {
                     required: true,
-                    message: t("Please enter service name!"),
+                    message: t("Please enter account name!"),
                   },
                 ]}
               >
-                <Input placeholder={t("Enter service name")} />
+                <Input placeholder={t("Enter account name")} />
               </Form.Item>
-              <Form.Item label={t("Price")} name="price">
+              <Form.Item
+                label={t("Account Number")}
+                name="accountNumber"
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please enter branch name!"),
+                  },
+                ]}
+              >
                 <InputNumber
-                  placeholder={t("Enter price")}
+                  placeholder={t("Enter account number")}
                   style={{ width: "100%" }}
                   min={0}
                   formatter={(value) =>
@@ -119,24 +124,38 @@ const PackageActions = () => {
                   }
                 />
               </Form.Item>
-              <Form.Item label={t("Description")} name="description">
-                <Input.TextArea rows={4} placeholder={t("Enter description")} />
+              <Form.Item
+                label={t("Bank Name")}
+                name="bankName"
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please enter bank name!"),
+                  },
+                ]}
+              >
+                <Input placeholder={t("Enter bank name")} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12} lg={12}>
-              <Form.Item label={t("Service")} name="serviceIds">
-                <ServiceSelect mode="multiple" />
+              <Form.Item
+                label={t("Branch Name")}
+                name="branchName"
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please enter branch name!"),
+                  },
+                ]}
+              >
+                <Input placeholder={t("Enter branch name")} />
               </Form.Item>
-              <Space align="center">
-                <Form.Item name="isActive" valuePropName="checked" noStyle>
-                  <Switch
-                    checkedChildren={<CheckOutlined />}
-                    unCheckedChildren={<CloseOutlined />}
-                    defaultChecked={true}
-                  />
-                </Form.Item>
-                <span>{t("Active")}</span>
-              </Space>
+              <Form.Item label={t("Code")} name="swiftCode">
+                <Input placeholder={t("Enter branch code")} />
+              </Form.Item>
+              <Form.Item label={t("Currency")} name="currencyCode">
+                <Input placeholder={t("Enter currency")} />
+              </Form.Item>
             </Col>
           </Row>
         </Form>
@@ -145,4 +164,4 @@ const PackageActions = () => {
   );
 };
 
-export default PackageActions;
+export default BankActions;

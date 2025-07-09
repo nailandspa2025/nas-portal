@@ -65,8 +65,8 @@
   }
 }
 .menuContainer {
-    height: calc(100vh);
-    overflow-x: hidden;
+    height: calc(100vh - 65px);
+    overflow-y: auto;
     flex: 1;
     padding: 24px 0;
 }
@@ -114,3 +114,30 @@
   border-top: 1px solid #d8dbe0;
   z-index: 3;
 }
+
+
+/* Dành cho Webkit (Chrome, Edge, Safari) */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.25);
+  }
+  
+  /* Firefox */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+  
