@@ -125,4 +125,17 @@ export const DropdownApi = {
     const endpoint = `/catalog/api/v1/dropdownlist/service-ids/${ids}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
+
+  getBanks: async (queryString: any) => {
+    const endpoint = `/catalog/api/v1/dropdownlist/banks?${queryString}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getBankById: async (id: string) => {
+    const endpoint = `/catalog/api/v1/dropdownlist/bank/${id}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getBankByIds: async (ids: string) => {
+    const endpoint = `/catalog/api/v1/dropdownlist/bank-ids/${ids}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
 };

@@ -23,4 +23,8 @@ export const BankAccountApi = {
     const endpoint = `/catalog/api/v1/bankaccounts/${id}`;
     return await apiCall(API_METHOD.DELETE, endpoint);
   },
+  getBankByStore: async (payload: any) => {
+    const endpoint = `/catalog/api/v1/bankaccounts/store?${payload}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
 };

@@ -21,6 +21,8 @@ import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 import MerchantSelect from "../../components/MerchantSelect";
 import PackageSelect from "../../components/PackageSelect";
+import BankSelect from "../../components/BankSelect";
+
 const StoreAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -64,6 +66,7 @@ const StoreAction = () => {
         email: data.email || "",
         description: data.description || "",
         servicePackageId: data.servicePackageId || null,
+        bankIds: data.bankIds || null,
       });
     }
   }, [data, form, params.id]);
@@ -310,6 +313,12 @@ const StoreAction = () => {
                 ]}
               >
                 <Input placeholder={t("Enter longitude")} />
+              </Form.Item>
+              <Form.Item label={t("Banks")} name="bankIds">
+                <BankSelect
+                  mode={"multiple"}
+                  placeholder={t("Please choose bank")}
+                />
               </Form.Item>
               <Form.Item label={t("Description")} name={"description"}>
                 <Input.TextArea rows={5} placeholder={t("Enter description")} />

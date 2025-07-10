@@ -12,6 +12,11 @@ import {
 } from "antd";
 import { useTranslation } from "react-i18next";
 import { validatePhoneNumber } from "../utils/common/validate";
+import { BankAccountApi } from "../apis/catalog/bank";
+import queryString from "query-string";
+import { useQuery } from "@tanstack/react-query";
+import { QRCodeSVG } from "qrcode.react";
+
 const PaymentMethod = [
   {
     label: "Cash",
@@ -68,16 +73,28 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
   );
 
   useEffect(() => {
-    form.setFieldsValue({
-      fullName: data.fullName || "",
-      emial: data?.email || "",
-      phone: data?.phone || "",
-    });
-    if (!openModal) {
+    if (openModal) {
+      form.setFieldsValue({
+        fullName: data.fullName || "",
+        email: data?.email || "",
+        phone: data?.phone || "",
+      });
+      setSelectedMethod(data.method || null);
+    } else {
       form.resetFields();
       setSelectedMethod(null);
     }
   }, [data, openModal]);
+  const { data: bankData } = useQuery({
+    queryKey: ["getBankByStore", { storeId: data.storeId }],
+    queryFn: async () => {
+      const response: any = await BankAccountApi.getBankByStore(
+        queryString.stringify({ storeId: data.storeId })
+      );
+      return response.data;
+    },
+    enabled: !!data.storeId,
+  });
   const onFinish = (values: any) => {
     const payload = {
       ...values,
@@ -140,37 +157,85 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
                 onChange={(value) => setSelectedMethod(value)}
               ></Select>
             </Form.Item>
-            {selectedMethod === 5 && (
+            {selectedMethod === 5 && bankData?.length > 0 && (
               <div
                 style={{
-                  border: "1px solid #f0f0f0",
-                  borderRadius: 8,
-                  textAlign: "center",
-                  marginBottom: 10,
+                  border: "1px solid #e0e0e0",
+                  borderRadius: 12,
                   backgroundColor: "#fafafa",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+                  padding: 16,
+                  marginTop: 12,
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
                 }}
               >
-                <h3 style={{ marginBottom: 5, color: "#1890ff" }}>
+                <h3
+                  style={{
+                    textAlign: "center",
+                    marginBottom: 20,
+                    color: "#1890ff",
+                    fontSize: 18,
+                    fontWeight: 600,
+                  }}
+                >
                   {t("Bank Transfer Info")}
                 </h3>
-                <div>
-                  <strong>{t("Bank")}:</strong> Vietcombank
-                </div>
-                <div>
-                  <strong>{t("Account Name")}:</strong> Nguyen Van A
-                </div>
-                <div>
-                  <strong>{t("Account Number")}:</strong> 0123456789
-                </div>
-                <img
-                  src="/images/qr-code.jpeg"
-                  alt="QR code"
-                  style={{ width: 200, height: 200 }}
-                />
-                <div style={{ fontStyle: "italic", color: "#888" }}>
-                  {t("Scan QR code to pay")}
-                </div>
+
+                {bankData.map((bank: any, index: number) => {
+                  const qrContent = `
+                    Bank: ${bank.bankName}
+                    Account Name: ${bank.accountName}
+                    Account Number: ${bank.accountNumber}
+                    Branch: ${bank.branchName}
+                  `.trim();
+
+                  return (
+                    <div
+                      key={index}
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: 16,
+                        borderRadius: 10,
+                        border: "1px solid #f0f0f0",
+                        marginBottom: 16,
+                        backgroundColor: "#fff",
+                      }}
+                    >
+                      <div style={{ flex: 1, paddingRight: 20 }}>
+                        <div style={{ marginBottom: 6 }}>
+                          <strong>{t("Bank")}:</strong> {bank.bankName}
+                        </div>
+                        <div style={{ marginBottom: 6 }}>
+                          <strong>{t("Account Name")}:</strong>{" "}
+                          {bank.accountName}
+                        </div>
+                        <div style={{ marginBottom: 6 }}>
+                          <strong>{t("Account Number")}:</strong>{" "}
+                          {bank.accountNumber}
+                        </div>
+                        <div>
+                          <strong>{t("Branch Name")}:</strong> {bank.branchName}
+                        </div>
+                      </div>
+
+                      <div style={{ textAlign: "center" }}>
+                        <QRCodeSVG value={qrContent} size={150} />
+                        <div
+                          style={{
+                            fontStyle: "italic",
+                            color: "#888",
+                            marginTop: 8,
+                            fontSize: 12,
+                          }}
+                        >
+                          {t("Scan QR code to pay")}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
             <Form.Item label={t("FullName")} name={"fullName"}>
