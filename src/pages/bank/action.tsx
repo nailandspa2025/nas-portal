@@ -115,13 +115,9 @@ const BankActions = () => {
                   },
                 ]}
               >
-                <InputNumber
+                <Input
                   placeholder={t("Enter account number")}
                   style={{ width: "100%" }}
-                  min={0}
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
                 />
               </Form.Item>
               <Form.Item
