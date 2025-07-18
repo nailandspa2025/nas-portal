@@ -13,7 +13,7 @@ interface Props {
   placeholder?: string;
   mode?: "multiple" | "tags" | "";
 }
-const PackageSelect: React.FC<Props> = ({
+const BanksSelect: React.FC<Props> = ({
   value,
   onChange,
   placeholder = "Choose",
@@ -22,7 +22,7 @@ const PackageSelect: React.FC<Props> = ({
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const { data = [], isLoading } = useQuery({
-    queryKey: ["packageOption", searchText],
+    queryKey: ["banksOption", searchText],
     queryFn: async () => {
       const res: any = await DropdownApi.getBanks(
         queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
@@ -35,7 +35,7 @@ const PackageSelect: React.FC<Props> = ({
     data.some((u: { id: string }) => u.id === id)
   );
   const { data: extraData } = useQuery({
-    queryKey: ["singlePackage", valuesArray],
+    queryKey: ["singleBank", valuesArray],
     queryFn: async () => {
       if (!valuesArray.length || isDataInList) return [];
       if (valuesArray.length === 1) {
@@ -75,4 +75,4 @@ const PackageSelect: React.FC<Props> = ({
   );
 };
 
-export default PackageSelect;
+export default BanksSelect;
