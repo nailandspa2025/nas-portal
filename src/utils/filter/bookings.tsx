@@ -91,7 +91,8 @@ export const columns = ({
       dataIndex: "bookingDate",
       key: "bookingDate",
       width: 100,
-      render: (date: string) => (date ? dayjs(date).format("DD/MM/YYYY") : "-"),
+      render: (date: string) =>
+        date ? dayjs(date).format("DD/MM/YYYY") : "N/A",
     },
     {
       title: t("Booking time"),
@@ -99,7 +100,7 @@ export const columns = ({
       key: "bookingTime",
       width: 100,
       render: (time: string) =>
-        time ? dayjs(time, "HH:mm:ss").format("HH:mm A") : "-",
+        time ? dayjs(time, "HH:mm:ss").format("HH:mm") : "N/A",
     },
     {
       title: t("Number"),

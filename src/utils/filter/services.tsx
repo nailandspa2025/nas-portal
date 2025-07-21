@@ -2,6 +2,7 @@
 import { DeleteOutlined, FormOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Tooltip, Space, Rate } from "antd";
 import { Link } from "react-router-dom";
+import dayjs from "dayjs";
 export const columns = ({
   hasEditPermission,
   hasDeletePermission,
@@ -42,6 +43,14 @@ export const columns = ({
       dataIndex: "code",
       key: "code",
       width: 120,
+    },
+    {
+      title: t("Working time"),
+      dataIndex: "workingTime",
+      key: "workingTime",
+      width: 100,
+      render: (time: string) =>
+        time ? dayjs(time, "HH:mm:ss").format("HH:mm") : "N/A",
     },
     {
       title: t("Price from"),

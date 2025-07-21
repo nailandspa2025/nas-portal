@@ -1,4 +1,13 @@
-import { Card, Form, Row, Col, Input, Rate, InputNumber } from "antd";
+import {
+  Card,
+  Form,
+  Row,
+  Col,
+  Input,
+  Rate,
+  InputNumber,
+  TimePicker,
+} from "antd";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 import TopActionButtons from "../../components/common/TopActionButtons";
@@ -10,6 +19,7 @@ import { toast } from "react-toastify";
 import { ServiceApi } from "../../apis/catalog/service";
 import { useState, useEffect } from "react";
 import AvatarUploader from "../../components/AvatarUploader";
+import dayjs from "dayjs";
 
 const ServiceActions = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
@@ -38,6 +48,7 @@ const ServiceActions = () => {
         priceFrom: data.priceFrom || 0,
         priceTo: data.priceTo || 0,
         rating: data.rating || 0,
+        workingTime: data.workingTime ? dayjs(data.workingTime, "HH:mm") : null,
       });
     }
   }, [data, form, params.id]);
@@ -125,6 +136,22 @@ const ServiceActions = () => {
                 ]}
               >
                 <Input placeholder={t("Enter service code")} />
+              </Form.Item>
+              <Form.Item
+                label={t("Working time")}
+                name={"workingTime"}
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please choose time"),
+                  },
+                ]}
+              >
+                <TimePicker
+                  format="HH:mm"
+                  placeholder={t("Choose  time")}
+                  style={{ width: "100%" }}
+                />
               </Form.Item>
               <Form.Item label={t("Description")} name="description">
                 <Input.TextArea rows={4} placeholder={t("Enter description")} />
