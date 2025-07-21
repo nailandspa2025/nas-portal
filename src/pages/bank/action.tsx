@@ -1,4 +1,4 @@
-import { Card, Form, Row, Col, Input, InputNumber } from "antd";
+import { Card, Form, Row, Col, Input } from "antd";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 import TopActionButtons from "../../components/common/TopActionButtons";
