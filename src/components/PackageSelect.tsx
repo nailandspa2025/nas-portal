@@ -57,7 +57,7 @@ const PackageSelect: React.FC<Props> = ({
   const onSearch = debounce((value: string) => {
     setSearchText(value);
   }, 500);
-  console.log("calv", mergedData);
+
   return (
     <Select
       mode={mode || undefined}

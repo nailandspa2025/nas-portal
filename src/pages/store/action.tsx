@@ -1,5 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card, Form, Row, Col, Input, Rate, TimePicker, Select } from "antd";
+import {
+  Card,
+  Form,
+  Row,
+  Col,
+  Input,
+  Rate,
+  TimePicker,
+  Select,
+  Button,
+  Typography,
+} from "antd";
+import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { StoreApi } from "../../apis/catalog/store";
@@ -67,6 +79,7 @@ const StoreAction = () => {
         description: data.description || "",
         servicePackageId: data.servicePackageId || null,
         bankIds: data.bankIds || null,
+        socialNetworks: data.socialNetworks || null,
       });
     }
   }, [data, form, params.id]);
@@ -365,6 +378,77 @@ const StoreAction = () => {
               </Form.Item>
             </Col>
           </Row>
+          <Typography.Title level={5} style={{ marginTop: 0 }}>
+            {t("SocialNetwork")}
+          </Typography.Title>
+          <Form.List name="socialNetworks">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <Row gutter={16} key={key}>
+                    <Col xs={24} sm={24} md={11} lg={11}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "name"]}
+                        rules={[
+                          {
+                            required: true,
+                            message: t("Please enter name!"),
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Enter Facebook, Youtub, Tiktok..." />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={24} md={11} lg={11}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "url"]}
+                        rules={[
+                          {
+                            required: true,
+                            message: t("Please enter url!"),
+                          },
+                          {
+                            validator: (_, value) => {
+                              if (!value || /^https?:\/\/.+$/.test(value)) {
+                                return Promise.resolve();
+                              }
+                              return Promise.reject(
+                                new Error(
+                                  t("URL must start with http:// or https://")
+                                )
+                              );
+                            },
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Enter url" />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={24} md={2} lg={2}>
+                      <Button
+                        danger
+                        icon={<MinusCircleOutlined />}
+                        onClick={() => remove(name)}
+                      />
+                    </Col>
+                  </Row>
+                ))}
+
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    icon={<PlusOutlined />}
+                    block
+                  >
+                    Add Social Network
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
         </Form>
       </Card>
       <TopActionButtons

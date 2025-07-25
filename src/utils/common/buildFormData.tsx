@@ -24,9 +24,9 @@ export const buildFormData = (
       }
       formData.append(parentKey!, formattedValue);
     } else if (Array.isArray(data)) {
-      data.forEach((item) => {
-        // 👇 Append with [] in key for array handling in ASP.NET
-        formData.append(`${parentKey}[]`, item);
+      data.forEach((item, index) => {
+        const newKey = `${parentKey}[${index}]`;
+        buildFormData(formData, item, newKey);
       });
     } else {
       Object.keys(data).forEach((key) => {
