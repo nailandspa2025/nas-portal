@@ -10,6 +10,7 @@ import {
   Select,
   Button,
   Typography,
+  Space,
 } from "antd";
 import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
@@ -34,7 +35,8 @@ import { checkAccessRight } from "../../utils/common/accessUtils";
 import MerchantSelect from "../../components/MerchantSelect";
 import PackageSelect from "../../components/PackageSelect";
 import BankSelect from "../../components/BankSelect";
-
+import { DeeplinkApi } from "../../apis/catalog/deeplink";
+import queryString from "query-string";
 const StoreAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -55,6 +57,17 @@ const StoreAction = () => {
     enabled: !!params.id,
   });
 
+  const { data: deeplink, refetch: refetchDeeplink } = useQuery({
+    queryKey: ["deeplinkDetail", params.id],
+    queryFn: async () => {
+      const res: any = await DeeplinkApi.getDetail(
+        queryString.stringify({ id: params.id, type: "store" })
+      );
+      return res?.data || {};
+    },
+    enabled: !!params.id,
+  });
+  console.log("deeplink", deeplink);
   useEffect(() => {
     if (params.id && data) {
       setImageUrls(data.imageUrls);
@@ -117,6 +130,31 @@ const StoreAction = () => {
   };
   const handleSubmit = () => {
     form.submit();
+  };
+  const generateLink = useMutation({
+    mutationFn: async (values) => {
+      const formD = new FormData();
+      buildFormData(formD, values);
+      return await DeeplinkApi.create(formD);
+    },
+    onSuccess: (res: any) => {
+      if (res.succeeded) {
+        toast.success(t("Save successfully"));
+        refetchDeeplink();
+      } else toast.error(t(res.message));
+    },
+  });
+  const createDeeplink = () => {
+    const payload: any = {
+      type: "store",
+      androidLink: `intent://store-detail/${params.id}#Intent;package=com.nas.nas_mobile;scheme=nasshine;end`,
+      iosLink: `nasshine://store-detail/${params.id}`,
+      targetId: params.id,
+      webFallback: `https://nasshine.com/${params.id}`,
+    };
+    if (params.id) {
+      generateLink.mutate(payload);
+    }
   };
   return (
     <>
@@ -336,8 +374,43 @@ const StoreAction = () => {
               <Form.Item label={t("Description")} name={"description"}>
                 <Input.TextArea rows={5} placeholder={t("Enter description")} />
               </Form.Item>
-            </Col>
+              {params.id && (
+                <>
+                  <Form.Item label={t("Deeplink")} name="deeplink">
+                    <Space.Compact style={{ width: "100%" }}>
+                      <Input
+                        placeholder={t("Enter deeplink")}
+                        value={deeplink?.shortLink || ""}
+                        disabled
+                      />
+                      <Button
+                        type="primary"
+                        disabled={!!deeplink?.shortLink}
+                        onClick={createDeeplink}
+                      >
+                        {t("Create link")}
+                      </Button>
+                    </Space.Compact>
+                  </Form.Item>
 
+                  {deeplink?.shortLink && (
+                    <Form.Item label={t("QR Code")}>
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+                          deeplink.shortLink
+                        )}`}
+                        alt="QR Code"
+                        style={{
+                          width: 150,
+                          height: 150,
+                          border: "1px solid #ccc",
+                        }}
+                      />
+                    </Form.Item>
+                  )}
+                </>
+              )}
+            </Col>
             <Col xs={24} sm={24} md={12} lg={12}>
               <Form.Item label={t("Package")} name="servicePackageId">
                 <PackageSelect placeholder={t("Please choose package")} />
