@@ -12,7 +12,17 @@ import {
   Typography,
   Space,
 } from "antd";
-import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  MinusCircleOutlined,
+  FacebookOutlined,
+  InstagramOutlined,
+  YoutubeOutlined,
+  TwitterOutlined,
+  LinkedinOutlined,
+  TikTokOutlined,
+  GlobalOutlined,
+} from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { StoreApi } from "../../apis/catalog/store";
@@ -67,7 +77,6 @@ const StoreAction = () => {
     },
     enabled: !!params.id,
   });
-  console.log("deeplink", deeplink);
   useEffect(() => {
     if (params.id && data) {
       setImageUrls(data.imageUrls);
@@ -156,6 +165,15 @@ const StoreAction = () => {
       generateLink.mutate(payload);
     }
   };
+  const socialNetworkOptions = [
+    { label: "Facebook", value: 1, icon: <FacebookOutlined /> },
+    { label: "Instagram", value: 2, icon: <InstagramOutlined /> },
+    { label: "TikTok", value: 3, icon: <TikTokOutlined /> }, // custom icon
+    { label: "YouTube", value: 4, icon: <YoutubeOutlined /> },
+    { label: "Twitter", value: 5, icon: <TwitterOutlined /> },
+    { label: "LinkedIn", value: 6, icon: <LinkedinOutlined /> },
+    { label: "Website", value: 7, icon: <GlobalOutlined /> },
+  ];
   return (
     <>
       <Row
@@ -458,53 +476,90 @@ const StoreAction = () => {
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <Row gutter={16} key={key}>
-                    <Col xs={24} sm={24} md={11} lg={11}>
-                      <Form.Item
-                        {...restField}
-                        name={[name, "name"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: t("Please enter name!"),
-                          },
-                        ]}
-                      >
-                        <Input placeholder="Enter Facebook, Youtub, Tiktok..." />
-                      </Form.Item>
+                  <Row gutter={8} key={key} style={{ width: "100%" }}>
+                    {/* Select + Name */}
+                    <Col xs={24} md={12}>
+                      <Row gutter={8}>
+                        {/* Select */}
+                        <Col xs={24} md={8}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "icon"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: t("Please select social network!"),
+                              },
+                            ]}
+                          >
+                            <Select
+                              placeholder="Select"
+                              optionLabelProp="label"
+                            >
+                              {socialNetworkOptions.map((opt) => (
+                                <Select.Option
+                                  key={opt.value}
+                                  value={opt.value}
+                                  label={opt.label}
+                                >
+                                  {opt.icon} {opt.label}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                        {/* Name */}
+                        <Col xs={24} md={16}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "name"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: t("Please enter name!"),
+                              },
+                            ]}
+                          >
+                            <Input placeholder="Enter Facebook, YouTube, TikTok..." />
+                          </Form.Item>
+                        </Col>
+                      </Row>
                     </Col>
-                    <Col xs={24} sm={24} md={11} lg={11}>
-                      <Form.Item
-                        {...restField}
-                        name={[name, "url"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: t("Please enter url!"),
-                          },
-                          {
-                            validator: (_, value) => {
-                              if (!value || /^https?:\/\/.+$/.test(value)) {
-                                return Promise.resolve();
-                              }
-                              return Promise.reject(
-                                new Error(
-                                  t("URL must start with http:// or https://")
-                                )
-                              );
+                    {/* URL */}
+                    <Col xs={24} lg={12}>
+                      <Space.Compact style={{ width: "100%" }}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, "url"]}
+                          style={{ flex: 1, marginBottom: 0 }} // ép full và bỏ margin
+                          rules={[
+                            {
+                              required: true,
+                              message: t("Please enter url!"),
                             },
-                          },
-                        ]}
-                      >
-                        <Input placeholder="Enter url" />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} sm={24} md={2} lg={2}>
-                      <Button
-                        danger
-                        icon={<MinusCircleOutlined />}
-                        onClick={() => remove(name)}
-                      />
+                            {
+                              validator: (_, value) => {
+                                if (!value || /^https?:\/\/.+$/.test(value)) {
+                                  return Promise.resolve();
+                                }
+                                return Promise.reject(
+                                  new Error(
+                                    t("URL must start with http:// or https://")
+                                  )
+                                );
+                              },
+                            },
+                          ]}
+                        >
+                          <Input placeholder="Enter url" />
+                        </Form.Item>
+                        <Button
+                          danger
+                          type="text"
+                          icon={<MinusCircleOutlined />}
+                          onClick={() => remove(name)}
+                        />
+                      </Space.Compact>
                     </Col>
                   </Row>
                 ))}
