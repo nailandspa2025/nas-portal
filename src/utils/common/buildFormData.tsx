@@ -5,8 +5,20 @@ export const buildFormData = (
 ) => {
   if (data instanceof FileList) {
     Array.from(data).forEach((file) => {
-      formData.append(parentKey!, file);
+      formData.append(parentKey!, file); // luôn Images
     });
+  } else if (Array.isArray(data)) {
+    // Nếu là mảng file
+    if (data.length > 0 && data[0] instanceof File) {
+      data.forEach((file) => {
+        formData.append(parentKey!, file); // append Images nhiều lần
+      });
+    } else {
+      data.forEach((item, index) => {
+        const newKey = `${parentKey}[${index}]`;
+        buildFormData(formData, item, newKey);
+      });
+    }
   } else if (
     data &&
     typeof data === "object" &&
@@ -23,11 +35,6 @@ export const buildFormData = (
         formattedValue = data.toISOString();
       }
       formData.append(parentKey!, formattedValue);
-    } else if (Array.isArray(data)) {
-      data.forEach((item, index) => {
-        const newKey = `${parentKey}[${index}]`;
-        buildFormData(formData, item, newKey);
-      });
     } else {
       Object.keys(data).forEach((key) => {
         const value = data[key];
