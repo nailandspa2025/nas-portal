@@ -108,11 +108,6 @@ const StoreAction = () => {
   const mutation = useMutation({
     mutationFn: async (values: any) => {
       const formD = new FormData();
-      if (values.images && values.images.length > 0) {
-        values.images.forEach((file: File) => {
-          formD.append("Images", file);
-        });
-      }
       buildFormData(formD, values);
       return params.id
         ? await StoreApi.update(params.id as any, formD)

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const buildFormData = (
   formData: FormData,
   data: any,
@@ -5,17 +6,16 @@ export const buildFormData = (
 ) => {
   if (data instanceof FileList) {
     Array.from(data).forEach((file) => {
-      formData.append(parentKey!, file); // luôn Images
+      formData.append(parentKey!, file);
     });
   } else if (Array.isArray(data)) {
-    // Nếu là mảng file
     if (data.length > 0 && data[0] instanceof File) {
       data.forEach((file) => {
-        formData.append(parentKey!, file); // append Images nhiều lần
+        formData.append(parentKey!, file);
       });
     } else {
       data.forEach((item, index) => {
-        const newKey = `${parentKey}[${index}]`;
+        const newKey = parentKey ? `${parentKey}[${index}]` : `${index}`;
         buildFormData(formData, item, newKey);
       });
     }
@@ -37,22 +37,22 @@ export const buildFormData = (
       formData.append(parentKey!, formattedValue);
     } else {
       Object.keys(data).forEach((key) => {
-        const value = data[key];
-        if (value === null || value === undefined) return;
-
-        const newKey = parentKey ? `${parentKey}.${key}` : key;
-        buildFormData(formData, value, newKey);
+        const newKey = Array.isArray(data)
+          ? parentKey
+          : parentKey
+          ? `${parentKey}.${key}`
+          : key;
+        buildFormData(formData, data[key], newKey);
       });
     }
   } else {
-    if (data === null || data === undefined) return;
     let value: string | Blob = "";
     if (data instanceof Date) {
       value = data.toISOString();
     } else if (data instanceof File) {
       value = data;
     } else {
-      value = data;
+      value = data == null ? "" : data;
     }
     if (parentKey) {
       formData.append(parentKey, value);
