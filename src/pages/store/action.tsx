@@ -127,6 +127,10 @@ const StoreAction = () => {
     const payload = {
       ...values,
       userIds: values.userIds ?? null,
+      images:
+        values.images.filter(
+          (item: any): item is File => item instanceof File
+        ) || [],
     };
     if (params.id) {
       payload.id = params.id;
