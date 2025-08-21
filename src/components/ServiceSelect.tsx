@@ -25,7 +25,7 @@ const ServiceSelect: React.FC<Props> = ({
     queryKey: ["serviceOption", searchText],
     queryFn: async () => {
       const res: any = await DropdownApi.getServices(
-        queryString.stringify({ page: 1, pageSize: 20, searchText: searchText })
+        queryString.stringify({ page: 1, pageSize: 50, searchText: searchText })
       );
       return res?.data?.items || [];
     },
