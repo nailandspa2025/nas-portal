@@ -165,6 +165,10 @@ const MerchantActions = () => {
       deploymentDate: values.contractDate
         ? values.contractDate.toISOString() // ISO 8601 format in UTC
         : null,
+      images:
+        values.images.filter(
+          (item: any): item is File => item instanceof File
+        ) || [],
     };
     if (params.id) {
       payload.id = params.id;

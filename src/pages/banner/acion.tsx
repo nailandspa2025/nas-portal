@@ -68,6 +68,10 @@ const BannerActions = () => {
     const payload = {
       ...values,
       isActive: values.isActive ?? true,
+      images:
+        values.images.filter(
+          (item: any): item is File => item instanceof File
+        ) || [],
     };
     if (params.id) {
       payload.id = params.id;
