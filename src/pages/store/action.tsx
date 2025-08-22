@@ -11,6 +11,7 @@ import {
   Button,
   Typography,
   Space,
+  Switch,
 } from "antd";
 import {
   PlusOutlined,
@@ -102,6 +103,7 @@ const StoreAction = () => {
         servicePackageId: data.servicePackageId || null,
         bankIds: data.bankIds || null,
         socialNetworks: data.socialNetworks || null,
+        paypalConfig: data.paypalConfig || null,
       });
     }
   }, [data, form, params.id]);
@@ -470,6 +472,72 @@ const StoreAction = () => {
                     form.setFieldsValue({ images: e });
                   }}
                 />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Typography.Title level={5} style={{ marginTop: 0 }}>
+            {t("PayPal Information")}
+          </Typography.Title>
+          <Row gutter={32}>
+            <Col xs={24} sm={24} md={11} lg={11}>
+              <Form.Item
+                label="ClientId"
+                name={["paypalConfig", "clientId"]}
+                dependencies={[["paypalConfig", "clientSecret"]]}
+                rules={[
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      const clientSecret = getFieldValue([
+                        "paypalConfig",
+                        "clientSecret",
+                      ]);
+                      if (!value && clientSecret) {
+                        return Promise.reject(
+                          new Error("Please enter ClientId!")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  }),
+                ]}
+              >
+                <Input placeholder={t("Enter clientId")} />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} sm={24} md={11} lg={11}>
+              <Form.Item
+                label="ClientSecret"
+                name={["paypalConfig", "clientSecret"]}
+                dependencies={[["paypalConfig", "clientId"]]}
+                rules={[
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      const clientId = getFieldValue([
+                        "paypalConfig",
+                        "clientId",
+                      ]);
+                      if (!value && clientId) {
+                        return Promise.reject(
+                          new Error("Please enter ClientSecret!")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password placeholder={t("Enter clientSecret")} />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} sm={24} md={2} lg={2}>
+              <Form.Item
+                label="Sandbox"
+                name={["paypalConfig", "isSandbox"]}
+                valuePropName="checked"
+              >
+                <Switch checkedChildren="Yes" unCheckedChildren="No" />
               </Form.Item>
             </Col>
           </Row>

@@ -1,4 +1,14 @@
-import { Card, Form, Row, Col, Input, Space, Switch, InputNumber } from "antd";
+import {
+  Card,
+  Form,
+  Row,
+  Col,
+  Input,
+  Space,
+  Switch,
+  InputNumber,
+  Select,
+} from "antd";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
 import TopActionButtons from "../../components/common/TopActionButtons";
@@ -34,6 +44,7 @@ const PackageActions = () => {
         serviceIds: data.serviceIds || null,
         durationDays: data.durationDays || 0,
         isActive: data.isActive || true,
+        currency: data.currency || null,
       });
     }
   }, [data, form, params.id]);
@@ -119,13 +130,33 @@ const PackageActions = () => {
                   }
                 />
               </Form.Item>
-              <Form.Item label={t("Description")} name="description">
-                <Input.TextArea rows={4} placeholder={t("Enter description")} />
+              <Form.Item
+                label={t("Currency")}
+                name="currency"
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please choose currency!"),
+                  },
+                ]}
+              >
+                <Select
+                  allowClear
+                  autoClearSearchValue
+                  placeholder={t("Select currency")}
+                >
+                  <Select.Option value={1}>USD - US Dollar</Select.Option>
+                  <Select.Option value={2}>EUR - Euro</Select.Option>
+                  <Select.Option value={3}>VND - Vietnamese Dong</Select.Option>
+                </Select>
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12} lg={12}>
               <Form.Item label={t("Service")} name="serviceIds">
                 <ServiceSelect mode="multiple" />
+              </Form.Item>
+              <Form.Item label={t("Description")} name="description">
+                <Input.TextArea rows={4} placeholder={t("Enter description")} />
               </Form.Item>
               <Space align="center">
                 <Form.Item name="isActive" valuePropName="checked" noStyle>

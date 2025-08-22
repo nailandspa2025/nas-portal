@@ -7,6 +7,7 @@ import {
   Rate,
   InputNumber,
   TimePicker,
+  Select,
 } from "antd";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
@@ -49,6 +50,7 @@ const ServiceActions = () => {
         priceTo: data.priceTo || 0,
         rating: data.rating || 0,
         workingTime: data.workingTime ? dayjs(data.workingTime, "HH:mm") : null,
+        currency: data.currency || null,
       });
     }
   }, [data, form, params.id]);
@@ -223,6 +225,26 @@ const ServiceActions = () => {
                     `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                   }
                 />
+              </Form.Item>
+              <Form.Item
+                label={t("Currency")}
+                name="currency"
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please choose currency!"),
+                  },
+                ]}
+              >
+                <Select
+                  allowClear
+                  autoClearSearchValue
+                  placeholder={t("Select currency")}
+                >
+                  <Select.Option value={1}>USD - US Dollar</Select.Option>
+                  <Select.Option value={2}>EUR - Euro</Select.Option>
+                  <Select.Option value={3}>VND - Vietnamese Dong</Select.Option>
+                </Select>
               </Form.Item>
 
               <Form.Item label={t("Image")} name="image">
