@@ -26,26 +26,30 @@ const PaymentMethod = [
     label: "BankTransfer",
     value: 5,
   },
-  {
-    label: "CreditCard",
-    value: 2,
-  },
-  {
-    label: "Momo",
-    value: 3,
-  },
-  {
-    label: "Zalopay",
-    value: 4,
-  },
+  // {
+  //   label: "CreditCard",
+  //   value: 2,
+  // },
+  // {
+  //   label: "Momo",
+  //   value: 3,
+  // },
+  // {
+  //   label: "Zalopay",
+  //   value: 4,
+  // },
 
+  // {
+  //   label: "MoMo",
+  //   value: 6,
+  // },
+  // {
+  //   label: "VNPay",
+  //   value: 7,
+  // },
   {
-    label: "MoMo",
-    value: 6,
-  },
-  {
-    label: "VNPay",
-    value: 7,
+    label: "PayPal",
+    value: 8,
   },
 ];
 

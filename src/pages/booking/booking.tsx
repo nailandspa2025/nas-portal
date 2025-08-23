@@ -121,6 +121,11 @@ const Bookings = () => {
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
+        const approveUrl = res.data?.approveUrl;
+        if (approveUrl) {
+          window.location.href = approveUrl;
+        }
+        console.log("Payment successful", approveUrl);
         toast.success("Save successfully");
         refetch();
       } else toast.error(t(res.message));
