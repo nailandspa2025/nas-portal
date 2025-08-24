@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import useElementHeight from "../../utils/useElementHeight";
 import { useMemo, useRef, useState } from "react";
-import { Row, Card } from "antd";
+import { Row, Card, Modal, Button } from "antd";
 import DataTable from "../../components/common/DataTable";
 import * as utils from "../../utils/filter/bookings";
 import FilterData from "../../components/common/FilterData";
@@ -17,6 +17,7 @@ import ModalConfirm from "../../components/ModalConfirm";
 import ModalPayment from "../../components/ModalPayment";
 import { buildFormData } from "../../utils/common/buildFormData";
 import ModalCancelBooking from "../../components/ModalCancelBooking";
+import { QRCodeCanvas } from "qrcode.react";
 const Bookings = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -32,6 +33,8 @@ const Bookings = () => {
   const [openModalPayment, setOpenModalPayment] = useState<boolean>(false);
   const [paymentData, setPaymentData] = useState<object>({});
   const [openModalCancel, setOpenModalCancel] = useState<boolean>(false);
+  const [qrModal, setQrModal] = useState<boolean>(false);
+  const [approveUrl, setApproveUrl] = useState<any>(null);
   const handleItemTable = {
     handleEdit: (record: any) => {
       navigate(`/booking/${record.id}`);
@@ -123,9 +126,10 @@ const Bookings = () => {
       if (res.succeeded) {
         const approveUrl = res.data?.approveUrl;
         if (approveUrl) {
-          window.location.href = approveUrl;
+          setApproveUrl(approveUrl);
+          setQrModal(true);
+          //window.location.href = approveUrl;
         }
-        console.log("Payment successful", approveUrl);
         toast.success("Save successfully");
         refetch();
       } else toast.error(t(res.message));
@@ -137,7 +141,12 @@ const Bookings = () => {
     },
   });
   const handlePaymentSubmit = async (values: any) => {
-    mutationPayment.mutate(values);
+    const payload = {
+      ...values,
+      returnUrl: window.location.origin + "/payment/success",
+      cancelUrl: window.location.origin + "/payment/failed",
+    };
+    mutationPayment.mutate(payload);
   };
   const handleCancelSubmit = (values: any) => {
     const payload = {
@@ -200,6 +209,38 @@ const Bookings = () => {
         setOpenModal={setOpenModalCancel}
         onSubmit={handleCancelSubmit}
       />
+      <Modal
+        title={<span className="font-semibold text-lg">💳 Scan QR to pay</span>}
+        open={qrModal}
+        onCancel={() => setQrModal(false)}
+        footer={[
+          <Button
+            key="cancel"
+            type="primary"
+            danger
+            onClick={() => setQrModal(false)}
+          >
+            {t("Cancel")}
+          </Button>,
+        ]}
+        centered
+      >
+        <div style={{ textAlign: "center", padding: "20px 0" }}>
+          <QRCodeCanvas value={approveUrl || ""} size={220} />
+          <p style={{ marginTop: 16, fontSize: 14, color: "#555" }}>
+            Use your banking app or e-wallet to scan the code
+          </p>
+
+          <a
+            href={approveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: "inline-block", marginTop: 12, color: "#1677ff" }}
+          >
+            👉 Open payment link
+          </a>
+        </div>
+      </Modal>
     </Card>
   );
 };

@@ -13,6 +13,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "./redux/reducers";
 import ForgotPassword from "./pages/auth/forgotpassword";
 import ResetPassword from "./pages/auth/resetpassword";
+import PaymentSuccess from "./pages/payment/success";
+import PaymentFail from "./pages/payment/failed";
 //import { listenForMessages } from "./firebase/firebaseConfig";
 function App() {
   const collapsed = useSelector((state: RootState) => state.global.status);
@@ -40,6 +42,9 @@ function App() {
             <Route path="*" element={<Navigate to="/sign-up" />} />
           </>
         )}
+
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/failed" element={<PaymentFail />} />
       </Routes>
     </BrowserRouter>
   );

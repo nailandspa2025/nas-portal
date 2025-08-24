@@ -22,4 +22,9 @@ export const PaymentApi = {
     const endpoint = `/order/api/v1/payments/${id}`;
     return await apiCall(API_METHOD.DELETE, endpoint);
   },
+
+  capturePaypal: async (payload: any) => {
+    const endpoint = `/order/api/v1/payments/capture-paypal`;
+    return await apiCall(API_METHOD.POST, endpoint, payload);
+  },
 };
