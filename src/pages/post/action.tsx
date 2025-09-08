@@ -20,6 +20,7 @@ const PostActions = () => {
   const navigate = useNavigate();
   const params = useParams();
   const [content, setContent] = useState("");
+  const [contentEn, setContentEn] = useState("");
   const [imageList, setImageList] = useState<File[]>([]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isAvatar, setIsAvatar] = useState(false);
@@ -40,6 +41,7 @@ const PostActions = () => {
         content: data.content || "",
         description: data.description || "",
         type: data.type || null,
+        contentEn: data.contentEn || "",
       });
     }
   }, [data, form, params.id]);
@@ -64,9 +66,11 @@ const PostActions = () => {
   });
   const onFinish = async (values: any) => {
     const updatedDescription = await uploadImage(content, imageList);
+    const updatedContentEn = await uploadImage(contentEn, imageList);
     const payload = {
       ...values,
       content: updatedDescription,
+      contentEn: updatedContentEn,
     };
     if (params.id) {
       payload.id = params.id;
@@ -159,6 +163,18 @@ const PostActions = () => {
                   setContent={(value) => {
                     setContent(value);
                     form.setFieldsValue({ content: value });
+                  }}
+                  setImages={setImageList}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item label={t("Content (English)")} name="contentEn">
+                <UseEditor
+                  content={contentEn}
+                  setContent={(value) => {
+                    setContent(value);
+                    form.setFieldsValue({ contentEn: value });
                   }}
                   setImages={setImageList}
                 />
