@@ -36,12 +36,12 @@ const PostActions = () => {
     if (params.id && data) {
       setImageUrl(data.avatar);
       setContent(data.content ?? "");
+      setContentEn(data.contentEn ?? "");
       form.setFieldsValue({
         title: data.title || "",
         content: data.content || "",
         description: data.description || "",
         type: data.type || null,
-        contentEn: data.contentEn || "",
       });
     }
   }, [data, form, params.id]);
