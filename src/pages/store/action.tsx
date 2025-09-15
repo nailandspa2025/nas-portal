@@ -104,6 +104,7 @@ const StoreAction = () => {
         bankIds: data.bankIds || null,
         socialNetworks: data.socialNetworks || null,
         paypalConfig: data.paypalConfig || null,
+        deepLink: data.deepLink || deeplink?.shortLink,
       });
     }
   }, [data, form, params.id]);
@@ -400,7 +401,7 @@ const StoreAction = () => {
               </Form.Item>
               {params.id && (
                 <>
-                  <Form.Item label={t("Deeplink")} name="deeplink">
+                  <Form.Item label={t("Deeplink")} name="deepLink">
                     <Space.Compact style={{ width: "100%" }}>
                       <Input
                         placeholder={t("Enter deeplink")}
