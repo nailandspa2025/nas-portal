@@ -6,7 +6,7 @@ import {
   UsergroupAddOutlined,
   AppstoreOutlined,
   // DatabaseOutlined,
-  // ShareAltOutlined,
+  ShareAltOutlined,
   FormOutlined,
   PictureOutlined,
   BankOutlined,
@@ -20,6 +20,34 @@ const _nav = [
     icon: <DashboardOutlined />,
     name: "Dashboard",
     route: "/",
+  },
+  {
+    id: "group-loyalty",
+    name: "Loyalty",
+    icon: <ShareAltOutlined />,
+    children: [
+      {
+        id: "loyalty-point",
+        children: "group-loyalty",
+        name: "Set point",
+        icon: "",
+        route: "/loyalty-point",
+      },
+      {
+        id: "loyalty-group",
+        children: "group-loyalty",
+        name: "Group declaration",
+        icon: "",
+        route: "/loyalty-group",
+      },
+      {
+        id: "loyalty-program",
+        children: "group-loyalty",
+        name: "Program loyalty",
+        icon: "",
+        route: "/loyalty-program",
+      },
+    ],
   },
   {
     id: "merchant",

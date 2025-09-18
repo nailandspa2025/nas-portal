@@ -138,4 +138,16 @@ export const DropdownApi = {
     const endpoint = `/catalog/api/v1/dropdownlist/bank-ids/${ids}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
+  getLoyaltyPoints: async (queryString: any) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/loyaltypoints?${queryString}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getLoyaltyPointById: async (id: any) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/loyaltypoint/${id}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getLoyaltyPointByIds: async (ids: string) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/loyaltypoint-ids/${ids}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
 };

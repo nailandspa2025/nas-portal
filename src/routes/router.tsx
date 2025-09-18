@@ -38,6 +38,12 @@ import Package from "../pages/package/package";
 import PackageActions from "../pages/package/action";
 import BankAccounts from "../pages/bank/bank";
 import BankActions from "../pages/bank/action";
+import LoyaltyPoints from "../pages/loyalty/point/loyalty.point";
+import LoyaltyPointAction from "../pages/loyalty/point/loyalty.point.action";
+import LoyaltyGroups from "../pages/loyalty/group/loyalty.group";
+import LoyaltyGroupActions from "../pages/loyalty/group/loyalty.group.action";
+import LoyaltyPrograms from "../pages/loyalty/program/loyalty.program";
+import LoyaltyProgramActions from "../pages/loyalty/program/loyalty.program.action";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -279,6 +285,53 @@ const routes: RouteType[] = [
     path: "/bank/:id",
     name: "Update Bank Account",
     element: <BankActions />,
+  },
+  {
+    path: "/loyalty-point",
+    name: "Set points",
+    element: <LoyaltyPoints />,
+  },
+  {
+    path: "/loyalty-point/none",
+    name: "Create set point",
+    element: <LoyaltyPointAction />,
+  },
+  {
+    path: "/loyalty-point/:id",
+    name: "Update set point",
+    element: <LoyaltyPointAction />,
+  },
+
+  {
+    path: "/loyalty-group",
+    name: "List groups",
+    element: <LoyaltyGroups />,
+  },
+  {
+    path: "/loyalty-group/none",
+    name: "Create  group",
+    element: <LoyaltyGroupActions />,
+  },
+  {
+    path: "/loyalty-group/:id",
+    name: "Update group",
+    element: <LoyaltyGroupActions />,
+  },
+
+  {
+    path: "/loyalty-program",
+    name: "List programs",
+    element: <LoyaltyPrograms />,
+  },
+  {
+    path: "/loyalty-program/none",
+    name: "Create  program",
+    element: <LoyaltyProgramActions />,
+  },
+  {
+    path: "/loyalty-program/:id",
+    name: "Update program",
+    element: <LoyaltyProgramActions />,
   },
 ];
 
