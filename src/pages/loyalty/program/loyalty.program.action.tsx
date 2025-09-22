@@ -31,7 +31,9 @@ const LoyaltyProgramActions = () => {
       form.setFieldsValue({
         name: data.name || "",
         isDraft: data.isDraft || false,
-        merchantId: data.merchantId || null,
+        pointIds: data.pointIds || null,
+        startDate: data.startDate ? dayjs(data.startDate, "YYYY-MM-DD") : null,
+        endDate: data.endDate ? dayjs(data.endDate, "YYYY-MM-DD") : null,
       });
     }
   }, [data, form, params.id]);
