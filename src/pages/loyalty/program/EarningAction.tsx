@@ -30,7 +30,7 @@ const EarningAction = ({ programId, item, onChange }: any) => {
         rule: item.rule || null,
         amount: item.amount || null,
         point: item.point || null,
-        tierId: item.tierIds || null,
+        tierId: item.tierId || null,
         groupId: item.groupId || null,
         isActive: item.isActive ?? true,
       });
