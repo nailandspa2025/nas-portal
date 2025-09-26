@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../../components/ModalConfirm";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { LoyaltyProgramApi } from "../../../apis/loyalty/LoyaltyProgram";
+import { ProgramApi } from "../../../apis/loyalty/program";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../../utils/common/accessUtils";
 
@@ -47,7 +47,7 @@ const LoyaltyPrograms = () => {
   const { data, refetch } = useQuery({
     queryKey: ["loyaltyProgramList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
-      const response: any = await LoyaltyProgramApi.getWithPagination(
+      const response: any = await ProgramApi.getWithPagination(
         queryString.stringify({ pageNumber, pageSize, ...filters })
       );
       return response.data;
@@ -56,7 +56,7 @@ const LoyaltyPrograms = () => {
   });
   const detele = useMutation({
     mutationFn: async (id: string) => {
-      return LoyaltyProgramApi.delete(id);
+      return ProgramApi.delete(id);
     },
     onSuccess: (res: any) => {
       setRowId("");

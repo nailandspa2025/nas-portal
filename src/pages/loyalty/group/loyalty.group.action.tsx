@@ -9,7 +9,7 @@ import { DropdownApi } from "../../../apis/dropdown/dropdown";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { buildFormData } from "../../../utils/common/buildFormData";
 import { toast } from "react-toastify";
-import { LoyaltyGroupApi } from "../../../apis/loyalty/LoyaltyGroup";
+import { GroupSettingApi } from "../../../apis/loyalty/groupSetting";
 const LoyaltyGroupActions = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -20,7 +20,7 @@ const LoyaltyGroupActions = () => {
   const { data } = useQuery({
     queryKey: ["roleDetail", params.id],
     queryFn: async () => {
-      const res: any = await LoyaltyGroupApi.getById(params.id as any);
+      const res: any = await GroupSettingApi.getById(params.id as any);
       return res?.data || {};
     },
     enabled: !!params.id,
@@ -39,8 +39,8 @@ const LoyaltyGroupActions = () => {
       const formD = new FormData();
       buildFormData(formD, values);
       return params.id
-        ? await LoyaltyGroupApi.update(params.id as string, formD)
-        : await LoyaltyGroupApi.create(formD);
+        ? await GroupSettingApi.update(params.id as string, formD)
+        : await GroupSettingApi.create(formD);
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
@@ -117,18 +117,18 @@ const LoyaltyGroupActions = () => {
               <Form.Item
                 label={t("Tier name")}
                 name={"tierIds"}
-                rules={[
-                  {
-                    required: true,
-                    message: t("Please choose tier name!"),
-                  },
-                ]}
+                // rules={[
+                //   {
+                //     required: true,
+                //     message: t("Please choose tier name!"),
+                //   },
+                // ]}
               >
                 <RemoteSelect
                   placeholder={t("Select tier name")}
-                  fetchList={DropdownApi.getMerchants}
-                  fetchById={DropdownApi.getUserById}
-                  fetchByIds={DropdownApi.getUserByIds}
+                  fetchList={DropdownApi.getLoyaltyTiers}
+                  fetchById={DropdownApi.getLoyaltyTierById}
+                  fetchByIds={DropdownApi.getLoyaltyTierByIds}
                   labelKey={(item) => `${item.name}`}
                   valueKey="id"
                   mode="multiple"

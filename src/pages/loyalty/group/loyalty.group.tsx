@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../../components/ModalConfirm";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { LoyaltyGroupApi } from "../../../apis/loyalty/LoyaltyGroup";
+import { GroupSettingApi } from "../../../apis/loyalty/groupSetting";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../../utils/common/accessUtils";
 
@@ -47,7 +47,7 @@ const LoyaltyGroups = () => {
   const { data, refetch } = useQuery({
     queryKey: ["loyaltyGroupList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
-      const response: any = await LoyaltyGroupApi.getWithPagination(
+      const response: any = await GroupSettingApi.getWithPagination(
         queryString.stringify({ pageNumber, pageSize, ...filters })
       );
       return response.data;
@@ -56,7 +56,7 @@ const LoyaltyGroups = () => {
   });
   const detele = useMutation({
     mutationFn: async (id: string) => {
-      return LoyaltyGroupApi.delete(id);
+      return GroupSettingApi.delete(id);
     },
     onSuccess: (res: any) => {
       setRowId("");

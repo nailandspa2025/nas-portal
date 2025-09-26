@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import ModalConfirm from "../../../components/ModalConfirm";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { LoyaltyPointApi } from "../../../apis/loyalty/LoyaltyPoint";
+import { PointSettingApi } from "../../../apis/loyalty/pointSetting";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../../utils/common/accessUtils";
 
@@ -47,7 +47,7 @@ const LoyaltyPoints = () => {
   const { data, refetch } = useQuery({
     queryKey: ["pointList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
-      const response: any = await LoyaltyPointApi.getWithPagination(
+      const response: any = await PointSettingApi.getWithPagination(
         queryString.stringify({ pageNumber, pageSize, ...filters })
       );
       return response.data;
@@ -56,7 +56,7 @@ const LoyaltyPoints = () => {
   });
   const detele = useMutation({
     mutationFn: async (id: string) => {
-      return LoyaltyPointApi.delete(id);
+      return PointSettingApi.delete(id);
     },
     onSuccess: (res: any) => {
       setRowId("");

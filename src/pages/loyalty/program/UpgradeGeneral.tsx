@@ -3,18 +3,18 @@ import { useMemo, useRef, useState } from "react";
 import useElementHeight from "../../../utils/useElementHeight";
 import DataTable from "../../../components/common/DataTable";
 import queryString from "query-string";
-import { EarningApi } from "../../../apis/loyalty/earning";
+import { UpgradeApi } from "../../../apis/loyalty/upgrage";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import * as utils from "../../../utils/filter/earning.general";
+import * as utils from "../../../utils/filter/upgrade.general";
 import { checkAccessRight } from "../../../utils/common/accessUtils";
 import FilterData from "../../../components/common/FilterData";
 import ModalConfirm from "../../../components/ModalConfirm";
 import { toast } from "react-toastify";
-import EarningAction from "./EarningAction";
+import UpgradeAction from "./UpgradeAction";
 
-const EarningGeneral = ({ programId }: { programId: any }) => {
+const UpgradeGeneral = ({ programId }: { programId: any }) => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const divRef = useRef<HTMLDivElement>(null);
@@ -32,9 +32,9 @@ const EarningGeneral = ({ programId }: { programId: any }) => {
     setPageNumber(1);
   };
   const { data, refetch } = useQuery({
-    queryKey: ["earingList", { programId, pageNumber, pageSize, ...filters }],
+    queryKey: ["upgradeList", { programId, pageNumber, pageSize, ...filters }],
     queryFn: async () => {
-      const response: any = await EarningApi.getWithPagination(
+      const response: any = await UpgradeApi.getWithPagination(
         queryString.stringify({ programId, pageNumber, pageSize, ...filters })
       );
       return response.data;
@@ -43,7 +43,7 @@ const EarningGeneral = ({ programId }: { programId: any }) => {
   });
   const detele = useMutation({
     mutationFn: async (id: any) => {
-      return EarningApi.delete(id);
+      return UpgradeApi.delete(id);
     },
     onSuccess: (res: any) => {
       setRowId(null);
@@ -136,7 +136,7 @@ const EarningGeneral = ({ programId }: { programId: any }) => {
         </>
       ) : (
         <>
-          <EarningAction
+          <UpgradeAction
             programId={programId}
             item={formData}
             onChange={handleSave}
@@ -147,4 +147,4 @@ const EarningGeneral = ({ programId }: { programId: any }) => {
   );
 };
 
-export default EarningGeneral;
+export default UpgradeGeneral;

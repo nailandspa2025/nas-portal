@@ -9,7 +9,7 @@ import { DropdownApi } from "../../../apis/dropdown/dropdown";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { buildFormData } from "../../../utils/common/buildFormData";
 import { toast } from "react-toastify";
-import { LoyaltyPointApi } from "../../../apis/loyalty/LoyaltyPoint";
+import { PointSettingApi } from "../../../apis/loyalty/pointSetting";
 const SetPointAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -20,7 +20,7 @@ const SetPointAction = () => {
   const { data } = useQuery({
     queryKey: ["roleDetail", params.id],
     queryFn: async () => {
-      const res: any = await LoyaltyPointApi.getById(params.id as any);
+      const res: any = await PointSettingApi.getById(params.id as any);
       return res?.data || {};
     },
     enabled: !!params.id,
@@ -39,8 +39,8 @@ const SetPointAction = () => {
       const formD = new FormData();
       buildFormData(formD, values);
       return params.id
-        ? await LoyaltyPointApi.update(params.id as string, formD)
-        : await LoyaltyPointApi.create(formD);
+        ? await PointSettingApi.update(params.id as string, formD)
+        : await PointSettingApi.create(formD);
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {

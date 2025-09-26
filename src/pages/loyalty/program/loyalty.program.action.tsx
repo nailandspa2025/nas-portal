@@ -1,198 +1,154 @@
-import { Button, Card, Col, Form, Input, Row, Space, DatePicker } from "antd";
-import { useState, useEffect } from "react";
+import { Layout, Menu, Grid } from "antd";
+import {
+  SettingOutlined,
+  StarOutlined,
+  ArrowUpOutlined,
+  GiftOutlined,
+} from "@ant-design/icons";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
-import { checkAccessRight } from "../../../utils/common/accessUtils";
-import RemoteSelect from "../../../components/RemoteSelect";
-import { DropdownApi } from "../../../apis/dropdown/dropdown";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { buildFormData } from "../../../utils/common/buildFormData";
-import { toast } from "react-toastify";
-import { LoyaltyProgramApi } from "../../../apis/loyalty/LoyaltyProgram";
-import dayjs from "dayjs";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { ProgramApi } from "../../../apis/loyalty/program";
+import GeneralInfoAction from "./GeneralInfoAction";
+import RankingGeneral from "./RankingGeneral";
+import UpgradeGeneral from "./UpgradeGeneral";
+import EarningGeneral from "./EarningGeneral";
 const LoyaltyProgramActions = () => {
-  const accesses = useSelector((state: any) => state.auth.user?.accesses);
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
+  const isMobile = !screens.lg;
+
+  const [selectedKey, setSelectedKey] = useState("program");
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const [isSaved, setIsSaved] = useState(false);
+  const [programId, setProgramId] = useState<number | undefined>();
   const { t } = useTranslation();
   const params = useParams();
-  const navigate = useNavigate();
-  const [isDraft, setIsDraft] = useState<boolean>(false);
-  const [form] = Form.useForm();
-  const { data } = useQuery({
-    queryKey: ["roleDetail", params.id],
+  const { data, refetch } = useQuery({
+    queryKey: ["programDetail", params.id],
     queryFn: async () => {
-      const res: any = await LoyaltyProgramApi.getById(params.id as any);
+      const res: any = await ProgramApi.getById(params.id as any);
+      setProgramId(res?.data?.id);
       return res?.data || {};
     },
     enabled: !!params.id,
   });
-  useEffect(() => {
-    if (params.id && data) {
-      form.setFieldsValue({
-        name: data.name || "",
-        isDraft: data.isDraft || false,
-        pointIds: data.pointIds || null,
-        startDate: data.startDate ? dayjs(data.startDate, "YYYY-MM-DD") : null,
-        endDate: data.endDate ? dayjs(data.endDate, "YYYY-MM-DD") : null,
-      });
-    }
-  }, [data, form, params.id]);
-  const mutation = useMutation({
-    mutationFn: async (values) => {
-      const formD = new FormData();
-      buildFormData(formD, values);
-      return params.id
-        ? await LoyaltyProgramApi.update(params.id as string, formD)
-        : await LoyaltyProgramApi.create(formD);
-    },
-    onSuccess: (res: any) => {
-      if (res.succeeded) {
-        toast.success(t("Save successfully"));
-        navigate("/loyalty-program");
-      } else toast.error(t(res.message));
-    },
-    onError: () => {
-      toast.error(t("An error occurred"));
-    },
-  });
-  const handleSubmit = (type: boolean) => {
-    setIsDraft(type);
-    form.submit();
+  const handleProgramSaved = (id: any) => {
+    refetch();
+    setIsSaved(true);
+    setProgramId(id);
+    setOpenKeys(["rankGroup"]);
+    setSelectedKey("rank");
   };
-  const onFinish = (values: any) => {
-    const payload = { ...values, isDraft };
-    if (params?.id) payload.id = params.id;
-    mutation.mutate(payload);
+  const handleMenuClick = ({ key }: { key: string }) => {
+    setSelectedKey(key);
+    //setOpenKeys([]);
   };
   return (
-    <>
-      <Row
-        className="custom-row"
-        justify="space-between"
-        align="middle"
-        gutter={[0, 16]}
-      >
-        <Col flex="auto">
-          <div className="custom-title">
-            {params?.id ? t("Update set points") : t("Create set points")}
-          </div>
-        </Col>
-      </Row>
-      <Card>
-        <Form layout="vertical" form={form} onFinish={onFinish}>
-          <Row gutter={32}>
-            <Col span={24}>
-              <Form.Item
-                label={t("Program name")}
-                name={"name"}
-                rules={[
-                  {
-                    required: true,
-                    message: t("Please enter program name!"),
-                  },
-                ]}
-              >
-                <Input placeholder={t("Enter program name")} />
-              </Form.Item>
-              <Form.Item
-                label={t("Selcet point")}
-                name={"pointIds"}
-                rules={[
-                  {
-                    required: true,
-                    message: t("Please choose point!"),
-                  },
-                ]}
-              >
-                <RemoteSelect
-                  placeholder={t("Select point")}
-                  fetchList={DropdownApi.getLoyaltyPoints}
-                  fetchById={DropdownApi.getUserById}
-                  fetchByIds={DropdownApi.getUserByIds}
-                  labelKey={(item) => `${item.name}`}
-                  valueKey="id"
-                  mode="multiple"
-                />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={t("Start date")}
-                name="startDate"
-                rules={[
-                  { required: true, message: t("Please enter start date!") },
-                ]}
-              >
-                <DatePicker
-                  style={{ width: "100%" }}
-                  placeholder={t("Enter start date")}
-                  format="DD/MM/YYYY"
-                />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="End date"
-                name="endDate"
-                dependencies={["startDate"]}
-                rules={[
-                  { required: true, message: "Please enter end date!" },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      const start = getFieldValue("startDate");
-                      if (!value || !start) return Promise.resolve();
-                      if (dayjs(value).isBefore(dayjs(start), "day")) {
-                        return Promise.reject(
-                          new Error(
-                            "End date cannot be earlier than start date!"
-                          )
-                        );
-                      }
-                      return Promise.resolve();
-                    },
-                  }),
-                ]}
-              >
-                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
-              </Form.Item>
-            </Col>
-          </Row>
-        </Form>
-      </Card>
-      <Space
-        wrap
-        style={{
-          width: "100%",
-          justifyContent: "flex-end",
-          marginTop: 20,
-        }}
-      >
-        <Button
-          type="default"
-          style={{ background: "#FF1818", color: "#fff" }}
-          onClick={() => navigate("/loyalty-point")}
+    <Layout style={{ height: "calc(100vh - 150px)" }}>
+      {!isMobile ? (
+        <Layout.Sider
+          width={220}
+          style={{ background: "#fff", borderRight: "1px solid #f0f0f0" }}
         >
-          {t("Cancel")}
-        </Button>
+          <div
+            style={{ padding: "16px", fontWeight: "bold", fontSize: "14px" }}
+          >
+            LOYALTY
+          </div>
+          <Menu
+            mode="inline"
+            openKeys={openKeys}
+            onOpenChange={setOpenKeys}
+            selectedKeys={[selectedKey]}
+            style={{ borderRight: 0 }}
+            onClick={handleMenuClick}
+          >
+            <Menu.Item key="program" icon={<SettingOutlined />}>
+              {t("Program configuration")}
+            </Menu.Item>
+            <Menu.SubMenu
+              key="rankGroup"
+              icon={<SettingOutlined />}
+              title={t("Rank configuration")}
+              disabled={!isSaved && !params.id}
+            >
+              <Menu.Item
+                key="rank"
+                icon={<StarOutlined />}
+                disabled={!isSaved && !params.id}
+              >
+                {t("Create rank")}
+              </Menu.Item>
+              <Menu.Item
+                key="upgrade"
+                icon={<ArrowUpOutlined />}
+                disabled={!isSaved && !params.id}
+              >
+                {t("Upgrade rank")}
+              </Menu.Item>
+            </Menu.SubMenu>
+            <Menu.Item
+              key="points"
+              icon={<GiftOutlined />}
+              disabled={!isSaved && !params.id}
+            >
+              {t("Points configuration")}
+            </Menu.Item>
+          </Menu>
+        </Layout.Sider>
+      ) : (
+        // --- Mobile: Menu ngang ---
+        <Menu
+          mode="horizontal"
+          selectedKeys={[selectedKey]}
+          onClick={handleMenuClick}
+          style={{ borderBottom: "1px solid #f0f0f0", marginBottom: 16 }}
+        >
+          <Menu.Item key="program" icon={<SettingOutlined />}>
+            {t("Program ")}
+          </Menu.Item>
+          <Menu.SubMenu
+            key="rankGroup"
+            icon={<SettingOutlined />}
+            title={t("Rank")}
+            disabled={!isSaved && !params.id}
+          >
+            <Menu.Item
+              key="rank"
+              icon={<StarOutlined />}
+              disabled={!isSaved && !params.id}
+            >
+              {t("Create rank")}
+            </Menu.Item>
+            <Menu.Item
+              key="upgrade"
+              icon={<ArrowUpOutlined />}
+              disabled={!isSaved && !params.id}
+            >
+              {t("Upgrade rank")}
+            </Menu.Item>
+          </Menu.SubMenu>
+          <Menu.Item
+            key="points"
+            icon={<GiftOutlined />}
+            disabled={!isSaved && !params.id}
+          >
+            {t("Points")}
+          </Menu.Item>
+        </Menu>
+      )}
 
-        <>
-          <Button
-            type="default"
-            onClick={() => handleSubmit(true)}
-            style={{ background: "#00A537", color: "#fff" }}
-          >
-            {t("Draft")}
-          </Button>
-          <Button
-            type="default"
-            onClick={() => handleSubmit(false)}
-            style={{ background: "#1890FF", color: "#fff" }}
-          >
-            {t("Save")}
-          </Button>
-        </>
-      </Space>
-    </>
+      <Layout style={{ paddingLeft: isMobile ? 0 : 24 }}>
+        {selectedKey === "program" && (
+          <GeneralInfoAction item={data} onSaved={handleProgramSaved} />
+        )}
+        {selectedKey === "rank" && <RankingGeneral programId={programId} />}
+        {selectedKey === "upgrade" && <UpgradeGeneral programId={programId} />}
+        {selectedKey === "points" && <EarningGeneral programId={programId} />}
+      </Layout>
+    </Layout>
   );
 };
 
