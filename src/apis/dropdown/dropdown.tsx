@@ -138,4 +138,41 @@ export const DropdownApi = {
     const endpoint = `/catalog/api/v1/dropdownlist/bank-ids/${ids}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
+  getLoyaltyPoints: async (queryString: any) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/point-settings?${queryString}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getLoyaltyPointById: async (id: any) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/point-settings/${id}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getLoyaltyPointByIds: async (ids: string) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/point-settings-ids/${ids}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+
+  getLoyaltyGroups: async (queryString: any) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/group-settings?${queryString}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getLoyaltyGroupById: async (id: any) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/group-settings/${id}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getLoyaltyGroupByIds: async (ids: string) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/group-settings-ids/${ids}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getLoyaltyTiers: async (queryString: any) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/tiers?${queryString}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getLoyaltyTierById: async (id: any) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/tiers/${id}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
+  getLoyaltyTierByIds: async (ids: string) => {
+    const endpoint = `/loyalty/api/v1/dropdownlist/tiers-ids/${ids}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
 };
