@@ -1,9 +1,9 @@
 import { Button, Card, Col, Form, Input, Row, Space } from "antd";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
+//import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { checkAccessRight } from "../../../utils/common/accessUtils";
+//import { checkAccessRight } from "../../../utils/common/accessUtils";
 import RemoteSelect from "../../../components/RemoteSelect";
 import { DropdownApi } from "../../../apis/dropdown/dropdown";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -11,7 +11,7 @@ import { buildFormData } from "../../../utils/common/buildFormData";
 import { toast } from "react-toastify";
 import { GroupSettingApi } from "../../../apis/loyalty/groupSetting";
 const LoyaltyGroupActions = () => {
-  const accesses = useSelector((state: any) => state.auth.user?.accesses);
+  //const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
   const params = useParams();
   const navigate = useNavigate();
