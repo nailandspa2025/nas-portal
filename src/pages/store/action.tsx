@@ -12,6 +12,7 @@ import {
   Typography,
   Space,
   Switch,
+  InputNumber,
 } from "antd";
 import {
   PlusOutlined,
@@ -105,6 +106,7 @@ const StoreAction = () => {
         socialNetworks: data.socialNetworks || null,
         paypalConfig: data.paypalConfig || null,
         deepLink: data.deepLink || deeplink?.shortLink,
+        order: data.order || null,
       });
     }
   }, [data, form, params.id]);
@@ -398,6 +400,12 @@ const StoreAction = () => {
               </Form.Item>
               <Form.Item label={t("Description")} name={"description"}>
                 <Input.TextArea rows={5} placeholder={t("Enter description")} />
+              </Form.Item>
+              <Form.Item label={t("Sort order")} name="order">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder={t("Enter sort order")}
+                />
               </Form.Item>
               {params.id && (
                 <>
