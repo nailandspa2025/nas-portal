@@ -1,97 +1,233 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import useElementHeight from "../../utils/useElementHeight";
-import { useMemo, useRef, useState } from "react";
-import { Row, Card, Modal, Button } from "antd";
-import DataTable from "../../components/common/DataTable";
-import * as utils from "../../utils/filter/bookings";
-import FilterData from "../../components/common/FilterData";
-import queryString from "query-string";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { BookingApi } from "../../apis/order/booking";
-import { useSelector } from "react-redux";
-import { checkAccessRight } from "../../utils/common/accessUtils";
+import { useState, useMemo } from "react";
+import { Card, Row, Col, Modal, Button } from "antd";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import dayjs from "dayjs";
+import queryString from "query-string";
+import { toast } from "react-toastify";
+
+// Calendar components
+import CalendarMain from "../../components/calendar/CalendarMain";
+import EventModal from "../../components/calendar/EventModal";
+import FilterData from "../../components/common/FilterData";
+import * as utils from "../../utils/filter/bookings";
+
+// APIs and utils
+import { BookingApi } from "../../apis/order/booking";
+import { buildFormData } from "../../utils/common/buildFormData";
+
+// Modals
 import ModalConfirm from "../../components/ModalConfirm";
 import ModalPayment from "../../components/ModalPayment";
-import { buildFormData } from "../../utils/common/buildFormData";
 import ModalCancelBooking from "../../components/ModalCancelBooking";
 import { QRCodeCanvas } from "qrcode.react";
+import "./calendar.scss";
+
+// Helper function to parse booking date and time
+const parseBookingDateTime = (bookingDate: string, bookingTime: string) => {
+  if (!bookingDate || !bookingTime) {
+    return dayjs(); // Fallback to current date/time if data is missing
+  }
+
+  // Extract date part from ISO string (remove time and Z)
+  const datePart = bookingDate.split("T")[0]; // Gets "2025-10-02"
+  const timeStr = bookingTime; // "10:20:00"
+
+  // Combine date and time properly
+  return dayjs(`${datePart}T${timeStr}`);
+};
+
 const Bookings = () => {
-  const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const divRef = useRef<HTMLDivElement>(null);
-  const heightElement = useElementHeight(divRef);
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(20);
+
+  // Calendar states
+  const [currentView, setCurrentView] = useState("dayGridMonth");
+  const [currentDate, setCurrentDate] = useState(dayjs());
+  const [endDate, setEndDate] = useState(dayjs().add(1, "month"));
+
+  // Filter states
   const [filters, setFilters] = useState<Record<string, string>>({});
-  const [filteredColumns, setFilteredColumns] = useState();
-  const [openModal, setOpenModal] = useState<boolean>(false);
-  const [rowId, setRowId] = useState<number>(0);
-  const [openModalPayment, setOpenModalPayment] = useState<boolean>(false);
-  const [paymentData, setPaymentData] = useState<object>({});
-  const [openModalCancel, setOpenModalCancel] = useState<boolean>(false);
-  const [qrModal, setQrModal] = useState<boolean>(false);
+
+  // Modal states
+  const [openEventModal, setOpenEventModal] = useState(false);
+  const [eventData, setEventData] = useState<any>(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [openModalPayment, setOpenModalPayment] = useState(false);
+  const [openModalCancel, setOpenModalCancel] = useState(false);
+  const [openQrModal, setQrModal] = useState(false);
+  const [paymentData, setPaymentData] = useState<any>({});
   const [approveUrl, setApproveUrl] = useState<any>(null);
-  const handleItemTable = {
-    handleEdit: (record: any) => {
-      navigate(`/booking/${record.id}`);
-    },
-    handleDelete: (record: any) => {
-      setRowId(record.id);
-      setOpenModal(true);
-    },
-    handleCancel: (record: any) => {
-      setRowId(record.id);
-      setOpenModalCancel(true);
-    },
-    handlePayment: (record: any) => {
-      setOpenModalPayment(true);
-      setPaymentData(record);
-    },
+  const [rowId, setRowId] = useState<number>(0);
+
+  // Filter handler
+  const handleFilterChange = (params: Record<string, string>) => {
+    setFilters(params);
   };
-  const { data, refetch } = useQuery({
-    queryKey: ["bookingList", { pageNumber, pageSize, ...filters }],
+
+  // Get bookings data
+  const { data: bookingsData, refetch: refetchBookings } = useQuery({
+    queryKey: [
+      "bookingCalendarList",
+      { startDate: currentDate, endDate: endDate, ...filters },
+    ],
     queryFn: async () => {
       const response: any = await BookingApi.getWithPagination(
-        queryString.stringify({ pageNumber, pageSize, ...filters })
+        queryString.stringify({
+          pageNumber: 1,
+          pageSize: 1000,
+          startDate: currentDate.format("YYYY-MM-DD"),
+          endDate: endDate.format("YYYY-MM-DD"),
+          ...filters,
+        })
       );
       return response.data;
     },
-    enabled: !!filters,
   });
-  const handleFilterChange = (params: Record<string, string>) => {
-    setFilters(params);
-    setPageNumber(1);
+
+  // Transform bookings to calendar events
+  const events = useMemo(() => {
+    if (!bookingsData?.items) return [];
+
+    return bookingsData.items.map((booking: any) => {
+      // Get status color mapping
+      const statusColorMap: Record<number, string> = {
+        1: "#faad14", // Pending - orange
+        2: "#52c41a", // Completed - green
+        3: "#ff4d4f", // Cancelled - red
+      };
+
+      const status = booking.status || 1;
+      const color = statusColorMap[status] || "#1677ff"; // default blue
+
+      // Parse booking date and time using helper function
+      const startDateTime = parseBookingDateTime(
+        booking.bookingDate,
+        booking.bookingTime
+      );
+
+      // No end time needed, just use start time for calendar display
+
+      // Format time as HH:mm
+      const timeDisplay = booking.bookingTime
+        ? dayjs(booking.bookingTime, "HH:mm:ss").format("HH:mm")
+        : "";
+
+      return {
+        id: booking.id,
+        title: booking.fullName || `Booking #${booking.id}`,
+        start: startDateTime.toDate(),
+        backgroundColor: color,
+        borderColor: color,
+        color: color,
+        textColor: "#ffffff",
+        className: `booking-status-${status}`, // Add CSS class based on status
+        extendedProps: {
+          ...booking,
+          startTime: timeDisplay, // Display time in HH:mm format
+          originalId: booking.id,
+          status: status,
+          statusColor: color,
+        },
+      };
+    });
+  }, [bookingsData]);
+
+  // Event handlers
+  const handleDateClick = (arg: any) => {
+    setEventData({
+      bookingDate: dayjs(arg.dateStr),
+      fullName: "",
+      phone: "",
+      email: "",
+    });
+    setOpenEventModal(true);
   };
-  const handleActions = {
-    createNew: () => {
-      navigate("/booking/none");
+
+  const handleEventClick = (arg: any) => {
+    const booking = arg.event.extendedProps;
+    setEventData({
+      ...booking,
+      bookingDate: dayjs(booking.bookingDate),
+      bookingTime: dayjs(booking.bookingTime, "HH:mm:ss"),
+      originalId: booking.originalId,
+    });
+    setOpenEventModal(true);
+  };
+
+  const handleCreateEvent = () => {
+    setEventData({
+      fullName: "",
+      phone: "",
+      email: "",
+      bookingDate: dayjs(),
+    });
+    setOpenEventModal(true);
+  };
+
+  // Mutations
+  const createBookingMutation = useMutation({
+    mutationFn: async (values: any) => {
+      const formD = new FormData();
+      buildFormData(formD, values);
+      return BookingApi.create(formD);
     },
-  };
-  const mutationDelete = useMutation({
+    onSuccess: (res: any) => {
+      if (res.succeeded) {
+        toast.success(t("Create booking successfully!"));
+        refetchBookings();
+        setOpenEventModal(false);
+        setEventData(null);
+      } else {
+        toast.error(t(res.message));
+      }
+    },
+    onError: (error: any) => {
+      toast.error(t(error.message));
+    },
+  });
+
+  const updateBookingMutation = useMutation({
+    mutationFn: async (values: any) => {
+      const formD = new FormData();
+      buildFormData(formD, values);
+      return BookingApi.update(values.id, formD);
+    },
+    onSuccess: (res: any) => {
+      if (res.succeeded) {
+        toast.success(t("Update booking successfully!"));
+        refetchBookings();
+        setOpenEventModal(false);
+        setEventData(null);
+      } else {
+        toast.error(t(res.message));
+      }
+    },
+    onError: (error: any) => {
+      toast.error(t(error.message));
+    },
+  });
+
+  const deleteBookingMutation = useMutation({
     mutationFn: async (id: number) => {
       return BookingApi.delete(id);
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
-        refetch();
-        toast.success(t("Delete successfully!"));
+        toast.success(t("Delete booking successfully!"));
+        refetchBookings();
+        setOpenEventModal(false);
+        setEventData(null);
       } else {
         toast.error(t(res.message));
       }
-      setRowId(0);
-      setOpenModal(false);
     },
-    onError: (error) => {
-      setRowId(0);
-      setOpenModal(false);
+    onError: (error: any) => {
       toast.error(t(error.message));
     },
   });
-  const mutationCancel = useMutation({
+
+  const cancelBookingMutation = useMutation({
     mutationFn: async (values: any) => {
       const formD = new FormData();
       buildFormData(formD, values);
@@ -99,28 +235,24 @@ const Bookings = () => {
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
-        refetch();
-        toast.success(t("Cancel successfully!"));
+        toast.success(t("Cancel booking successfully!"));
+        refetchBookings();
+        setOpenModalCancel(false);
+        setRowId(0);
       } else {
         toast.error(t(res.message));
       }
-      setRowId(0);
-      setOpenModalCancel(false);
     },
-    onError: (error) => {
-      setRowId(0);
-      setOpenModalCancel(false);
+    onError: (error: any) => {
       toast.error(t(error.message));
     },
   });
-  const onConfirmDelate = (id: number) => {
-    mutationDelete.mutate(id);
-  };
-  const mutationPayment = useMutation({
-    mutationFn: async (values) => {
+
+  const paymentMutation = useMutation({
+    mutationFn: async (values: any) => {
       const formD = new FormData();
       buildFormData(formD, values);
-      return await BookingApi.payment(formD);
+      return BookingApi.payment(formD);
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
@@ -128,120 +260,174 @@ const Bookings = () => {
         if (approveUrl) {
           setApproveUrl(approveUrl);
           setQrModal(true);
-          //window.location.href = approveUrl;
         }
-        toast.success("Save successfully");
-        refetch();
-      } else toast.error(t(res.message));
-      setOpenModalPayment(false);
+        toast.success(t("Payment processed successfully!"));
+        refetchBookings();
+        setOpenModalPayment(false);
+      } else {
+        toast.error(t(res.message));
+      }
     },
-    onError: () => {
-      toast.error(t("An error occurred"));
-      setOpenModalPayment(false);
+    onError: (error: any) => {
+      toast.error(t(error.message));
     },
   });
+
+  // Event handlers
+  const handleEventSubmit = (values: any) => {
+    const payload = {
+      ...values,
+      bookingDate: dayjs(values.bookingDate).format("YYYY-MM-DD"),
+      bookingTime: dayjs(values.bookingTime).format("HH:mm:ss"),
+    };
+
+    if (eventData?.originalId) {
+      payload.id = eventData.originalId;
+      updateBookingMutation.mutate(payload);
+    } else {
+      createBookingMutation.mutate(payload);
+    }
+  };
+
+  const handleEventDelete = (booking: any) => {
+    setRowId(booking.originalId);
+    setOpenModal(true);
+  };
+
+  const handleEventPayment = (booking: any) => {
+    setPaymentData(booking);
+    setOpenModalPayment(true);
+    setOpenEventModal(false);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteBookingMutation.mutate(rowId);
+    setOpenModal(false);
+  };
+
   const handlePaymentSubmit = async (values: any) => {
     const payload = {
       ...values,
       returnUrl: window.location.origin + "/payment/success",
       cancelUrl: window.location.origin + "/payment/failed",
     };
-    mutationPayment.mutate(payload);
+    paymentMutation.mutate(payload);
   };
+
   const handleCancelSubmit = (values: any) => {
     const payload = {
       ...values,
       id: rowId,
     };
-    mutationCancel.mutate(payload);
+    cancelBookingMutation.mutate(payload);
   };
-  const columns = useMemo(() => {
-    return utils.columns({
-      hasEditPermission: checkAccessRight(accesses, "update", "booking"),
-      hasDeletePermission: checkAccessRight(accesses, "delete", "booking"),
-      hasPaymentPermission: checkAccessRight(accesses, "payment", "booking"),
-      t,
-      handleEdit: handleItemTable.handleEdit,
-      handleDelete: handleItemTable.handleDelete,
-      handleCancel: handleItemTable.handleCancel,
-      handlePayment: handleItemTable.handlePayment,
-    });
-  }, [accesses]);
+
+  // Custom utils for calendar - only filters, no columns/buttons
+  const calendarUtils = useMemo(() => {
+    return {
+      filters: utils.filters || [], // Keep filters
+    };
+  }, []);
+
   return (
-    <Card className="ant-custom-pagination">
-      <div ref={divRef}>
-        <Row style={{ marginBottom: "16px" }}>
-          <FilterData
-            filteredColumns={columns}
-            onColumnChange={setFilteredColumns}
-            onFilterChange={handleFilterChange}
-            handlers={handleActions}
-            utils={utils}
-          />
-        </Row>
-      </div>
-      <DataTable
-        current={pageNumber}
-        columns={filteredColumns}
-        dataSource={data?.items}
-        total={data?.totalCount}
-        pageSize={pageSize}
-        heightTable={heightElement}
-        onChange={(page, pageSize) => {
-          setPageSize(pageSize);
-          setPageNumber(page);
-        }}
+    <div style={{ padding: "24px" }}>
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Card>
+            <Row style={{ marginBottom: "16px" }}>
+              <FilterData
+                onFilterChange={handleFilterChange}
+                utils={calendarUtils}
+                filteredColumns={[]}
+                onColumnChange={() => {}}
+              />
+            </Row>
+            <CalendarMain
+              events={events}
+              onDateClick={handleDateClick}
+              onEventClick={handleEventClick}
+              currentView={currentView}
+              setCurrentView={setCurrentView}
+              setCurrentDate={setCurrentDate}
+              currentDate={currentDate}
+              setEndDate={setEndDate}
+              endDate={endDate}
+              onCreate={handleCreateEvent}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Event Modal */}
+      <EventModal
+        open={openEventModal}
+        setOpen={setOpenEventModal}
+        eventData={eventData}
+        setEventData={setEventData}
+        loading={
+          createBookingMutation.isPending || updateBookingMutation.isPending
+        }
+        onSubmit={handleEventSubmit}
+        handleDelete={handleEventDelete}
+        handlePayment={handleEventPayment}
       />
+
+      {/* Delete Confirmation Modal */}
       <ModalConfirm
         openModal={openModal}
         setOpenModal={setOpenModal}
-        onChange={() => onConfirmDelate(rowId)}
+        onChange={handleConfirmDelete}
       />
 
+      {/* Payment Modal */}
       <ModalPayment
         data={paymentData}
         openModal={openModalPayment}
         setOpenModal={setOpenModalPayment}
         onSubmit={handlePaymentSubmit}
       />
+
+      {/* Cancel Booking Modal */}
       <ModalCancelBooking
         openModal={openModalCancel}
         setOpenModal={setOpenModalCancel}
         onSubmit={handleCancelSubmit}
       />
+
+      {/* QR Payment Modal */}
       <Modal
         title={<span className="font-semibold text-lg">💳 Scan QR to pay</span>}
-        open={qrModal}
+        open={openQrModal}
         onCancel={() => setQrModal(false)}
         footer={[
           <Button
             key="cancel"
             type="primary"
             danger
-            onClick={() => setQrModal(false)}
-          >
+            onClick={() => setQrModal(false)}>
             {t("Cancel")}
           </Button>,
         ]}
-        centered
-      >
+        centered>
         <div style={{ textAlign: "center", padding: "20px 0" }}>
           <QRCodeCanvas value={approveUrl || ""} size={220} />
           <p style={{ marginTop: 16, fontSize: 14, color: "#555" }}>
             Use your banking app or e-wallet to scan the code
           </p>
-
           <a
             href={approveUrl}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ display: "inline-block", marginTop: 12, color: "#1677ff" }}
-          >
+            style={{
+              display: "inline-block",
+              marginTop: 12,
+              color: "#1677ff",
+            }}>
             👉 Open payment link
           </a>
         </div>
       </Modal>
-    </Card>
+    </div>
   );
 };
 export default Bookings;

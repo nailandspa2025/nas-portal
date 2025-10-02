@@ -1,0 +1,76 @@
+.fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  border-radius: 50%; /* Hình tròn */
+  width: 24px;
+  height: 24px;
+  color: #fff; /* Màu chữ xanh */
+  background-color: #0b57d0;
+}
+.fc .fc-daygrid-day-number {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+}
+
+/* Force calendar event colors */
+.fc-event {
+  border: none !important;
+  color: white !important;
+}
+
+.fc-event .fc-event-main {
+  background-color: inherit !important;
+  color: white !important;
+}
+
+.fc-event .fc-event-main * {
+  color: white !important;
+}
+
+/* Prevent white background on hover */
+.fc-daygrid-day:hover {
+  background-color: transparent !important;
+}
+
+.fc-event:hover {
+  opacity: 0.9;
+}
+
+.fc-event:hover .fc-event-main {
+  background-color: inherit !important;
+}
+
+/* List view hover styles */
+.fc-list-event:hover td {
+  background-color: transparent !important;
+}
+
+.fc-list-event:hover .fc-list-event-dot {
+  border-color: inherit !important;
+}
+
+.fc-list-event:hover .fc-list-event-title,
+.fc-list-event:hover .fc-list-event-time {
+  background-color: inherit !important;
+}
+
+/* Status specific colors using CSS classes */
+.booking-status-1 {
+  background-color: #faad14 !important;
+  border-color: #faad14 !important;
+}
+
+.booking-status-2 {
+  background-color: #52c41a !important;
+  border-color: #52c41a !important;
+}
+
+.booking-status-3 {
+  background-color: #ff4d4f !important;
+  border-color: #ff4d4f !important;
+}
+
+/* Suppress Antd React version warning */
+.ant-compatible-warning {
+  display: none !important;
+}
