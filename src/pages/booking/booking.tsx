@@ -330,7 +330,7 @@ const Bookings = () => {
   }, []);
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div>
       <Row gutter={[16, 16]}>
         <Col span={24}>
           <Card>
@@ -404,11 +404,13 @@ const Bookings = () => {
             key="cancel"
             type="primary"
             danger
-            onClick={() => setQrModal(false)}>
+            onClick={() => setQrModal(false)}
+          >
             {t("Cancel")}
           </Button>,
         ]}
-        centered>
+        centered
+      >
         <div style={{ textAlign: "center", padding: "20px 0" }}>
           <QRCodeCanvas value={approveUrl || ""} size={220} />
           <p style={{ marginTop: 16, fontSize: 14, color: "#555" }}>
@@ -422,7 +424,8 @@ const Bookings = () => {
               display: "inline-block",
               marginTop: 12,
               color: "#1677ff",
-            }}>
+            }}
+          >
             👉 Open payment link
           </a>
         </div>
