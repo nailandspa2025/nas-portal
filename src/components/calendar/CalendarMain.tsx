@@ -4,9 +4,11 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import listPlugin from "@fullcalendar/list";
 import interactionPlugin from "@fullcalendar/interaction";
-import { useRef, useState } from "react";
+import resourceTimeGridPlugin from "@fullcalendar/resource-timegrid";
+import resourceDayGridPlugin from "@fullcalendar/resource-daygrid";
+import { useRef, useState, useEffect } from "react";
 import { Button, Col, Row, Space, DatePicker } from "antd";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -16,21 +18,81 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 
+// Calendar constants
+const CALENDAR_CONFIG = {
+  MIN_HEIGHT: 400,
+  FOOTER_PADDING: 80,
+  FIRST_DAY: 1,
+  SLOT_MIN_TIME: "06:00:00",
+  SLOT_MAX_TIME: "22:00:00",
+  SLOT_DURATION: "00:15:00",
+  RESOURCE_AREA_WIDTH: "15%",
+} as const;
+
+const CALENDAR_VIEWS = {
+  RESOURCE_DAY: "resourceTimeGridDay",
+  RESOURCE_WEEK: "resourceTimeGridWeek",
+  MONTH: "dayGridMonth",
+  WEEK: "timeGridWeek",
+  DAY: "timeGridDay",
+  LIST: "listWeek",
+} as const;
+
+const SCHEDULER_LICENSE_KEY = "CC-Attribution-NonCommercial-NoDerivatives";
+
+// Type definitions - using FullCalendar's built-in types
+type CalendarEvent = any; // FullCalendar's EventInput type
+type CalendarResource = any; // FullCalendar's ResourceInput type
+type DateClickArg = any; // FullCalendar's DateClickArg type
+type EventClickArg = any; // FullCalendar's EventClickArg type
+
 interface CalendarMainProps {
-  events: any[];
-  onDateClick: (arg: any) => void;
-  onEventClick: (arg: any) => void;
+  events: CalendarEvent[];
+  resources?: CalendarResource[];
+  onDateClick: (arg: DateClickArg) => void;
+  onEventClick: (arg: EventClickArg) => void;
   currentView: string;
   setCurrentView: (view: string) => void;
-  setCurrentDate: (date: dayjs.Dayjs) => void;
-  currentDate: any;
-  setEndDate: (date: dayjs.Dayjs) => void;
-  endDate?: any;
+  setCurrentDate: (date: Dayjs) => void;
+  currentDate: Dayjs;
+  setEndDate: (date: Dayjs) => void;
+  endDate?: Dayjs;
   onCreate: () => void;
 }
 
+// Custom hook for calendar height calculation
+const useCalendarHeight = (
+  wrapperRef: React.RefObject<HTMLDivElement | null>
+) => {
+  const [calendarHeight, setCalendarHeight] = useState<string>("auto");
+
+  useEffect(() => {
+    const calculateHeight = () => {
+      const wrapper = wrapperRef.current;
+      if (!wrapper) return;
+
+      const rect = wrapper.getBoundingClientRect();
+      const availableHeight =
+        window.innerHeight - rect.top - CALENDAR_CONFIG.FOOTER_PADDING;
+
+      if (availableHeight > CALENDAR_CONFIG.MIN_HEIGHT) {
+        setCalendarHeight(`${availableHeight}px`);
+      } else {
+        setCalendarHeight(`${CALENDAR_CONFIG.MIN_HEIGHT}px`);
+      }
+    };
+
+    calculateHeight();
+    window.addEventListener("resize", calculateHeight);
+    return () => window.removeEventListener("resize", calculateHeight);
+  }, [wrapperRef]);
+
+  return calendarHeight;
+};
+
 export default function CalendarMain({
   events,
+  resources = [],
   onDateClick,
   onEventClick,
   currentView,
@@ -43,8 +105,12 @@ export default function CalendarMain({
   const { i18n, t } = useTranslation();
 
   const calendarRef = useRef<FullCalendar | null>(null);
+  const calendarWrapperRef = useRef<HTMLDivElement>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
+  const calendarHeight = useCalendarHeight(calendarWrapperRef);
+
+  // Calendar navigation handlers
   const handleToday = () => {
     const calendarApi = calendarRef.current?.getApi();
     calendarApi?.today();
@@ -60,7 +126,7 @@ export default function CalendarMain({
     calendarApi?.next();
   };
 
-  const handleDateSelect = (date: dayjs.Dayjs | null) => {
+  const handleDateSelect = (date: Dayjs | null) => {
     if (date) {
       const calendarApi = calendarRef.current?.getApi();
       calendarApi?.gotoDate(date.toDate());
@@ -73,53 +139,114 @@ export default function CalendarMain({
     const calendarApi = calendarRef.current?.getApi();
     calendarApi?.changeView(viewName);
   };
+
+  // Helper functions
+  const hasResources = resources && resources.length > 0;
+
+  const getInitialView = () => {
+    return hasResources ? CALENDAR_VIEWS.RESOURCE_DAY : currentView;
+  };
+
+  const formatCurrentDate = () => {
+    return hasResources
+      ? currentDate.format("ddd, MMM DD, YYYY")
+      : currentDate.add(1, "month").format("MMMM YYYY");
+  };
   return (
     <>
       <Row justify="space-between" align="middle" gutter={[8, 8]}>
+        {/* Left - View mode buttons + New button */}
         <Col flex="auto">
-          <Space.Compact>
-            <Button
-              type={currentView == "dayGridMonth" ? "primary" : undefined}
-              onClick={() => changeView("dayGridMonth")}>
-              {t("Month")}
-            </Button>
-            <Button
-              onClick={() => changeView("timeGridWeek")}
-              type={currentView == "timeGridWeek" ? "primary" : undefined}>
-              {t("Week")}
-            </Button>
-            <Button
-              onClick={() => changeView("timeGridDay")}
-              type={currentView === "timeGridDay" ? "primary" : undefined}>
-              {t("Day")}
-            </Button>
-            <Button
-              onClick={() => changeView("listWeek")}
-              type={currentView == "listWeek" ? "primary" : undefined}>
-              {t("Next to")}
-            </Button>
-            <Button onClick={() => onCreate()} icon={<PlusOutlined />}></Button>
-          </Space.Compact>
-        </Col>
-        <Col flex="auto">
-          <div style={{ fontSize: 18, fontWeight: 600, textAlign: "center" }}>
-            {currentDate.add(1, "month").format("MMMM YYYY")}{" "}
-          </div>
-        </Col>
-        <Col flex="auto">
-          <div
-            style={{
-              textAlign: "end",
-            }}>
+          <Space size="small">
             <Space.Compact>
-              <Button onClick={handleToday}>{t("Today")}</Button>
+              {hasResources ? (
+                <>
+                  <Button
+                    type={
+                      currentView === CALENDAR_VIEWS.RESOURCE_DAY
+                        ? "primary"
+                        : undefined
+                    }
+                    onClick={() => changeView(CALENDAR_VIEWS.RESOURCE_DAY)}>
+                    {t("View by day")}
+                  </Button>
+                  <Button
+                    type={
+                      currentView === CALENDAR_VIEWS.RESOURCE_WEEK
+                        ? "primary"
+                        : undefined
+                    }
+                    onClick={() => changeView(CALENDAR_VIEWS.RESOURCE_WEEK)}>
+                    {t("View by week")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    type={
+                      currentView === CALENDAR_VIEWS.MONTH
+                        ? "primary"
+                        : undefined
+                    }
+                    onClick={() => changeView(CALENDAR_VIEWS.MONTH)}>
+                    {t("Month")}
+                  </Button>
+                  <Button
+                    type={
+                      currentView === CALENDAR_VIEWS.WEEK
+                        ? "primary"
+                        : undefined
+                    }
+                    onClick={() => changeView(CALENDAR_VIEWS.WEEK)}>
+                    {t("Week")}
+                  </Button>
+                  <Button
+                    type={
+                      currentView === CALENDAR_VIEWS.DAY ? "primary" : undefined
+                    }
+                    onClick={() => changeView(CALENDAR_VIEWS.DAY)}>
+                    {t("Day")}
+                  </Button>
+                  <Button
+                    type={
+                      currentView === CALENDAR_VIEWS.LIST
+                        ? "primary"
+                        : undefined
+                    }
+                    onClick={() => changeView(CALENDAR_VIEWS.LIST)}>
+                    {t("Next to")}
+                  </Button>
+                </>
+              )}
+            </Space.Compact>
+            <Button type="primary" onClick={onCreate} icon={<PlusOutlined />}>
+              {t("New")}
+            </Button>
+          </Space>
+        </Col>
+
+        {/* Center - Navigation controls + Current date */}
+        <Col flex="auto">
+          <div style={{ textAlign: "center" }}>
+            <Space
+              size="small"
+              style={{ display: "inline-flex", alignItems: "center" }}>
               <Button icon={<LeftOutlined />} onClick={handlePrev} />
+              <Button onClick={handleToday}>{t("Today")}</Button>
               <Button
                 icon={<CalendarOutlined />}
                 onClick={() => setDatePickerOpen(true)}
               />
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 600,
+                  padding: "0 12px",
+                }}>
+                {formatCurrentDate()}
+              </div>
               <Button icon={<RightOutlined />} onClick={handleNext} />
-            </Space.Compact>
+            </Space>
           </div>
           <DatePicker
             open={datePickerOpen}
@@ -136,7 +263,10 @@ export default function CalendarMain({
             }}
           />
         </Col>
-        <Col span={24}>
+
+        {/* Right - Empty for balance */}
+        <Col flex="auto"></Col>
+        <Col span={24} ref={calendarWrapperRef}>
           <FullCalendar
             ref={calendarRef}
             plugins={[
@@ -144,18 +274,23 @@ export default function CalendarMain({
               timeGridPlugin,
               listPlugin,
               interactionPlugin,
+              resourceTimeGridPlugin,
+              resourceDayGridPlugin,
             ]}
-            initialView={currentView}
+            initialView={getInitialView()}
+            schedulerLicenseKey={SCHEDULER_LICENSE_KEY}
             headerToolbar={false}
             events={events}
+            resources={hasResources ? resources : undefined}
             dateClick={onDateClick}
             eventClick={onEventClick}
-            height="auto"
-            firstDay={1}
+            height={calendarHeight}
+            firstDay={CALENDAR_CONFIG.FIRST_DAY}
             locale={i18n.language}
             allDaySlot={false}
-            slotMinTime="06:00:00"
-            //slotDuration="01:00:00"
+            slotMinTime={CALENDAR_CONFIG.SLOT_MIN_TIME}
+            slotMaxTime={CALENDAR_CONFIG.SLOT_MAX_TIME}
+            slotDuration={CALENDAR_CONFIG.SLOT_DURATION}
             eventTimeFormat={{
               hour: "2-digit",
               minute: "2-digit",
@@ -166,16 +301,12 @@ export default function CalendarMain({
               setCurrentDate(dayjs(arg.start));
               setEndDate(dayjs(arg.end));
             }}
-            // dayHeaderContent={(arg) => {
-            //   const dayNames = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-            //   const day = dayNames[arg.date.getDay()];
-            //   const date = arg.date;
-            //   const formatted = `${String(date.getDate()).padStart(
-            //     2,
-            //     "0"
-            //   )}/${String(date.getMonth() + 1).padStart(2, "0")}`;
-            //   return `${day} ${formatted}`;
-            // }}
+            resourceAreaHeaderContent={
+              hasResources ? t("Staff (All)") : undefined
+            }
+            resourceAreaWidth={
+              hasResources ? CALENDAR_CONFIG.RESOURCE_AREA_WIDTH : undefined
+            }
             dayHeaderClassNames={() => "custom-header-cell"}
             dayHeaderDidMount={(info) => {
               Object.assign(info.el.style, {
@@ -188,13 +319,39 @@ export default function CalendarMain({
                 fontSize: "14px",
               });
             }}
+            resourceLabelContent={(arg) => {
+              const resource = arg.resource;
+              const bookingCount = events.filter(
+                (e) => e.resourceId === resource.id
+              ).length;
+              return (
+                <div style={{ padding: "8px" }}>
+                  <div style={{ fontWeight: "600" }}>{resource.title}</div>
+                  <div style={{ fontSize: "12px", color: "#666" }}>
+                    ({bookingCount})
+                  </div>
+                </div>
+              );
+            }}
             eventContent={(arg) => {
               const { event } = arg;
               const startTime = event.extendedProps?.startTime || "00:00";
+              const phone = event.extendedProps?.phone || "";
+              const serviceName = event.extendedProps?.productName || "";
               return (
-                <div>
-                  <div>{startTime}</div>
-                  <div>{event.title}</div>
+                <div
+                  style={{
+                    padding: "4px 6px",
+                    overflow: "hidden",
+                    fontSize: "12px",
+                    lineHeight: "1.3",
+                  }}>
+                  <div style={{ fontWeight: "600" }}>{event.title}</div>
+                  <div>{phone}</div>
+                  <div style={{ fontSize: "11px" }}>{serviceName}</div>
+                  <div style={{ fontSize: "11px", marginTop: "2px" }}>
+                    {startTime}
+                  </div>
                 </div>
               );
             }}
