@@ -42,9 +42,9 @@ const Bookings = () => {
   const { t } = useTranslation();
 
   // Calendar states
-  const [currentView, setCurrentView] = useState("dayGridMonth");
+  const [currentView, setCurrentView] = useState("resourceTimeGridDay");
   const [currentDate, setCurrentDate] = useState(dayjs());
-  const [endDate, setEndDate] = useState(dayjs().add(1, "month"));
+  const [endDate, setEndDate] = useState(dayjs().add(1, "day"));
 
   // Filter states
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -76,14 +76,49 @@ const Bookings = () => {
         queryString.stringify({
           pageNumber: 1,
           pageSize: 1000,
-          startDate: currentDate.format("YYYY-MM-DD"),
-          endDate: endDate.format("YYYY-MM-DD"),
+          targetDate: currentDate.format("YYYY-MM-DD"),
           ...filters,
         })
       );
       return response.data;
     },
   });
+
+  // Transform technicians from booking data to resources
+  const resources = useMemo(() => {
+    if (!bookingsData?.items) return [];
+
+    // Extract all technicians from bookings and remove duplicates
+    const techniciansMap = new Map();
+
+    bookingsData.items.forEach((booking: any) => {
+      if (booking.technicians && booking.technicians.length > 0) {
+        booking.technicians.forEach((tech: any) => {
+          if (!techniciansMap.has(tech.id)) {
+            techniciansMap.set(tech.id, tech);
+          }
+        });
+      }
+    });
+
+    // Convert Map to array and transform to resources
+    const techResources = Array.from(techniciansMap.values()).map(
+      (tech: any) => ({
+        id: tech.id.toString(),
+        title: tech.technicianName || `Staff ${tech.id}`,
+        ...tech,
+      })
+    );
+
+    // Add "Unassigned" resource first
+    const unassigned = {
+      id: "unassigned",
+      title: "Unassigned",
+      technicianName: "Unassigned",
+    };
+
+    return [unassigned, ...techResources];
+  }, [bookingsData?.items]);
 
   // Transform bookings to calendar events
   const events = useMemo(() => {
@@ -113,10 +148,17 @@ const Bookings = () => {
         ? dayjs(booking.bookingTime, "HH:mm:ss").format("HH:mm")
         : "";
 
+      // Get first technician from technicians array
+      const technicianId =
+        booking.technicians && booking.technicians.length > 0
+          ? booking.technicians[0].id.toString()
+          : "unassigned";
+
       return {
         id: booking.id,
         title: booking.fullName || `Booking #${booking.id}`,
         start: startDateTime.toDate(),
+        resourceId: technicianId, // Assign to resource from technicians array
         backgroundColor: color,
         borderColor: color,
         color: color,
@@ -128,6 +170,10 @@ const Bookings = () => {
           originalId: booking.id,
           status: status,
           statusColor: color,
+          productName:
+            booking.services && booking.services.length > 0
+              ? booking.services[0].name
+              : "",
         },
       };
     });
@@ -344,6 +390,7 @@ const Bookings = () => {
             </Row>
             <CalendarMain
               events={events}
+              resources={resources}
               onDateClick={handleDateClick}
               onEventClick={handleEventClick}
               currentView={currentView}
@@ -404,13 +451,11 @@ const Bookings = () => {
             key="cancel"
             type="primary"
             danger
-            onClick={() => setQrModal(false)}
-          >
+            onClick={() => setQrModal(false)}>
             {t("Cancel")}
           </Button>,
         ]}
-        centered
-      >
+        centered>
         <div style={{ textAlign: "center", padding: "20px 0" }}>
           <QRCodeCanvas value={approveUrl || ""} size={220} />
           <p style={{ marginTop: 16, fontSize: 14, color: "#555" }}>
@@ -424,8 +469,7 @@ const Bookings = () => {
               display: "inline-block",
               marginTop: 12,
               color: "#1677ff",
-            }}
-          >
+            }}>
             👉 Open payment link
           </a>
         </div>
