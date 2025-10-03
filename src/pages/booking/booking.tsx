@@ -76,7 +76,8 @@ const Bookings = () => {
         queryString.stringify({
           pageNumber: 1,
           pageSize: 1000,
-          targetDate: currentDate.format("YYYY-MM-DD"),
+          fromDate: currentDate.format("YYYY-MM-DD"),
+          endDate: endDate.format("YYYY-MM-DD"),
           ...filters,
         })
       );
@@ -451,11 +452,13 @@ const Bookings = () => {
             key="cancel"
             type="primary"
             danger
-            onClick={() => setQrModal(false)}>
+            onClick={() => setQrModal(false)}
+          >
             {t("Cancel")}
           </Button>,
         ]}
-        centered>
+        centered
+      >
         <div style={{ textAlign: "center", padding: "20px 0" }}>
           <QRCodeCanvas value={approveUrl || ""} size={220} />
           <p style={{ marginTop: 16, fontSize: 14, color: "#555" }}>
@@ -469,7 +472,8 @@ const Bookings = () => {
               display: "inline-block",
               marginTop: 12,
               color: "#1677ff",
-            }}>
+            }}
+          >
             👉 Open payment link
           </a>
         </div>
