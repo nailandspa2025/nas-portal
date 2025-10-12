@@ -28,15 +28,9 @@ export const columns = ({
     },
     {
       title: t("Point name"),
-      dataIndex: "pointNames",
-      key: "pointNames",
+      dataIndex: "pointName",
+      key: "pointName",
       width: 180,
-      render: (pointNames: any) => {
-        if (Array.isArray(pointNames)) {
-          return pointNames.join(", ");
-        }
-        return pointNames;
-      },
     },
     {
       title: t("Start date"),
