@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, Col, Row, Form, Input, Space, Button, DatePicker } from "antd";
 import { useTranslation } from "react-i18next";
 import RemoteSelect from "../../../components/RemoteSelect";
@@ -38,7 +39,7 @@ const GeneralInfoAction = ({ item, onSaved }: any) => {
       form.setFieldsValue({
         name: item.name || "",
         isDraft: item.isDraft || false,
-        pointIds: item.pointIds || null,
+        pointSettingId: item.pointSettingId || null,
         startDate: item.startDate ? dayjs(item.startDate, "YYYY-MM-DD") : null,
         endDate: item.endDate ? dayjs(item.endDate, "YYYY-MM-DD") : null,
       });
@@ -86,7 +87,7 @@ const GeneralInfoAction = ({ item, onSaved }: any) => {
               </Form.Item>
               <Form.Item
                 label={t("Selcet point")}
-                name={"pointIds"}
+                name={"pointSettingId"}
                 rules={[
                   {
                     required: true,
@@ -98,10 +99,9 @@ const GeneralInfoAction = ({ item, onSaved }: any) => {
                   placeholder={t("Select point")}
                   fetchList={DropdownApi.getLoyaltyPoints}
                   fetchById={DropdownApi.getUserById}
-                  fetchByIds={DropdownApi.getUserByIds}
+                  //fetchByIds={DropdownApi.getUserByIds}
                   labelKey={(item) => `${item.name}`}
                   valueKey="id"
-                  mode="multiple"
                 />
               </Form.Item>
             </Col>
