@@ -89,29 +89,24 @@ const Bookings = () => {
   const resources = useMemo(() => {
     if (!bookingsData?.items) return [];
 
-    // Extract all technicians from bookings and remove duplicates
-    const techniciansMap = new Map();
+    const techniciansMap = new Map<number, any>();
 
     bookingsData.items.forEach((booking: any) => {
-      if (booking.technicians && booking.technicians.length > 0) {
-        booking.technicians.forEach((tech: any) => {
-          if (!techniciansMap.has(tech.id)) {
-            techniciansMap.set(tech.id, tech);
-          }
-        });
-      }
+      booking.technicians?.forEach((tech: any) => {
+        if (!techniciansMap.has(tech.id)) {
+          techniciansMap.set(tech.id, {
+            id: tech.id.toString(),
+            title: tech.technicianName || `Staff ${tech.id}`,
+            technicianName: tech.technicianName,
+            phone: tech.phone,
+            address: tech.technicianAddress,
+          });
+        }
+      });
     });
 
-    // Convert Map to array and transform to resources
-    const techResources = Array.from(techniciansMap.values()).map(
-      (tech: any) => ({
-        id: tech.id.toString(),
-        title: tech.technicianName || `Staff ${tech.id}`,
-        ...tech,
-      })
-    );
+    const techResources = Array.from(techniciansMap.values());
 
-    // Add "Unassigned" resource first
     const unassigned = {
       id: "unassigned",
       title: "Unassigned",
@@ -121,63 +116,62 @@ const Bookings = () => {
     return [unassigned, ...techResources];
   }, [bookingsData?.items]);
 
-  // Transform bookings to calendar events
+  // ✅ Event mapping
   const events = useMemo(() => {
     if (!bookingsData?.items) return [];
 
-    return bookingsData.items.map((booking: any) => {
-      // Get status color mapping
-      const statusColorMap: Record<number, string> = {
-        1: "#faad14", // Pending - orange
-        2: "#52c41a", // Completed - green
-        3: "#ff4d4f", // Cancelled - red
-      };
+    const statusColorMap: Record<number, string> = {
+      1: "#faad14", // Pending
+      2: "#52c41a", // Completed
+      3: "#ff4d4f", // Cancelled
+    };
 
+    const allEvents: any[] = [];
+
+    bookingsData.items.forEach((booking: any) => {
       const status = booking.status || 1;
-      const color = statusColorMap[status] || "#1677ff"; // default blue
+      const color = statusColorMap[status] || "#1677ff";
 
-      // Parse booking date and time using helper function
       const startDateTime = parseBookingDateTime(
         booking.bookingDate,
         booking.bookingTime
       );
 
-      // No end time needed, just use start time for calendar display
-
-      // Format time as HH:mm
       const timeDisplay = booking.bookingTime
         ? dayjs(booking.bookingTime, "HH:mm:ss").format("HH:mm")
         : "";
 
-      // Get first technician from technicians array
-      const technicianId =
-        booking.technicians && booking.technicians.length > 0
-          ? booking.technicians[0].id.toString()
-          : "unassigned";
+      const technicianIds =
+        booking.technicianIds && booking.technicianIds.length > 0
+          ? booking.technicianIds
+          : ["unassigned"];
 
-      return {
-        id: booking.id,
-        title: booking.fullName || `Booking #${booking.id}`,
-        start: startDateTime.toDate(),
-        resourceId: technicianId, // Assign to resource from technicians array
-        backgroundColor: color,
-        borderColor: color,
-        color: color,
-        textColor: "#ffffff",
-        className: `booking-status-${status}`, // Add CSS class based on status
-        extendedProps: {
-          ...booking,
-          startTime: timeDisplay, // Display time in HH:mm format
-          originalId: booking.id,
-          status: status,
-          statusColor: color,
-          productName:
-            booking.services && booking.services.length > 0
-              ? booking.services[0].name
-              : "",
-        },
-      };
+      // ✅ Nhân event ra cho mỗi technician
+      technicianIds.forEach((techId: any, index: number) => {
+        allEvents.push({
+          id: `${booking.id}_${techId}`, // unique id
+          title: booking.fullName || `Booking #${booking.id}`,
+          start: startDateTime.toDate(),
+          resourceId: techId.toString(), // gán 1 technician duy nhất
+          backgroundColor: color,
+          borderColor: color,
+          textColor: "#ffffff",
+          extendedProps: {
+            ...booking,
+            technicianIds,
+            technicianIndex: index + 1,
+            totalTechnicians: technicianIds.length,
+            startTime: timeDisplay,
+            status,
+            statusColor: color,
+            productName:
+              booking.services?.length > 0 ? booking.services[0].name : "",
+          },
+        });
+      });
     });
+
+    return allEvents;
   }, [bookingsData]);
 
   // Event handlers

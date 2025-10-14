@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, Row } from "antd";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import queryString from "query-string";

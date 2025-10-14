@@ -147,3 +147,24 @@ textarea.ant-input {
 .customTable .ant-table-body::-webkit-scrollbar-track {
   background-color: transparent;
 }
+
+
+/* Đường line chính (ngang qua toàn lịch) */
+.fc-timegrid-now-indicator-line {
+  border-top: 2px solid #ff0000 !important; /* Màu đỏ */
+  z-index: 9999 !important; /* Đè lên mọi thứ, kể cả event */
+  pointer-events: none !important;
+}
+
+/* Mũi tên nhỏ bên trái (nếu có) */
+.fc-timegrid-now-indicator-arrow {
+  border-color: #ff0000 transparent transparent transparent !important;
+  z-index: 9999 !important;
+}
+
+/* Nếu có phần resource view — giúp line kéo dài qua toàn width */
+.fc-resourceTimeGrid .fc-timegrid-now-indicator-line {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}

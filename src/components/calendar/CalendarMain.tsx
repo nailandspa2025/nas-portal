@@ -109,6 +109,27 @@ export default function CalendarMain({
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const calendarHeight = useCalendarHeight(calendarWrapperRef);
+  useEffect(() => {
+    const calendarApi = calendarRef.current?.getApi();
+    if (!calendarApi) return;
+
+    const scrollToNow = () => {
+      const now = dayjs();
+      const hour = now.hour();
+      const minute = now.minute();
+
+      const scrollTime = `${String(hour).padStart(2, "0")}:${String(
+        minute
+      ).padStart(2, "0")}:00`;
+      calendarApi.scrollToTime(scrollTime);
+    };
+
+    setTimeout(scrollToNow, 500);
+
+    const interval = setInterval(scrollToNow, 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Calendar navigation handlers
   const handleToday = () => {
@@ -167,7 +188,8 @@ export default function CalendarMain({
                         ? "primary"
                         : undefined
                     }
-                    onClick={() => changeView(CALENDAR_VIEWS.RESOURCE_DAY)}>
+                    onClick={() => changeView(CALENDAR_VIEWS.RESOURCE_DAY)}
+                  >
                     {t("View by day")}
                   </Button>
                   <Button
@@ -176,7 +198,8 @@ export default function CalendarMain({
                         ? "primary"
                         : undefined
                     }
-                    onClick={() => changeView(CALENDAR_VIEWS.RESOURCE_WEEK)}>
+                    onClick={() => changeView(CALENDAR_VIEWS.RESOURCE_WEEK)}
+                  >
                     {t("View by week")}
                   </Button>
                 </>
@@ -188,7 +211,8 @@ export default function CalendarMain({
                         ? "primary"
                         : undefined
                     }
-                    onClick={() => changeView(CALENDAR_VIEWS.MONTH)}>
+                    onClick={() => changeView(CALENDAR_VIEWS.MONTH)}
+                  >
                     {t("Month")}
                   </Button>
                   <Button
@@ -197,14 +221,16 @@ export default function CalendarMain({
                         ? "primary"
                         : undefined
                     }
-                    onClick={() => changeView(CALENDAR_VIEWS.WEEK)}>
+                    onClick={() => changeView(CALENDAR_VIEWS.WEEK)}
+                  >
                     {t("Week")}
                   </Button>
                   <Button
                     type={
                       currentView === CALENDAR_VIEWS.DAY ? "primary" : undefined
                     }
-                    onClick={() => changeView(CALENDAR_VIEWS.DAY)}>
+                    onClick={() => changeView(CALENDAR_VIEWS.DAY)}
+                  >
                     {t("Day")}
                   </Button>
                   <Button
@@ -213,7 +239,8 @@ export default function CalendarMain({
                         ? "primary"
                         : undefined
                     }
-                    onClick={() => changeView(CALENDAR_VIEWS.LIST)}>
+                    onClick={() => changeView(CALENDAR_VIEWS.LIST)}
+                  >
                     {t("Next to")}
                   </Button>
                 </>
@@ -230,7 +257,8 @@ export default function CalendarMain({
           <div style={{ textAlign: "center" }}>
             <Space
               size="small"
-              style={{ display: "inline-flex", alignItems: "center" }}>
+              style={{ display: "inline-flex", alignItems: "center" }}
+            >
               <Button icon={<LeftOutlined />} onClick={handlePrev} />
               <Button onClick={handleToday}>{t("Today")}</Button>
               <Button
@@ -242,7 +270,8 @@ export default function CalendarMain({
                   fontSize: 18,
                   fontWeight: 600,
                   padding: "0 12px",
-                }}>
+                }}
+              >
                 {formatCurrentDate()}
               </div>
               <Button icon={<RightOutlined />} onClick={handleNext} />
@@ -280,11 +309,13 @@ export default function CalendarMain({
             initialView={getInitialView()}
             schedulerLicenseKey={SCHEDULER_LICENSE_KEY}
             headerToolbar={false}
+            nowIndicator={true}
             events={events}
             resources={hasResources ? resources : undefined}
             dateClick={onDateClick}
             eventClick={onEventClick}
             height={calendarHeight}
+            scrollTime={dayjs().format("HH:mm:ss")}
             firstDay={CALENDAR_CONFIG.FIRST_DAY}
             locale={i18n.language}
             allDaySlot={false}
@@ -321,12 +352,26 @@ export default function CalendarMain({
             }}
             resourceLabelContent={(arg) => {
               const resource = arg.resource;
-              const bookingCount = events.filter(
-                (e) => e.resourceId === resource.id
-              ).length;
+
+              const matchedEvents = events.filter(
+                (e) =>
+                  e.resourceId === resource.id ||
+                  (Array.isArray(e.resourceIds) &&
+                    e.resourceIds.includes(resource.id))
+              );
+              const uniqueBookingIds = new Set(
+                matchedEvents.map(
+                  (e) =>
+                    e.extendedProps?.originalId ??
+                    e.extendedProps?.bookingId ??
+                    e.bookingId ??
+                    e.id
+                )
+              );
+              const bookingCount = uniqueBookingIds.size;
               return (
                 <div style={{ padding: "8px" }}>
-                  <div style={{ fontWeight: "600" }}>{resource.title}</div>
+                  <div style={{ fontWeight: 600 }}>{resource.title}</div>
                   <div style={{ fontSize: "12px", color: "#666" }}>
                     ({bookingCount})
                   </div>
@@ -338,6 +383,10 @@ export default function CalendarMain({
               const startTime = event.extendedProps?.startTime || "00:00";
               const phone = event.extendedProps?.phone || "";
               const serviceName = event.extendedProps?.productName || "";
+
+              const index = event.extendedProps?.technicianIndex || 1;
+              const total = event.extendedProps?.totalTechnicians || 1;
+
               return (
                 <div
                   style={{
@@ -345,12 +394,28 @@ export default function CalendarMain({
                     overflow: "hidden",
                     fontSize: "12px",
                     lineHeight: "1.3",
-                  }}>
+                  }}
+                >
                   <div style={{ fontWeight: "600" }}>{event.title}</div>
-                  <div>{phone}</div>
-                  <div style={{ fontSize: "11px" }}>{serviceName}</div>
-                  <div style={{ fontSize: "11px", marginTop: "2px" }}>
+                  {phone && <div>{phone}</div>}
+                  {serviceName && (
+                    <div style={{ fontSize: "12px" }}>{serviceName}</div>
+                  )}
+                  <div style={{ fontSize: "12px", marginTop: "2px" }}>
                     {startTime}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      marginTop: "2px",
+                      color: "#fff",
+                      backgroundColor: "rgba(0,0,0,0.3)",
+                      borderRadius: "4px",
+                      padding: "3px 6px",
+                      display: "inline-block",
+                    }}
+                  >
+                    {index}/{total}
                   </div>
                 </div>
               );
