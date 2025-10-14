@@ -159,6 +159,7 @@ const Bookings = () => {
           extendedProps: {
             ...booking,
             technicianIds,
+            originalId: booking.id,
             technicianIndex: index + 1,
             totalTechnicians: technicianIds.length,
             startTime: timeDisplay,
