@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Card, Col, Form, Input, Row, Space } from "antd";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +32,7 @@ const LoyaltyGroupActions = () => {
         name: data.name || "",
         isDraft: data.isDraft || false,
         merchantId: data.merchantId || null,
+        tierIds: data.tierIds || [],
       });
     }
   }, [data, form, params.id]);
@@ -107,8 +109,8 @@ const LoyaltyGroupActions = () => {
                 <RemoteSelect
                   placeholder={t("Select merchant")}
                   fetchList={DropdownApi.getMerchants}
-                  fetchById={DropdownApi.getUserById}
-                  fetchByIds={DropdownApi.getUserByIds}
+                  fetchById={DropdownApi.getMerchantById}
+                  //fetchByIds={DropdownApi.getUserByIds}
                   labelKey={(item) => `${item.name}`}
                   valueKey="id"
                   mode=""

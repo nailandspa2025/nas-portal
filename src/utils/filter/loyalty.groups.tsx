@@ -34,9 +34,10 @@ export const columns = ({
     },
     {
       title: t("Tier name"),
-      dataIndex: "tierName",
-      key: "tierName",
+      dataIndex: "tierNames",
+      key: "tierNames",
       width: 180,
+      render: (text: string) => (Array.isArray(text) ? text.join(", ") : text),
     },
     {
       title: t("Status"),
