@@ -166,13 +166,13 @@ const MerchantActions = () => {
         ? values.contractDate.toISOString() // ISO 8601 format in UTC
         : null,
       images:
-        values.images.filter(
+        values?.images?.filter(
           (item: any): item is File => item instanceof File
         ) || [],
     };
     if (params.id) {
       payload.id = params.id;
-      payload.linkUrls = linkUrls.filter(
+      payload.linkUrls = linkUrls?.filter(
         (item: any) => typeof item === "string"
       );
       payload.isAvatar = isAvatar;
@@ -211,7 +211,7 @@ const MerchantActions = () => {
     setOpenModal(true);
   };
   const handleBrandDelete = (index: number) => {
-    setBrands((prev: any) => prev.filter((_: any, i: any) => i !== index));
+    setBrands((prev: any) => prev?.filter((_: any, i: any) => i !== index));
   };
   return (
     <>
