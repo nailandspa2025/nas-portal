@@ -133,13 +133,13 @@ const StoreAction = () => {
       ...values,
       userIds: values.userIds ?? null,
       images:
-        values.images.filter(
+        values?.images?.filter(
           (item: any): item is File => item instanceof File
         ) || [],
     };
     if (params.id) {
       payload.id = params.id;
-      payload.linkUrls = linkUrls.filter(
+      payload.linkUrls = linkUrls?.filter(
         (item: any) => typeof item === "string"
       );
       payload.isAvatar = isAvatar;
