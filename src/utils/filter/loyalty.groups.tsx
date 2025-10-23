@@ -23,7 +23,7 @@ export const columns = ({
       key: "name",
       width: 280,
       render: (text: string, record: { id: number }) => (
-        <Link to={`/loyalty-point/${record.id}`}>{text}</Link>
+        <Link to={`/loyalty-group/${record.id}`}>{text}</Link>
       ),
     },
     {

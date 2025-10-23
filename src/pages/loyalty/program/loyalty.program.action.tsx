@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Layout, Menu, Grid } from "antd";
 import {
   SettingOutlined,

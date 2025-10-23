@@ -93,7 +93,7 @@ const LoyaltyGroupActions = () => {
               >
                 <Input
                   placeholder={t("Enter group name")}
-                  disabled={!!params.id}
+                  //disabled={!!params.id}
                 />
               </Form.Item>
               <Form.Item

@@ -45,22 +45,27 @@ export const columns = ({
       key: "award",
       width: 130,
       render: (_: any, record: any) => {
-        if (record.amountPerPoint && record.pointValue) {
-          return `$${record.amountPerPoint} - ${record.pointValue} ${t(
-            "Point"
-          )}`;
+        const { amount, point } = record;
+        if (amount && point) {
+          return `$${amount} - ${point} ${t("Point")}`;
+        }
+        if (amount) {
+          return `$${amount}`;
+        }
+        if (point) {
+          return `${point} ${t("Point")}`;
         }
         return "N/A";
       },
     },
     {
       title: t("Reward Calculation"),
-      dataIndex: "roundingRule",
-      key: "roundingRule",
+      dataIndex: "rule",
+      key: "rule",
       width: 130,
-      render: (roundingRule: number) => {
-        if (roundingRule == 1) return t("Round up");
-        if (roundingRule == 2) return t("Round down");
+      render: (rule: number) => {
+        if (rule == 1) return t("Round up");
+        if (rule == 2) return t("Round down");
         return "N/A";
       },
     },
