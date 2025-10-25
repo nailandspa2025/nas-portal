@@ -59,6 +59,7 @@ const UserAction = () => {
         districtId: data.districtId || null,
         cityId: data.cityId || null,
         groupIds: data.groupIds || null,
+        isOwner: data.isOwner || false,
       });
     }
   }, [data, form, params.id]);

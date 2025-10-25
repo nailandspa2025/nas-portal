@@ -61,6 +61,7 @@ const MerchantUserActions = () => {
         cityId: data.cityId || null,
         groupIds: data.groupIds || null,
         storeIds: data.storeIds || null,
+        isOwner: data.isOwner || false,
       });
     }
   }, [data, form, params.id]);
@@ -243,6 +244,16 @@ const MerchantUserActions = () => {
                   placeholder={t("Choose ward")}
                 ></Select>
               </Form.Item>
+              <Space align="center">
+                <Form.Item name="isOwner" valuePropName="checked" noStyle>
+                  <Switch
+                    checkedChildren={<CheckOutlined />}
+                    unCheckedChildren={<CloseOutlined />}
+                    defaultChecked={false}
+                  />
+                </Form.Item>
+                <span>{t("Owner")}</span>
+              </Space>
             </Col>
             <Col span={24}>
               <Form.Item label={t("Address")} name="street">
