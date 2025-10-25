@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, Row } from "antd";
 import { useMemo, useRef, useState } from "react";
 import useElementHeight from "../../../utils/useElementHeight";
