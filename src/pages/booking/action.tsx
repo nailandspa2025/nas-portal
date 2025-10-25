@@ -22,11 +22,13 @@ import { toast } from "react-toastify";
 import { buildFormData } from "../../utils/common/buildFormData";
 
 import StoreSelect from "../../components/StoreSelect";
-import ProductSelect from "../../components/ProductSelect";
+
 import AppAccuntSelect from "../../components/AppAccountSelect";
 import { BookingApi } from "../../apis/order/booking";
 import { validatePhoneNumber } from "../../utils/common/validate";
-import TechnicianSelect from "../../components/TechnicianSelect";
+
+import RemoteSelect from "../../components/RemoteSelect";
+import { DropdownApi } from "../../apis/dropdown/dropdown";
 const BookingActions = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -56,9 +58,11 @@ const BookingActions = () => {
         address: data.address || "",
         userId: (data.userId ? Number(data.userId) : null) as number | null,
         productId: data.productId || null,
-        technicianId: data.technicianId || null,
+
         storeId: data.storeId || null,
         number: data.number ?? null,
+        technicianIds: data.technicianIds || null,
+        serviceIds: data.serviceIds || null,
       });
     }
   }, [data, form, params.id]);
@@ -204,7 +208,7 @@ const BookingActions = () => {
             <Col xs={24} sm={24} md={12} lg={12}>
               <Form.Item
                 label={"Technician"}
-                name={"technicianId"}
+                name={"technicianIds"}
                 rules={[
                   {
                     required: true,
@@ -212,7 +216,15 @@ const BookingActions = () => {
                   },
                 ]}
               >
-                <TechnicianSelect placeholder="Choose technician" />
+                <RemoteSelect
+                  mode="multiple"
+                  fetchList={DropdownApi.getTechnicians}
+                  fetchById={DropdownApi.getTechnicianById}
+                  fetchByIds={DropdownApi.getTechnicianByIds}
+                  labelKey={(item) => `${item.technicianName} - ${item.phone}`}
+                  valueKey="id"
+                  placeholder={t("Choose technician")}
+                />
               </Form.Item>
               <Form.Item
                 label={t("Store")}
@@ -245,8 +257,16 @@ const BookingActions = () => {
                   }
                 />
               </Form.Item>
-              <Form.Item label={t("Service")} name={"productId"}>
-                <ProductSelect placeholder={t("Choose product")} />
+              <Form.Item label={t("Service")} name={"serviceIds"}>
+                <RemoteSelect
+                  mode="multiple"
+                  fetchList={DropdownApi.getServices}
+                  fetchById={DropdownApi.getServiceById}
+                  fetchByIds={DropdownApi.getServiceByIds}
+                  labelKey="name"
+                  valueKey="id"
+                  placeholder={t("Choose service")}
+                />
               </Form.Item>
               <Form.Item
                 label={t("Appointment date")}

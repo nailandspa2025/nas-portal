@@ -15,12 +15,12 @@ import type { Dayjs } from "dayjs";
 import { useTranslation } from "react-i18next";
 import React, { useEffect } from "react";
 import StoreSelect from "../StoreSelect";
-import TechnicianSelect from "../TechnicianSelect";
-import ProductSelect from "../ProductSelect";
 import AppAccountSelect from "../AppAccountSelect";
 import dayjs from "dayjs";
 import { DeleteOutlined, BankOutlined } from "@ant-design/icons";
 import { validatePhoneNumber } from "../../utils/common/validate";
+import { DropdownApi } from "../../apis/dropdown/dropdown";
+import RemoteSelect from "../../components/RemoteSelect";
 export interface EventData {
   title: string;
   start: Dayjs;
@@ -59,10 +59,11 @@ const EventModal: React.FC<EventModalProps> = ({
         gender: eventData.gender ?? null,
         userId: eventData.userId ? Number(eventData.userId) : null,
         storeId: eventData.storeId || null,
-        technicianId: eventData.technicianId || null,
         productId: eventData.productId || null,
         number: eventData.number ?? null,
         note: eventData.note || null,
+        serviceIds: eventData.serviceIds || null,
+        technicianIds: eventData.technicianIds || null,
         bookingDate: eventData.bookingDate
           ? dayjs(eventData.bookingDate, "YYYY-MM-DD")
           : null,
@@ -94,17 +95,20 @@ const EventModal: React.FC<EventModalProps> = ({
           key="cancel"
           type="primary"
           danger
-          onClick={() => setOpen(false)}>
+          onClick={() => setOpen(false)}
+        >
           {t("Cancel")}
         </Button>,
         <Button
           key="submit"
           type="primary"
           loading={loading}
-          onClick={() => form.submit()}>
+          onClick={() => form.submit()}
+        >
           {t("Save")}
         </Button>,
-      ]}>
+      ]}
+    >
       {eventData?.originalId && (
         <div
           style={{
@@ -113,7 +117,8 @@ const EventModal: React.FC<EventModalProps> = ({
             right: 50,
             display: "flex",
             gap: "8px",
-          }}>
+          }}
+        >
           {eventData?.status === 1 && (
             <Button
               icon={<BankOutlined />}
@@ -142,7 +147,8 @@ const EventModal: React.FC<EventModalProps> = ({
               label={t("Full name")}
               rules={[
                 { required: true, message: t("Please enter full name!") },
-              ]}>
+              ]}
+            >
               <Input placeholder={t("Enter full name")} />
             </Form.Item>
             <Form.Item name="address" label={t("Address")}>
@@ -151,12 +157,14 @@ const EventModal: React.FC<EventModalProps> = ({
             <Form.Item
               name="gender"
               label={t("Gender")}
-              rules={[{ required: true, message: t("Please enter gender!") }]}>
+              rules={[{ required: true, message: t("Please enter gender!") }]}
+            >
               <Select
                 style={{ width: "100%" }}
                 showSearch
                 placeholder={t("Choose gender")}
-                allowClear>
+                allowClear
+              >
                 <Select.Option value={1}>{t("Male")}</Select.Option>
                 <Select.Option value={2}>{t("Female")}</Select.Option>
                 <Select.Option value={3}>{t("Other")}</Select.Option>
@@ -168,41 +176,55 @@ const EventModal: React.FC<EventModalProps> = ({
               rules={[
                 { required: true, message: t("Please enter phone!") },
                 { validator: validatePhoneNumber },
-              ]}>
+              ]}
+            >
               <Input placeholder={t("Enter phone")} />
             </Form.Item>
             <Form.Item
               name="email"
               label="Email"
-              rules={[{ type: "email", message: t("Invalid email") }]}>
+              rules={[{ type: "email", message: t("Invalid email") }]}
+            >
               <Input placeholder="Enter email" />
             </Form.Item>
             <Form.Item
               name="userId"
               label={t("User mobile")}
-              rules={[{ required: true, message: t("Please choose user!") }]}>
+              rules={[{ required: true, message: t("Please choose user!") }]}
+            >
               <AppAccountSelect placeholder={t("Please choose user")} />
             </Form.Item>
           </Col>
           <Col xs={24} sm={24} md={12}>
             <Form.Item
               label={t("Technician")}
-              name={"technicianId"}
+              name={"technicianIds"}
               rules={[
                 { required: true, message: t("Please choose technician!") },
-              ]}>
-              <TechnicianSelect placeholder={t("Choose technician")} />
+              ]}
+            >
+              <RemoteSelect
+                placeholder={t("Select technician ")}
+                fetchList={DropdownApi.getTechnicians}
+                fetchById={DropdownApi.getTechnicianById}
+                fetchByIds={DropdownApi.getTechnicianByIds}
+                mode="multiple"
+                labelKey={(item) => `${item.technicianName} - ${item.phone}`}
+                valueKey="id"
+              />
             </Form.Item>
             <Form.Item
               label={t("Store")}
               name={"storeId"}
-              rules={[{ required: true, message: t("Please choose store!") }]}>
+              rules={[{ required: true, message: t("Please choose store!") }]}
+            >
               <StoreSelect placeholder={t("Choose store")} />
             </Form.Item>
             <Form.Item
               name="number"
               label={t("Number")}
-              rules={[{ required: true, message: t("Please enter number") }]}>
+              rules={[{ required: true, message: t("Please enter number") }]}
+            >
               <InputNumber
                 placeholder={t("Enter number")}
                 style={{ width: "100%" }}
@@ -212,13 +234,22 @@ const EventModal: React.FC<EventModalProps> = ({
                 }
               />
             </Form.Item>
-            <Form.Item name="productId" label={t("Service")}>
-              <ProductSelect placeholder={t("Choose product")} />
+            <Form.Item name="serviceIds" label={t("Service")}>
+              <RemoteSelect
+                placeholder={t("Select service name")}
+                fetchList={DropdownApi.getServices}
+                fetchById={DropdownApi.getServiceById}
+                fetchByIds={DropdownApi.getServiceByIds}
+                mode="multiple"
+                labelKey={(item) => `${item.name}`}
+                valueKey="id"
+              />
             </Form.Item>
             <Form.Item
               name="bookingDate"
               label={t("Appointment date")}
-              rules={[{ required: true, message: t("Please choose date!") }]}>
+              rules={[{ required: true, message: t("Please choose date!") }]}
+            >
               <DatePicker
                 style={{ width: "100%" }}
                 placeholder={t("Choose date")}
@@ -232,7 +263,8 @@ const EventModal: React.FC<EventModalProps> = ({
             <Form.Item
               name="bookingTime"
               label={t("Appointment time")}
-              rules={[{ required: true, message: t("Please choose time!") }]}>
+              rules={[{ required: true, message: t("Please choose time!") }]}
+            >
               <TimePicker format="HH:mm" style={{ width: "100%" }} />
             </Form.Item>
           </Col>
@@ -240,7 +272,8 @@ const EventModal: React.FC<EventModalProps> = ({
             <Form.Item label={t("Note")} name={"note"}>
               <Input.TextArea
                 rows={3}
-                placeholder={t("Enter note")}></Input.TextArea>
+                placeholder={t("Enter note")}
+              ></Input.TextArea>
             </Form.Item>
           </Col>
         </Row>

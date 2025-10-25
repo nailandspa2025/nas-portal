@@ -158,15 +158,18 @@ const Bookings = () => {
           textColor: "#ffffff",
           extendedProps: {
             ...booking,
-            technicianIds,
+            technicianIds: booking.technicianIds,
             originalId: booking.id,
             technicianIndex: index + 1,
             totalTechnicians: technicianIds.length,
             startTime: timeDisplay,
             status,
             statusColor: color,
+            serviceIds: booking.serviceIds,
             productName:
-              booking.services?.length > 0 ? booking.services[0].name : "",
+              booking.services?.length > 0
+                ? booking.services.map((s: any) => s.name).join(", ")
+                : "",
           },
         });
       });
