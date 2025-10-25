@@ -230,6 +230,16 @@ const UserAction = () => {
                   placeholder={t("Choose ward")}
                 ></Select>
               </Form.Item>
+              <Space align="center">
+                <Form.Item name="isOwner" valuePropName="checked" noStyle>
+                  <Switch
+                    checkedChildren={<CheckOutlined />}
+                    unCheckedChildren={<CloseOutlined />}
+                    defaultChecked={false}
+                  />
+                </Form.Item>
+                <span>{t("Owner")}</span>
+              </Space>
             </Col>
             <Col span={24}>
               <Form.Item label={t("Address")} name="street">
