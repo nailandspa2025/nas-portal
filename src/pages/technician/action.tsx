@@ -142,9 +142,9 @@ const TechnicianAction = () => {
                 {/* <AppAccountSelect placeholder={t("Choose user")} /> */}
                 <RemoteSelect
                   placeholder={t("Choose user")}
-                  fetchList={DropdownApi.getMerchants}
-                  fetchById={DropdownApi.getMerchantById}
-                  labelKey={(item) => `${item.name} - ${item.phoneNumber}`}
+                  fetchList={DropdownApi.getUserMerchants}
+                  fetchById={DropdownApi.getUserMerchantById}
+                  labelKey={(item) => `${item.fullName} - ${item.phoneNumber}`}
                   valueKey="id"
                 />
               </Form.Item>
