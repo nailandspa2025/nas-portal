@@ -45,7 +45,7 @@ const TechnicianAction = () => {
         workingSchedule: data.workingSchedule
           ? dayjs(data.workingSchedule, "YYYY-MM-DD")
           : null,
-        accountId: data.accountId || "",
+        userMerchantId: data.userMerchantId || "",
         storeId: data.storeId || "",
       });
     }
@@ -138,7 +138,7 @@ const TechnicianAction = () => {
               >
                 <Input placeholder={t("Enter phone number")} maxLength={10} />
               </Form.Item>
-              <Form.Item label={t("User")} name="accountId">
+              <Form.Item label={t("User Merchant")} name="userMerchantId">
                 {/* <AppAccountSelect placeholder={t("Choose user")} /> */}
                 <RemoteSelect
                   placeholder={t("Choose user")}
