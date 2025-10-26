@@ -10,12 +10,13 @@ import { validatePhoneNumber } from "../../utils/common/validate";
 import dayjs from "dayjs";
 import { buildFormData } from "../../utils/common/buildFormData";
 import AvatarUploader from "../../components/AvatarUploader";
-import AppAccountSelect from "../../components/AppAccountSelect";
 import StoreSelect from "../../components/StoreSelect";
 import TopActionButtons from "../../components/common/TopActionButtons";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
+import RemoteSelect from "../../components/RemoteSelect";
+import { DropdownApi } from "../../apis/dropdown/dropdown";
 const TechnicianAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -138,7 +139,14 @@ const TechnicianAction = () => {
                 <Input placeholder={t("Enter phone number")} maxLength={10} />
               </Form.Item>
               <Form.Item label={t("User")} name="accountId">
-                <AppAccountSelect placeholder={t("Choose user")} />
+                {/* <AppAccountSelect placeholder={t("Choose user")} /> */}
+                <RemoteSelect
+                  placeholder={t("Choose user")}
+                  fetchList={DropdownApi.getMerchants}
+                  fetchById={DropdownApi.getMerchantById}
+                  labelKey={(item) => `${item.name} - ${item.phoneNumber}`}
+                  valueKey="id"
+                />
               </Form.Item>
               <Form.Item label={t("Store")} name="storeId">
                 <StoreSelect
