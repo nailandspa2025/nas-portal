@@ -81,6 +81,43 @@ export const columns = ({
       hidden: false,
     },
     {
+      title: t("Work Status"),
+      dataIndex: "status",
+      key: "status",
+      render: (status: number, record: any) => {
+        if (record.isActive) {
+          return <span style={{ color: "green" }}>{t("Working")}</span>;
+        }
+        let color = "";
+        let text = "";
+        switch (status) {
+          case 1:
+            color = "blue";
+            text = t("New");
+            break;
+          case 2:
+            color = "green";
+            text = t("Working");
+            break;
+          case 3:
+            color = "orange";
+            text = t("On Leave");
+            break;
+          case 4:
+            color = "red";
+            text = t("Fired");
+            break;
+          default:
+            color = "gray";
+            text = t("Unknown");
+        }
+        return <span style={{ color }}>{text}</span>;
+      },
+      width: 120,
+      hidden: false,
+    },
+
+    {
       title: t("Address"),
       dataIndex: "street",
       key: "street",

@@ -124,6 +124,7 @@ const MerchantActions = () => {
           ? dayjs(data.deploymentDate, "YYYY-MM-DD")
           : null,
         isActive: data.isActive ?? true,
+        country: data.country || "",
       });
     }
   }, [data, form, params.id]);
@@ -256,6 +257,18 @@ const MerchantActions = () => {
                 ]}
               >
                 <Input placeholder={t("Enter merchant name")} />
+              </Form.Item>
+              <Form.Item
+                label={t("Country")}
+                name="country"
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please enter country name!"),
+                  },
+                ]}
+              >
+                <Input placeholder={t("Enter country name")} />
               </Form.Item>
               <Form.Item
                 label={t("Tax code")}

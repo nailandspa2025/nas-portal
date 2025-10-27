@@ -60,6 +60,13 @@ export const columns = ({
       ),
     },
     {
+      title: t("Country"),
+      dataIndex: "country",
+      key: "country",
+      width: 120,
+      render: (country: string) => country || "Unknown",
+    },
+    {
       title: t("Tax code"),
       dataIndex: "taxCode",
       key: "taxCode",
