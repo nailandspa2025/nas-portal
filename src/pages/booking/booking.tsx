@@ -319,13 +319,7 @@ const Bookings = () => {
   });
 
   // Event handlers
-  const handleEventSubmit = (values: any) => {
-    const payload = {
-      ...values,
-      bookingDate: dayjs(values.bookingDate).format("YYYY-MM-DD"),
-      bookingTime: dayjs(values.bookingTime).format("HH:mm:ss"),
-    };
-
+  const handleEventSubmit = (payload: any) => {
     if (eventData?.originalId) {
       payload.id = eventData.originalId;
       updateBookingMutation.mutate(payload);

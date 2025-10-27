@@ -127,18 +127,8 @@ const MerchantUserActions = () => {
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Row gutter={32}>
             <Col xs={24} sm={24} md={12} lg={12}>
-              <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                  {
-                    required: true,
-                    message: t("Pease enter email!"),
-                    type: "email",
-                  },
-                ]}
-              >
-                <Input placeholder={t("Enter email")} disabled={!!params.id} />
+              <Form.Item label="Email" name="email">
+                <Input placeholder={t("Enter email")} />
               </Form.Item>
               {!params.id && (
                 <Form.Item

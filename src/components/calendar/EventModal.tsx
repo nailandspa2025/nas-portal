@@ -18,7 +18,6 @@ import StoreSelect from "../StoreSelect";
 import AppAccountSelect from "../AppAccountSelect";
 import dayjs from "dayjs";
 import { DeleteOutlined, BankOutlined } from "@ant-design/icons";
-import { validatePhoneNumber } from "../../utils/common/validate";
 import { DropdownApi } from "../../apis/dropdown/dropdown";
 import RemoteSelect from "../../components/RemoteSelect";
 export interface EventData {
@@ -82,7 +81,19 @@ const EventModal: React.FC<EventModalProps> = ({
       bookingTime: dayjs(values.bookingTime).format("HH:mm:ss") ?? null,
     };
     if (eventData?.originalId) payload.id = eventData.originalId;
+
     onSubmit(payload);
+  };
+  const handleUserChange = async (value: any, option: any) => {
+    if (!value) return;
+    const user = option || {};
+    form.setFieldsValue({
+      fullName: user.fullName || "",
+      phone: user.phone || "",
+      email: user.email || "",
+      gender: user.gender || undefined,
+      address: user.address || "",
+    });
   };
   return (
     <Modal
@@ -143,22 +154,22 @@ const EventModal: React.FC<EventModalProps> = ({
         <Row gutter={16}>
           <Col xs={24} sm={24} md={12}>
             <Form.Item
-              name="fullName"
-              label={t("Full name")}
-              rules={[
-                { required: true, message: t("Please enter full name!") },
-              ]}
+              name="userId"
+              label={t("User mobile")}
+              rules={[{ required: true, message: t("Please choose user!") }]}
             >
+              <AppAccountSelect
+                placeholder={t("Please choose user")}
+                onChange={handleUserChange}
+              />
+            </Form.Item>
+            <Form.Item name="fullName" label={t("Full name")}>
               <Input placeholder={t("Enter full name")} />
             </Form.Item>
             <Form.Item name="address" label={t("Address")}>
               <Input placeholder={t("Enter address")} />
             </Form.Item>
-            <Form.Item
-              name="gender"
-              label={t("Gender")}
-              rules={[{ required: true, message: t("Please enter gender!") }]}
-            >
+            <Form.Item name="gender" label={t("Gender")}>
               <Select
                 style={{ width: "100%" }}
                 showSearch
@@ -170,14 +181,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 <Select.Option value={3}>{t("Other")}</Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item
-              name="phone"
-              label={t("Phone")}
-              rules={[
-                { required: true, message: t("Please enter phone!") },
-                { validator: validatePhoneNumber },
-              ]}
-            >
+            <Form.Item name="phone" label={t("Phone")}>
               <Input placeholder={t("Enter phone")} />
             </Form.Item>
             <Form.Item
@@ -186,13 +190,6 @@ const EventModal: React.FC<EventModalProps> = ({
               rules={[{ type: "email", message: t("Invalid email") }]}
             >
               <Input placeholder="Enter email" />
-            </Form.Item>
-            <Form.Item
-              name="userId"
-              label={t("User mobile")}
-              rules={[{ required: true, message: t("Please choose user!") }]}
-            >
-              <AppAccountSelect placeholder={t("Please choose user")} />
             </Form.Item>
           </Col>
           <Col xs={24} sm={24} md={12}>
