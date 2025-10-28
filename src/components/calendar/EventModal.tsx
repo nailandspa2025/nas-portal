@@ -117,14 +117,16 @@ const EventModal: React.FC<EventModalProps> = ({
         >
           {t("Cancel")}
         </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          loading={loading}
-          onClick={() => form.submit()}
-        >
-          {t("Save")}
-        </Button>,
+        eventData?.status === 1 && (
+          <Button
+            key="submit"
+            type="primary"
+            loading={loading}
+            onClick={() => form.submit()}
+          >
+            {t("Save")}
+          </Button>
+        ),
       ]}
     >
       {eventData?.originalId && (
@@ -279,7 +281,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 style={{ width: "100%" }}
                 placeholder={t("Choose date")}
                 format="DD/MM/YYYY"
-                disabled={!!eventData?.originalId}
+                // disabled={!!eventData?.originalId}
                 disabledDate={(current) => {
                   return current && current < dayjs().startOf("day");
                 }}
