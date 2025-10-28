@@ -352,7 +352,10 @@ const Bookings = () => {
     };
     paymentMutation.mutate(payload);
   };
-
+  const handleEventCancel = (booking: any) => {
+    setRowId(booking.originalId);
+    setOpenModalCancel(true);
+  };
   const handleCancelSubmit = (values: any) => {
     const payload = {
       ...values,
@@ -410,6 +413,7 @@ const Bookings = () => {
         onSubmit={handleEventSubmit}
         handleDelete={handleEventDelete}
         handlePayment={handleEventPayment}
+        handleCancel={handleEventCancel}
       />
 
       {/* Delete Confirmation Modal */}

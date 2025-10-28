@@ -17,7 +17,11 @@ import React, { useEffect } from "react";
 import StoreSelect from "../StoreSelect";
 import AppAccountSelect from "../AppAccountSelect";
 import dayjs from "dayjs";
-import { DeleteOutlined, BankOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  BankOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons";
 import { DropdownApi } from "../../apis/dropdown/dropdown";
 import RemoteSelect from "../../components/RemoteSelect";
 export interface EventData {
@@ -35,6 +39,7 @@ interface EventModalProps {
   onSubmit?: (values: any) => void;
   handleDelete?: (values: any) => void;
   handlePayment?: (values: any) => void;
+  handleCancel?: (values: any) => void;
 }
 
 const EventModal: React.FC<EventModalProps> = ({
@@ -45,9 +50,11 @@ const EventModal: React.FC<EventModalProps> = ({
   onSubmit = () => {},
   handleDelete = () => {},
   handlePayment = () => {},
+  handleCancel = () => {},
 }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation();
+  const storeId = Form.useWatch("storeId", form);
   useEffect(() => {
     if (open) {
       form.setFieldsValue({
@@ -127,27 +134,39 @@ const EventModal: React.FC<EventModalProps> = ({
             top: 13,
             right: 50,
             display: "flex",
-            gap: "8px",
+            gap: "4px",
           }}
         >
           {eventData?.status === 1 && (
+            <>
+              <Button
+                icon={<BankOutlined />}
+                type="text"
+                style={{ color: "#1890ff" }}
+                onClick={() => {
+                  handlePayment(eventData);
+                }}
+              />
+              <Button
+                icon={<CloseCircleOutlined />}
+                type="text"
+                style={{ color: "red" }}
+                onClick={() => {
+                  handleCancel(eventData);
+                }}
+              />
+            </>
+          )}
+          {eventData?.status === 3 && (
             <Button
-              icon={<BankOutlined />}
+              icon={<DeleteOutlined />}
               type="text"
-              style={{ color: "#1890ff" }}
+              danger
               onClick={() => {
-                handlePayment(eventData);
+                handleDelete(eventData);
               }}
             />
           )}
-          <Button
-            icon={<DeleteOutlined />}
-            type="text"
-            danger
-            onClick={() => {
-              handleDelete(eventData);
-            }}
-          />
         </div>
       )}
       <Form form={form} layout="vertical" onFinish={onFinish}>
@@ -194,29 +213,38 @@ const EventModal: React.FC<EventModalProps> = ({
           </Col>
           <Col xs={24} sm={24} md={12}>
             <Form.Item
+              label={t("Store")}
+              name="storeId"
+              rules={[{ required: true, message: t("Please choose store!") }]}
+            >
+              <StoreSelect
+                placeholder={t("Choose store")}
+                onChange={() => {
+                  form.setFieldsValue({ technicianIds: [] });
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item
               label={t("Technician")}
-              name={"technicianIds"}
+              name="technicianIds"
               rules={[
                 { required: true, message: t("Please choose technician!") },
               ]}
             >
               <RemoteSelect
-                placeholder={t("Select technician ")}
+                placeholder={t("Select technician")}
+                mode="multiple"
                 fetchList={DropdownApi.getTechnicians}
                 fetchById={DropdownApi.getTechnicianById}
                 fetchByIds={DropdownApi.getTechnicianByIds}
-                mode="multiple"
                 labelKey={(item) => `${item.technicianName} - ${item.phone}`}
                 valueKey="id"
+                params={{ storeId }}
+                disabled={!storeId}
               />
             </Form.Item>
-            <Form.Item
-              label={t("Store")}
-              name={"storeId"}
-              rules={[{ required: true, message: t("Please choose store!") }]}
-            >
-              <StoreSelect placeholder={t("Choose store")} />
-            </Form.Item>
+
             <Form.Item
               name="number"
               label={t("Number")}

@@ -17,6 +17,8 @@ interface RemoteSelectProps {
   labelKey?: string | ((item: any) => string);
   valueKey?: string;
   pageSize?: number;
+  params?: Record<string, any>;
+  disabled?: boolean;
 }
 
 const RemoteSelect: React.FC<RemoteSelectProps> = ({
@@ -30,15 +32,29 @@ const RemoteSelect: React.FC<RemoteSelectProps> = ({
   labelKey = "name",
   valueKey = "id",
   pageSize = 20,
+  params = {},
+  disabled = false,
 }) => {
   const [searchText, setSearchText] = useState("");
+
+  // ✅ tạo stable key từ params
+  const paramKey = JSON.stringify(params || {});
+
+  // 🧠 Query danh sách
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["remoteSelectInfinite", fetchList.name, searchText],
+      queryKey: ["remoteSelectInfinite", fetchList.name, searchText, paramKey],
       queryFn: async ({ pageParam = 1 }) => {
-        const res: any = await fetchList(
-          queryString.stringify({ page: pageParam, pageSize, searchText })
-        );
+        if (disabled) return { items: [], total: 0, page: pageParam };
+
+        const query = queryString.stringify({
+          page: pageParam,
+          pageSize,
+          searchText,
+          ...params,
+        });
+
+        const res: any = await fetchList(query);
         return {
           items: res?.data?.items || [],
           total: res?.data?.total || 0,
@@ -50,13 +66,17 @@ const RemoteSelect: React.FC<RemoteSelectProps> = ({
         const loaded = lastPage.page * pageSize;
         return loaded < total ? lastPage.page + 1 : undefined;
       },
+      enabled: !disabled, // không gọi nếu đang disable
       initialPageParam: 1,
     });
 
+  // 🧠 xử lý danh sách dữ liệu
   const listData = useMemo(
     () => uniqBy(data?.pages.flatMap((p) => p.items) || [], valueKey),
     [data, valueKey]
   );
+
+  // 🧠 lấy dữ liệu thêm nếu value không nằm trong list
   const valuesArray = Array.isArray(value) ? value : value ? [value] : [];
   const isDataInList = valuesArray.every((id) =>
     listData.some((u: any) => u[valueKey] === id)
@@ -78,13 +98,13 @@ const RemoteSelect: React.FC<RemoteSelectProps> = ({
     enabled: !!valuesArray.length && !isDataInList,
   });
 
-  const mergedData = useMemo(() => {
-    return uniqBy([...listData, ...(extraData || [])], valueKey);
-  }, [listData, extraData, valueKey]);
+  const mergedData = useMemo(
+    () => uniqBy([...listData, ...(extraData || [])], valueKey),
+    [listData, extraData, valueKey]
+  );
 
-  const onSearch = debounce((v: string) => {
-    setSearchText(v);
-  }, 500);
+  const onSearch = debounce((v: string) => setSearchText(v), 500);
+
   const handlePopupScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     if (target.scrollTop + target.offsetHeight >= target.scrollHeight - 20) {
@@ -99,6 +119,7 @@ const RemoteSelect: React.FC<RemoteSelectProps> = ({
       mode={mode || undefined}
       showSearch
       allowClear
+      disabled={disabled}
       placeholder={placeholder}
       value={value || null}
       loading={isLoading}
