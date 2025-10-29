@@ -117,7 +117,7 @@ const EventModal: React.FC<EventModalProps> = ({
         >
           {t("Cancel")}
         </Button>,
-        eventData?.status === 1 && (
+        eventData?.status != 2 && eventData?.status != 3 && (
           <Button
             key="submit"
             type="primary"
