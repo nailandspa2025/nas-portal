@@ -102,7 +102,7 @@ export default function CalendarMain({
   setEndDate,
   onCreate,
 }: CalendarMainProps) {
-  const { i18n, t } = useTranslation();
+  const { t } = useTranslation();
 
   const calendarRef = useRef<FullCalendar | null>(null);
   const calendarWrapperRef = useRef<HTMLDivElement>(null);
@@ -317,15 +317,20 @@ export default function CalendarMain({
             height={calendarHeight}
             scrollTime={dayjs().format("HH:mm:ss")}
             firstDay={CALENDAR_CONFIG.FIRST_DAY}
-            locale={i18n.language}
+            locale={"en"}
             allDaySlot={false}
             slotMinTime={CALENDAR_CONFIG.SLOT_MIN_TIME}
             slotMaxTime={CALENDAR_CONFIG.SLOT_MAX_TIME}
             slotDuration={CALENDAR_CONFIG.SLOT_DURATION}
+            slotLabelFormat={{
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            }}
             eventTimeFormat={{
               hour: "2-digit",
               minute: "2-digit",
-              hour12: false,
+              hour12: true,
             }}
             titleFormat={{ year: "numeric", month: "numeric" }}
             datesSet={(arg) => {

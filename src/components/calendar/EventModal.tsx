@@ -292,7 +292,11 @@ const EventModal: React.FC<EventModalProps> = ({
               label={t("Appointment time")}
               rules={[{ required: true, message: t("Please choose time!") }]}
             >
-              <TimePicker format="HH:mm" style={{ width: "100%" }} />
+              <TimePicker
+                format="hh:mm A"
+                style={{ width: "100%" }}
+                minuteStep={5}
+              />
             </Form.Item>
           </Col>
           <Col span={24}>
