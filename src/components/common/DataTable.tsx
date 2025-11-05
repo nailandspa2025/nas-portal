@@ -15,6 +15,7 @@ interface DataTableProps<T> {
   bordered?: boolean;
   rowClassName?: boolean;
   current?: number;
+  expandable?: TableProps<T>["expandable"];
 }
 
 const DataTable = <T extends Record<string, unknown>>({
@@ -29,6 +30,7 @@ const DataTable = <T extends Record<string, unknown>>({
   bordered = true,
   rowClassName = false,
   current = 1,
+  expandable,
 }: DataTableProps<T>) => {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -67,6 +69,7 @@ const DataTable = <T extends Record<string, unknown>>({
       rowClassName={(record) =>
         rowClassName ? (record.isActive ? "" : "table-row-disable") : ""
       }
+      expandable={expandable}
     />
   );
 };

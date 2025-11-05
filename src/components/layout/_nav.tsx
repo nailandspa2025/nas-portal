@@ -68,6 +68,12 @@ const _nav = [
     route: "/reward",
   },
   {
+    id: "category",
+    icon: <TagsOutlined />,
+    name: "Category ",
+    route: "/category",
+  },
+  {
     id: "product",
     icon: <TagsOutlined />,
     name: "Product",

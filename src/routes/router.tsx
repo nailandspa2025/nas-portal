@@ -44,6 +44,8 @@ import LoyaltyGroups from "../pages/loyalty/group/loyalty.group";
 import LoyaltyGroupActions from "../pages/loyalty/group/loyalty.group.action";
 import LoyaltyPrograms from "../pages/loyalty/program/loyalty.program";
 import LoyaltyProgramActions from "../pages/loyalty/program/loyalty.program.action";
+import Category from "../pages/category/category";
+import CategoryAction from "../pages/category/action";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -332,6 +334,21 @@ const routes: RouteType[] = [
     path: "/loyalty-program/:id",
     name: "Update program",
     element: <LoyaltyProgramActions />,
+  },
+  {
+    path: "/category",
+    name: "List Category",
+    element: <Category />,
+  },
+  {
+    path: "/category/none",
+    name: "Create  category",
+    element: <CategoryAction />,
+  },
+  {
+    path: "/category/:id",
+    name: "Update category",
+    element: <CategoryAction />,
   },
 ];
 

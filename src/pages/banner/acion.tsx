@@ -22,7 +22,7 @@ const BannerActions = () => {
   const [imageUrls, setImageUrls] = useState([]);
   const [linkUrls, setLinkUrls] = useState([]);
   const { data } = useQuery({
-    queryKey: ["bookingDetail", params.id],
+    queryKey: ["bannerDetail", params.id],
     queryFn: async () => {
       const res: any = await BannerApi.getById(params.id as any);
       return res?.data || {};
@@ -69,13 +69,13 @@ const BannerActions = () => {
       ...values,
       isActive: values.isActive ?? true,
       images:
-        values.images.filter(
+        values.images?.filter(
           (item: any): item is File => item instanceof File
         ) || [],
     };
     if (params.id) {
       payload.id = params.id;
-      payload.linkUrls = linkUrls.filter(
+      payload.linkUrls = linkUrls?.filter(
         (item: any) => typeof item === "string"
       );
     }
@@ -98,11 +98,7 @@ const BannerActions = () => {
           <TopActionButtons
             backUrl="/banner"
             onSubmit={handleSubmit}
-            hasSubmitPermission={checkAccessRight(
-              accesses,
-              "update",
-              "booking"
-            )}
+            hasSubmitPermission={checkAccessRight(accesses, "update", "banner")}
           />
         </Col>
       </Row>
