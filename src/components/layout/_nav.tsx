@@ -13,6 +13,7 @@ import {
   SettingOutlined,
   ShopOutlined,
   AppstoreAddOutlined,
+  ProfileOutlined,
 } from "@ant-design/icons";
 const _nav = [
   {
@@ -60,6 +61,12 @@ const _nav = [
     icon: <AppstoreOutlined />,
     name: "Store",
     route: "/store",
+  },
+  {
+    id: "bio",
+    icon: <ProfileOutlined />,
+    name: "Bio",
+    route: "/bio",
   },
   {
     id: "reward",

@@ -46,6 +46,8 @@ import LoyaltyPrograms from "../pages/loyalty/program/loyalty.program";
 import LoyaltyProgramActions from "../pages/loyalty/program/loyalty.program.action";
 import Category from "../pages/category/category";
 import CategoryAction from "../pages/category/action";
+import Bio from "../pages/bio/bio";
+import BioActions from "../pages/bio/action";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -349,6 +351,21 @@ const routes: RouteType[] = [
     path: "/category/:id",
     name: "Update category",
     element: <CategoryAction />,
+  },
+  {
+    path: "/bio",
+    name: "List Bio",
+    element: <Bio />,
+  },
+  {
+    path: "/bio/none",
+    name: "Create  bio",
+    element: <BioActions />,
+  },
+  {
+    path: "/bio/:id",
+    name: "Update bio",
+    element: <BioActions />,
   },
 ];
 
