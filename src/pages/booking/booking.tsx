@@ -116,6 +116,13 @@ const Bookings = () => {
     return [unassigned, ...techResources];
   }, [bookingsData?.items]);
 
+  // Chuyển TimeSpan "HH:mm:ss" sang milliseconds
+  const parseTimeSpanToMs = (ts: string | undefined | null) => {
+    if (!ts) return 0;
+    const [h, m, s] = ts.split(":").map(Number);
+    return (h * 3600 + m * 60 + s) * 1000;
+  };
+
   // ✅ Event mapping
   const events = useMemo(() => {
     if (!bookingsData?.items) return [];
@@ -132,27 +139,34 @@ const Bookings = () => {
       const status = booking.status || 1;
       const color = statusColorMap[status] || "#1677ff";
 
+      // Start datetime
       const startDateTime = parseBookingDateTime(
         booking.bookingDate,
         booking.bookingTime
       );
 
-      const timeDisplay = booking.bookingTime
-        ? dayjs(booking.bookingTime, "HH:mm:ss").format("HH:mm")
-        : "";
+      // Tổng workingTime từ tất cả services
+      const totalWorkingMs =
+        booking.services?.reduce((total: number, s: any) => {
+          return total + parseTimeSpanToMs(s.workingTime);
+        }, 0) || 0;
 
+      // End datetime
+      const endDateTime = startDateTime.add(totalWorkingMs, "millisecond");
+
+      // Technician(s)
       const technicianIds =
         booking.technicianIds && booking.technicianIds.length > 0
           ? booking.technicianIds
           : ["unassigned"];
 
-      // ✅ Nhân event ra cho mỗi technician
       technicianIds.forEach((techId: any, index: number) => {
         allEvents.push({
-          id: `${booking.id}_${techId}`, // unique id
+          id: `${booking.id}_${techId}`,
           title: booking.fullName || `Booking #${booking.id}`,
           start: startDateTime.toDate(),
-          resourceId: techId.toString(), // gán 1 technician duy nhất
+          end: endDateTime.toDate(), // ✅ Thời gian kết thúc
+          resourceId: techId.toString(),
           backgroundColor: color,
           borderColor: color,
           textColor: "#ffffff",
@@ -162,14 +176,13 @@ const Bookings = () => {
             originalId: booking.id,
             technicianIndex: index + 1,
             totalTechnicians: technicianIds.length,
-            startTime: timeDisplay,
+            startTime: startDateTime.format("HH:mm"),
+            endTime: endDateTime.format("HH:mm"), // hiển thị
             status,
             statusColor: color,
             serviceIds: booking.serviceIds,
-            productName:
-              booking.services?.length > 0
-                ? booking.services.map((s: any) => s.name).join(", ")
-                : "",
+            serviceName:
+              booking.services?.map((s: any) => s.name).join(", ") || "",
           },
         });
       });

@@ -391,6 +391,7 @@ export default function CalendarMain({
 
               const index = event.extendedProps?.technicianIndex || 1;
               const total = event.extendedProps?.totalTechnicians || 1;
+              const endTime = event.extendedProps?.endTime || "00:00";
 
               return (
                 <div
@@ -407,7 +408,7 @@ export default function CalendarMain({
                     <div style={{ fontSize: "12px" }}>{serviceName}</div>
                   )}
                   <div style={{ fontSize: "12px", marginTop: "2px" }}>
-                    {startTime}
+                    {startTime} - {endTime}
                   </div>
                   <div
                     style={{
