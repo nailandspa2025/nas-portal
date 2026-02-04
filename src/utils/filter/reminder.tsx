@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeleteOutlined, FormOutlined, UserOutlined } from "@ant-design/icons";
-import { Space, Tooltip, Avatar } from "antd";
+import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
+import { Space, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 
 export const columns = ({
