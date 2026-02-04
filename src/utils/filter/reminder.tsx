@@ -45,7 +45,11 @@ export const columns = ({
       dataIndex: "channel",
       key: "channel",
       width: 120,
-      render: (channel: string) => channel || "-",
+      render: (channel: number) => {
+        if (channel === 1) return "Email";
+        if (channel === 3) return "Notification";
+        return "-";
+      },
     },
     {
       title: t("Status"),
