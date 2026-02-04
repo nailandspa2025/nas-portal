@@ -62,7 +62,7 @@ interface CalendarMainProps {
 
 // Custom hook for calendar height calculation
 const useCalendarHeight = (
-  wrapperRef: React.RefObject<HTMLDivElement | null>
+  wrapperRef: React.RefObject<HTMLDivElement | null>,
 ) => {
   const [calendarHeight, setCalendarHeight] = useState<string>("auto");
 
@@ -119,7 +119,7 @@ export default function CalendarMain({
       const minute = now.minute();
 
       const scrollTime = `${String(hour).padStart(2, "0")}:${String(
-        minute
+        minute,
       ).padStart(2, "0")}:00`;
       calendarApi.scrollToTime(scrollTime);
     };
@@ -362,7 +362,7 @@ export default function CalendarMain({
                 (e) =>
                   e.resourceId === resource.id ||
                   (Array.isArray(e.resourceIds) &&
-                    e.resourceIds.includes(resource.id))
+                    e.resourceIds.includes(resource.id)),
               );
               const uniqueBookingIds = new Set(
                 matchedEvents.map(
@@ -370,8 +370,8 @@ export default function CalendarMain({
                     e.extendedProps?.originalId ??
                     e.extendedProps?.bookingId ??
                     e.bookingId ??
-                    e.id
-                )
+                    e.id,
+                ),
               );
               const bookingCount = uniqueBookingIds.size;
               return (

@@ -197,6 +197,13 @@ const _nav = [
         icon: "",
         route: "/config-reason",
       },
+      {
+        id: "config-reminder",
+        children: "config",
+        name: "Config reminder",
+        icon: "",
+        route: "/config-reminder",
+      },
     ],
   },
 ];
