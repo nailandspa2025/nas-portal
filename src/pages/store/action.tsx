@@ -73,7 +73,7 @@ const StoreAction = () => {
     queryKey: ["deeplinkDetail", params.id],
     queryFn: async () => {
       const res: any = await DeeplinkApi.getDetail(
-        queryString.stringify({ id: params.id, type: "store" })
+        queryString.stringify({ id: params.id, type: "store" }),
       );
       return res?.data || {};
     },
@@ -107,6 +107,15 @@ const StoreAction = () => {
         paypalConfig: data.paypalConfig || null,
         deepLink: data.deepLink || deeplink?.shortLink,
         order: data.order || null,
+        workingDaySelect:
+          data.storeWorkingDays?.map((x: any) => x.dayOfWeek) || [],
+        storeWorkingDays: data.storeWorkingDays
+          ? data.storeWorkingDays.map((x: any) => ({
+              ...x,
+              openTime: x.openTime ? dayjs(x.openTime, "HH:mm:ss") : null,
+              closeTime: x.closeTime ? dayjs(x.closeTime, "HH:mm:ss") : null,
+            }))
+          : [],
       });
     }
   }, [data, form, params.id]);
@@ -134,13 +143,13 @@ const StoreAction = () => {
       userIds: values.userIds ?? null,
       images:
         values?.images?.filter(
-          (item: any): item is File => item instanceof File
+          (item: any): item is File => item instanceof File,
         ) || [],
     };
     if (params.id) {
       payload.id = params.id;
       payload.linkUrls = linkUrls?.filter(
-        (item: any) => typeof item === "string"
+        (item: any) => typeof item === "string",
       );
       payload.isAvatar = isAvatar;
     }
@@ -183,6 +192,16 @@ const StoreAction = () => {
     { label: "LinkedIn", value: 6, icon: <LinkedinOutlined /> },
     { label: "Website", value: 7, icon: <GlobalOutlined /> },
   ];
+  const weekDays = [
+    { label: t("Monday"), value: 1 },
+    { label: t("Tuesday"), value: 2 },
+    { label: t("Wednesday"), value: 3 },
+    { label: t("Thursday"), value: 4 },
+    { label: t("Friday"), value: 5 },
+    { label: t("Saturday"), value: 6 },
+    { label: t("Sunday"), value: 0 },
+  ];
+
   return (
     <>
       <Row
@@ -272,7 +291,7 @@ const StoreAction = () => {
               <Row gutter={15}>
                 <Col span={12}>
                   <Form.Item
-                    label={t("Opne Time")}
+                    label={t("Open Time")}
                     name="openTime"
                     rules={[
                       {
@@ -287,8 +306,8 @@ const StoreAction = () => {
                           if (dayjs(value).isAfter(dayjs(closeTime))) {
                             return Promise.reject(
                               new Error(
-                                t("Open time must be before close time!")
-                              )
+                                t("Open time must be before close time!"),
+                              ),
                             );
                           }
                           return Promise.resolve();
@@ -320,8 +339,8 @@ const StoreAction = () => {
                           if (dayjs(value).isBefore(dayjs(openTime))) {
                             return Promise.reject(
                               new Error(
-                                t("Close time must be after open time!")
-                              )
+                                t("Close time must be after open time!"),
+                              ),
                             );
                           }
                           return Promise.resolve();
@@ -337,6 +356,134 @@ const StoreAction = () => {
                   </Form.Item>
                 </Col>
               </Row>
+              <Form.Item label={t("Add working day")} name="workingDaySelect">
+                <Select
+                  mode="multiple"
+                  placeholder={t("Add working day")}
+                  options={weekDays}
+                  onChange={(days: number[]) => {
+                    const current =
+                      form.getFieldValue("storeWorkingDays") || [];
+
+                    const map = new Map(
+                      current.map((x: any) => [x.dayOfWeek, x]),
+                    );
+
+                    const next = days.map((day) => {
+                      return (
+                        map.get(day) || {
+                          dayOfWeek: day,
+                          openTime: null,
+                          closeTime: null,
+                        }
+                      );
+                    });
+
+                    form.setFieldsValue({
+                      workingDaySelect: days, // 👈 FIX
+                      storeWorkingDays: next,
+                    });
+                  }}
+                />
+              </Form.Item>
+
+              <Form.List name="storeWorkingDays">
+                {(fields) => (
+                  <>
+                    {fields.map(({ key, name }) => (
+                      <Row gutter={16} key={key}>
+                        <Col span={6}>
+                          <Form.Item name={[name, "dayOfWeek"]}>
+                            <Select disabled options={weekDays} />
+                          </Form.Item>
+                        </Col>
+
+                        <Col span={9}>
+                          <Form.Item
+                            name={[name, "openTime"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: t("Please enter open time!"),
+                              },
+                              ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                  const closeTime = getFieldValue([
+                                    "storeWorkingDays",
+                                    name,
+                                    "closeTime",
+                                  ]);
+
+                                  if (!value || !closeTime)
+                                    return Promise.resolve();
+
+                                  if (dayjs(value).isAfter(dayjs(closeTime))) {
+                                    return Promise.reject(
+                                      new Error(
+                                        t(
+                                          "Open time must be before close time!",
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return Promise.resolve();
+                                },
+                              }),
+                            ]}
+                          >
+                            <TimePicker
+                              placeholder={t("Select open time")}
+                              format="HH:mm"
+                              style={{ width: "100%" }}
+                            />
+                          </Form.Item>
+                        </Col>
+
+                        <Col span={9}>
+                          <Form.Item
+                            name={[name, "closeTime"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: t("Please enter close time!"),
+                              },
+                              ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                  const openTime = getFieldValue([
+                                    "storeWorkingDays",
+                                    name,
+                                    "openTime",
+                                  ]);
+
+                                  if (!value || !openTime)
+                                    return Promise.resolve();
+
+                                  if (dayjs(value).isBefore(dayjs(openTime))) {
+                                    return Promise.reject(
+                                      new Error(
+                                        t(
+                                          "Close time must be after open time!",
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return Promise.resolve();
+                                },
+                              }),
+                            ]}
+                          >
+                            <TimePicker
+                              placeholder={t("Select close time")}
+                              format="HH:mm"
+                              style={{ width: "100%" }}
+                            />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    ))}
+                  </>
+                )}
+              </Form.List>
 
               <Form.Item
                 label={t("Address")}
@@ -430,7 +577,7 @@ const StoreAction = () => {
                     <Form.Item label={t("QR Code")}>
                       <img
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
-                          deeplink.shortLink
+                          deeplink.shortLink,
                         )}`}
                         alt="QR Code"
                         style={{
@@ -484,9 +631,7 @@ const StoreAction = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Typography.Title level={5} style={{ marginTop: 0 }}>
-            {t("PayPal Information")}
-          </Typography.Title>
+
           <Row gutter={32}>
             <Col xs={24} sm={24} md={11} lg={11}>
               <Form.Item
@@ -502,7 +647,7 @@ const StoreAction = () => {
                       ]);
                       if (!value && clientSecret) {
                         return Promise.reject(
-                          new Error("Please enter ClientId!")
+                          new Error("Please enter ClientId!"),
                         );
                       }
                       return Promise.resolve();
@@ -528,7 +673,7 @@ const StoreAction = () => {
                       ]);
                       if (!value && clientId) {
                         return Promise.reject(
-                          new Error("Please enter ClientSecret!")
+                          new Error("Please enter ClientSecret!"),
                         );
                       }
                       return Promise.resolve();
@@ -625,8 +770,10 @@ const StoreAction = () => {
                                 }
                                 return Promise.reject(
                                   new Error(
-                                    t("URL must start with http:// or https://")
-                                  )
+                                    t(
+                                      "URL must start with http:// or https://",
+                                    ),
+                                  ),
                                 );
                               },
                             },
