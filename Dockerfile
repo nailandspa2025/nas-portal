@@ -17,8 +17,8 @@ FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 
-COPY ssl/nasshine.com.crt /etc/nginx/certs/nasshine.com.crt
-COPY ssl/nasshine.com.key /etc/nginx/certs/nasshine.com.key
+# COPY ssl/nasshine.com.crt /etc/nginx/certs/nasshine.com.crt
+# COPY ssl/nasshine.com.key /etc/nginx/certs/nasshine.com.key
 
-EXPOSE 8081
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
