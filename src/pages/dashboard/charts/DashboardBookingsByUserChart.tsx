@@ -1,6 +1,7 @@
 import { useMemo, useState, type FC } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DatePicker } from "antd";
+import type { ApexOptions } from "apexcharts";
 import dayjs, { type Dayjs } from "dayjs";
 import { useTranslation } from "react-i18next";
 import CommonChart from "../../../components/apexchart/CommonChart";
@@ -53,7 +54,12 @@ const DashboardBookingsByUserChart: FC<DashboardBookingsByUserChartProps> = ({
     [data, seriesName, t],
   );
 
-  const options = useMemo(
+  const maxBookingCount = useMemo(
+    () => Math.max(0, ...data.map((value) => Math.ceil(value))),
+    [data],
+  );
+
+  const options = useMemo<ApexOptions>(
     () => ({
       plotOptions: {
         bar: {
@@ -62,9 +68,24 @@ const DashboardBookingsByUserChart: FC<DashboardBookingsByUserChartProps> = ({
           columnWidth: "55%",
         },
       },
+      yaxis: {
+        min: 0,
+        max: Math.max(1, maxBookingCount),
+        stepSize: 1,
+        decimalsInFloat: 0,
+        forceNiceScale: false,
+        labels: {
+          formatter: (val) => (Number.isInteger(val) ? String(val) : ""),
+        },
+      },
+      tooltip: {
+        y: {
+          formatter: (val) => Math.round(val).toString(),
+        },
+      },
       legend: { show: false },
     }),
-    [],
+    [maxBookingCount],
   );
 
   const extra = (
