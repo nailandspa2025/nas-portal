@@ -1,0 +1,92 @@
+.apex-chart-wrapper {
+  .apexcharts-canvas line[stroke="transparent"] {
+    display: none;
+  }
+
+  .apexcharts-tooltip {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    border-color: #d8dbe0;
+    background: #fff;
+    color: #333;
+
+    .apexcharts-tooltip-title {
+      font-weight: 600;
+      border-color: #d8dbe0;
+      background: #fff;
+    }
+
+    &.apexcharts-theme-light {
+      color: rgba(0, 0, 0, 0.88);
+    }
+
+    &.apexcharts-theme-dark {
+      color: #fff;
+    }
+
+    .apexcharts-tooltip-series-group:first-of-type {
+      padding-bottom: 0;
+    }
+  }
+
+  .apexcharts-xaxistooltip,
+  .apexcharts-yaxistooltip {
+    border-color: #d8dbe0;
+    background: #f5f5f5;
+
+    &::before {
+      border-bottom-color: #d8dbe0;
+    }
+  }
+
+  .apexcharts-xaxistooltip::after {
+    border-bottom-color: #f5f5f5;
+  }
+
+  .apexcharts-yaxistooltip::after {
+    border-bottom-color: #f5f5f5;
+  }
+
+  .apexcharts-yaxistooltip::before {
+    border-left-color: #d8dbe0;
+  }
+
+  .apexcharts-xaxistooltip-text,
+  .apexcharts-yaxistooltip-text {
+    color: rgba(0, 0, 0, 0.88);
+  }
+
+  .apexcharts-text,
+  .apexcharts-tooltip-text,
+  .apexcharts-datalabel-label,
+  .apexcharts-datalabel,
+  .apexcharts-xaxistooltip-text,
+  .apexcharts-yaxistooltip-text,
+  .apexcharts-legend-text {
+    font-family:
+      "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  }
+
+  .apexcharts-pie-label {
+    filter: none;
+  }
+
+  .apexcharts-marker {
+    box-shadow: none;
+  }
+}
+
+[dir="rtl"] .apex-chart-wrapper {
+  .apexcharts-tooltip .apexcharts-tooltip-marker {
+    margin-inline-end: 10px;
+    margin-inline-start: 0;
+  }
+
+  .apexcharts-tooltip .apexcharts-tooltip-text-y-value {
+    margin-inline-start: 5px;
+    margin-inline-end: 0;
+  }
+
+  .apexcharts-yaxis .apexcharts-yaxis-texts-g .apexcharts-yaxis-label {
+    text-anchor: start;
+  }
+}
