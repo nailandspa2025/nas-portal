@@ -10,16 +10,12 @@ import {
 
 export type DashboardChartCardProps = {
   title: ReactNode;
-  /** Thường dùng cho filter: Select, DatePicker.RangePicker, … */
   extra?: ReactNode;
   chartType: DashboardChartType;
   series: ApexChartProps["series"];
-  /** Trục X (line / area / bar / …) */
   categories?: string[];
-  /** pie / donut / polarArea */
   labels?: string[];
   height?: number;
-  /** Gộp sâu vào options mặc định (toolbar, tooltip, màu, …) */
   options?: ApexOptions;
   cardProps?: CardProps;
 };
