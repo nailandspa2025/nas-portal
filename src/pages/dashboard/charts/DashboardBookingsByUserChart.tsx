@@ -6,10 +6,7 @@ import dayjs, { type Dayjs } from "dayjs";
 import { useTranslation } from "react-i18next";
 import CommonChart from "../../../components/apexchart/CommonChart";
 import type { DashboardBookingsByUserChartProps } from "../dashboardChart.types";
-import {
-  type BookingByUserItem,
-  ReportApi,
-} from "../../../apis/report/report";
+import { type BookingByUserItem, ReportApi } from "../../../apis/report/report";
 
 const DashboardBookingsByUserChart: FC<DashboardBookingsByUserChartProps> = ({
   seriesName,
@@ -21,7 +18,7 @@ const DashboardBookingsByUserChart: FC<DashboardBookingsByUserChartProps> = ({
   const { RangePicker } = DatePicker;
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>(() => {
     const end = dayjs();
-    return [end.subtract(6, "day").startOf("day"), end.startOf("day")];
+    return [end.subtract(1, "month").startOf("day"), end.startOf("day")];
   });
   const fromDate = dateRange[0].format("YYYY-MM-DD");
   const endDate = dateRange[1].format("YYYY-MM-DD");
@@ -61,11 +58,32 @@ const DashboardBookingsByUserChart: FC<DashboardBookingsByUserChartProps> = ({
 
   const options = useMemo<ApexOptions>(
     () => ({
+      dataLabels: {
+        enabled: true,
+        formatter: (val) => Math.round(Number(val ?? 0)).toString(),
+        offsetY: -20,
+        style: {
+          fontSize: "11px",
+          fontWeight: 700,
+          colors: ["#1f2937"],
+        },
+        background: {
+          enabled: true,
+          foreColor: "#ffffff",
+          borderRadius: 6,
+          borderWidth: 0,
+          opacity: 0.92,
+          padding: 4,
+        },
+      },
       plotOptions: {
         bar: {
           horizontal: false,
           borderRadius: 4,
           columnWidth: "55%",
+          dataLabels: {
+            position: "top",
+          },
         },
       },
       yaxis: {

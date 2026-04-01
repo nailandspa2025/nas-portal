@@ -9,6 +9,9 @@ type DateRangeParams = {
 
 type RevenueByTimeParams = DateRangeParams & {
   GroupBy?: number;
+  year?: number;
+  fromYear?: number;
+  toYear?: number;
 };
 
 export type ReportApiEnvelope<T> = {
@@ -69,6 +72,9 @@ export const ReportApi = {
       GroupBy: params?.GroupBy ?? 1,
       fromDate: params?.fromDate,
       endDate: params?.endDate,
+      year: params?.year,
+      fromYear: params?.fromYear,
+      toYear: params?.toYear,
     });
     const endpoint = `/report/api/v1/report/revenue-by-time?${qs}`;
     return await apiCall<ReportApiEnvelope<RevenueByTimeItem[]>>(
@@ -76,8 +82,11 @@ export const ReportApi = {
       endpoint
     );
   },
-  revenueByMethod: async () => {
-    const endpoint = "/report/api/v1/report/revenue-by-method";
+  revenueByMethod: async (params?: DateRangeParams) => {
+    const qs = params ? queryString.stringify(params) : "";
+    const endpoint = qs
+      ? `/report/api/v1/report/revenue-by-method?${qs}`
+      : "/report/api/v1/report/revenue-by-method";
     return await apiCall<ReportApiEnvelope<RevenueByMethodItem[]>>(
       API_METHOD.GET,
       endpoint

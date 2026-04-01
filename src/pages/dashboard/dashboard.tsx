@@ -10,17 +10,17 @@ import {
 const Dashboard: FC = () => {
   return (
     <Row gutter={[16, 16]}>
-      <Col xs={24} lg={14}>
+      <Col xs={24} lg={24}>
         <DashboardRevenueChart />
       </Col>
-      <Col xs={24} lg={10}>
-        <DashboardRevenueByMethodChart />
-      </Col>
-      <Col xs={24} lg={16}>
+      <Col xs={24} lg={24}>
         <DashboardBookingsByUserChart />
       </Col>
-      <Col xs={24} lg={8}>
+      <Col xs={24} lg={12}>
         <DashboardBookingStatusChart />
+      </Col>
+      <Col xs={24} lg={12}>
+        <DashboardRevenueByMethodChart />
       </Col>
     </Row>
   );

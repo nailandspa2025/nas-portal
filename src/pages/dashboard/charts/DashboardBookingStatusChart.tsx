@@ -21,7 +21,7 @@ const DashboardBookingStatusChart: FC<DashboardBookingStatusChartProps> = ({
   const { RangePicker } = DatePicker;
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>(() => {
     const end = dayjs();
-    return [end.subtract(6, "day").startOf("day"), end.startOf("day")];
+    return [end.subtract(1, "month").startOf("day"), end.startOf("day")];
   });
   const fromDate = dateRange[0].format("YYYY-MM-DD");
   const endDate = dateRange[1].format("YYYY-MM-DD");
