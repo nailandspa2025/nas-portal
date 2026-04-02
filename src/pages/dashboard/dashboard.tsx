@@ -11,10 +11,10 @@ const Dashboard: FC = () => {
   return (
     <Row gutter={[16, 16]}>
       <Col xs={24} lg={24}>
-        <DashboardRevenueChart />
+        <DashboardBookingsByUserChart />
       </Col>
       <Col xs={24} lg={24}>
-        <DashboardBookingsByUserChart />
+        <DashboardRevenueChart />
       </Col>
       <Col xs={24} lg={12}>
         <DashboardBookingStatusChart />

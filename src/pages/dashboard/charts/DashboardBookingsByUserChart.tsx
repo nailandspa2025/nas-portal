@@ -26,14 +26,15 @@ const DashboardBookingsByUserChart: FC<DashboardBookingsByUserChartProps> = ({
   const { data: bookingByUserResponse } = useQuery({
     queryKey: ["dashboardBookingByUser", fromDate, endDate],
     queryFn: () => ReportApi.bookingByUser({ fromDate, endDate }),
-    select: (response) => response.data.items ?? [],
+    // select: (response) => response.data.items ?? [],
+    select: (response) => response.data,
   });
 
   const rows = useMemo(
-    () => (Array.isArray(bookingByUserResponse) ? bookingByUserResponse : []),
+    () => bookingByUserResponse?.items ?? [],
     [bookingByUserResponse],
   );
-
+  const totalBookings = bookingByUserResponse?.total?.toLocaleString() ?? 0;
   const categories = useMemo(
     () =>
       (rows as BookingByUserItem[]).map((row, index) =>
@@ -127,7 +128,7 @@ const DashboardBookingsByUserChart: FC<DashboardBookingsByUserChartProps> = ({
 
   return (
     <CommonChart
-      title={title ?? t("Bookings by user")}
+      title={`${title ?? t("Bookings by user")} (Total: ${totalBookings})`}
       extra={extra}
       chartType="bar"
       categories={categories}

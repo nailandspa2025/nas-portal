@@ -56,14 +56,21 @@ const DashboardRevenueChart: FC<DashboardRevenueChartProps> = ({
   const { data: revenueByTimeResponse } = useQuery({
     queryKey: ["dashboardRevenueByTime", queryParams],
     queryFn: () => ReportApi.revenueByTime(queryParams),
-    select: (response) => response.data.items ?? [],
+    //select: (response) => response.data.items ?? [],
+    select: (response) => response.data,
     placeholderData: (previousData) => previousData,
   });
 
-  const rows = useMemo(() => {
-    if (Array.isArray(revenueByTimeResponse)) return revenueByTimeResponse;
-    return [];
-  }, [revenueByTimeResponse]);
+  // const rows = useMemo(() => {
+  //   if (Array.isArray(revenueByTimeResponse)) return revenueByTimeResponse;
+  //   return [];
+  // }, [revenueByTimeResponse]);
+  const rows = useMemo(
+    () => revenueByTimeResponse?.items ?? [],
+    [revenueByTimeResponse],
+  );
+  const totalBookings =
+    revenueByTimeResponse?.totalRevenue?.toLocaleString() ?? 0;
 
   const categories = useMemo(
     () =>
@@ -155,12 +162,14 @@ const DashboardRevenueChart: FC<DashboardRevenueChartProps> = ({
         width: "100%",
         maxWidth: "100%",
         flexWrap: "wrap",
-      }}>
+      }}
+    >
       <Radio.Group
         size="small"
         value={groupBy}
         buttonStyle="solid"
-        onChange={(event) => setGroupBy(event.target.value as 1 | 2 | 3)}>
+        onChange={(event) => setGroupBy(event.target.value as 1 | 2 | 3)}
+      >
         <Radio.Button value={1}>{t("Day")}</Radio.Button>
         <Radio.Button value={2}>{t("Month")}</Radio.Button>
         <Radio.Button value={3}>{t("Year")}</Radio.Button>
@@ -171,7 +180,8 @@ const DashboardRevenueChart: FC<DashboardRevenueChartProps> = ({
           display: "flex",
           alignItems: "center",
           width: 260,
-        }}>
+        }}
+      >
         {groupBy === 1 && (
           <RangePicker
             size="small"
@@ -228,10 +238,10 @@ const DashboardRevenueChart: FC<DashboardRevenueChartProps> = ({
       </div>
     </div>
   );
-
+  console.log("data", revenueByTimeResponse);
   return (
     <CommonChart
-      title={title ?? t("Revenue by time")}
+      title={`${title ?? t("Revenue by time")} (Total: ${totalBookings})`}
       extra={extra}
       chartType="bar"
       categories={categories}
