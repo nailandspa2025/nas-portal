@@ -1,12 +1,20 @@
 export default {
-  // Menu
-  Dashboard: "Dashboard",
   Store: "Store",
-  Product: "Product",
   Technician: "Technician",
-  "App Accoount": "App Accoount",
-  Booking: "Booking",
-  "Group & user": "Group & users",
   User: "User",
-  "Group rights": "Group rights",
+
+  Pending: "Pending",
+  Completed: "Completed",
+  Cancelled: "Cancelled",
+  Total: "Total",
+  Revenue: "Revenue",
+  "Revenue by time": "Revenue by time",
+  Bookings: "Bookings",
+
+  "Booking status": "Booking status",
+  "Bookings by user": "Bookings by user",
+  "Revenue by method": "Revenue by method",
+  Method: "Method",
+  "From date": "From date",
+  "To date": "To date",
 };
