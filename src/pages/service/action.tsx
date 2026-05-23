@@ -51,6 +51,7 @@ const ServiceActions = () => {
         rating: data.rating || 0,
         workingTime: data.workingTime ? dayjs(data.workingTime, "HH:mm") : null,
         currency: data.currency || null,
+        commission: data.commission || 0,
       });
     }
   }, [data, form, params.id]);
@@ -106,7 +107,7 @@ const ServiceActions = () => {
             hasSubmitPermission={checkAccessRight(
               accesses,
               "update",
-              "service"
+              "service",
             )}
           />
         </Col>
@@ -158,6 +159,16 @@ const ServiceActions = () => {
               <Form.Item label={t("Description")} name="description">
                 <Input.TextArea rows={4} placeholder={t("Enter description")} />
               </Form.Item>
+              <Form.Item label={t("Commission")} name="commission">
+                <InputNumber
+                  placeholder={t("Enter commission")}
+                  style={{ width: "100%" }}
+                  min={0}
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                />
+              </Form.Item>
               <Form.Item name="rating" label={t("Rating")}>
                 <Rate />
               </Form.Item>
@@ -193,8 +204,10 @@ const ServiceActions = () => {
                       ) {
                         return Promise.reject(
                           new Error(
-                            t("Please enter Price to when Price from is filled")
-                          )
+                            t(
+                              "Please enter Price to when Price from is filled",
+                            ),
+                          ),
                         );
                       }
 
@@ -206,9 +219,9 @@ const ServiceActions = () => {
                         return Promise.reject(
                           new Error(
                             t(
-                              "Price to must be greater than or equal to Price from"
-                            )
-                          )
+                              "Price to must be greater than or equal to Price from",
+                            ),
+                          ),
                         );
                       }
 

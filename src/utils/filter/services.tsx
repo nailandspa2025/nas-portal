@@ -67,6 +67,15 @@ export const columns = ({
       render: (price: number) => <span>{price?.toLocaleString()}</span>,
     },
     {
+      title: t("Commission"),
+      dataIndex: "commission",
+      key: "commission",
+      width: 180,
+      render: (commission: number) => (
+        <span>{commission?.toLocaleString()}</span>
+      ),
+    },
+    {
       title: t("Rating"),
       dataIndex: "rating",
       key: "rating",
@@ -80,6 +89,7 @@ export const columns = ({
       dataIndex: "description",
       key: "description",
       width: 250,
+      hidden: true,
     },
     {
       align: "center",
