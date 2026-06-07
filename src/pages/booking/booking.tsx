@@ -79,7 +79,7 @@ const Bookings = () => {
           fromDate: currentDate.format("YYYY-MM-DD"),
           endDate: endDate.format("YYYY-MM-DD"),
           ...filters,
-        })
+        }),
       );
       return response.data;
     },
@@ -95,11 +95,13 @@ const Bookings = () => {
       booking.technicians?.forEach((tech: any) => {
         if (!techniciansMap.has(tech.id)) {
           techniciansMap.set(tech.id, {
-            id: tech.id.toString(),
-            title: tech.technicianName || `Staff ${tech.id}`,
-            technicianName: tech.technicianName,
-            phone: tech.phone,
-            address: tech.technicianAddress,
+            id: tech?.technician?.id?.toString(),
+            title:
+              tech.technician?.technicianName ||
+              `Staff ${tech?.technician?.id}`,
+            technicianName: tech.technician?.technicianName,
+            phone: tech.technician?.phone,
+            address: tech.technician?.technicianAddress,
           });
         }
       });
@@ -142,7 +144,7 @@ const Bookings = () => {
       // Start datetime
       const startDateTime = parseBookingDateTime(
         booking.bookingDate,
-        booking.bookingTime
+        booking.bookingTime,
       );
 
       // Tổng workingTime từ tất cả services
@@ -166,7 +168,7 @@ const Bookings = () => {
           title: booking.fullName || `Booking #${booking.id}`,
           start: startDateTime.toDate(),
           end: endDateTime.toDate(), // ✅ Thời gian kết thúc
-          resourceId: techId.toString(),
+          resourceId: techId?.toString(),
           backgroundColor: color,
           borderColor: color,
           textColor: "#ffffff",
