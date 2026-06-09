@@ -49,6 +49,7 @@ import PackageSelect from "../../components/PackageSelect";
 import BankSelect from "../../components/BankSelect";
 import { DeeplinkApi } from "../../apis/catalog/deeplink";
 import queryString from "query-string";
+import PaymentProviderForm from "../../components/PaymentProviderForm";
 const StoreAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -116,9 +117,61 @@ const StoreAction = () => {
               closeTime: x.closeTime ? dayjs(x.closeTime, "HH:mm:ss") : null,
             }))
           : [],
+        paymentProviders: mapPaymentProviders(data.paymentProviders),
       });
     }
   }, [data, form, params.id]);
+  const mapPaymentProviders = (providers: any[] = []) => {
+    const getSetting = (
+      settings: any[],
+      key: string,
+      defaultValue: any = "",
+    ) => {
+      return settings?.find((x) => x.key === key)?.value ?? defaultValue;
+    };
+
+    return providers.map((provider: any) => {
+      switch (provider.paymentMethod) {
+        // BankTransfer
+        case 5:
+          return {
+            paymentMethod: 5,
+            isActive: provider.isActive,
+            bankName: getSetting(provider.settings, "BankName"),
+            accountNumber: getSetting(provider.settings, "AccountNumber"),
+            accountHolder: getSetting(provider.settings, "AccountHolder"),
+            bankCode: getSetting(provider.settings, "bankCode"),
+          };
+
+        // Paypal
+        case 8:
+          return {
+            paymentMethod: 8,
+            isActive: provider.isActive,
+            clientId: getSetting(provider.settings, "ClientId"),
+            clientSecret: getSetting(provider.settings, "ClientSecret"),
+            isSandbox:
+              getSetting(provider.settings, "IsSandbox", "false") === "true",
+          };
+
+        // Stripe
+        case 9:
+          return {
+            paymentMethod: 9,
+            isActive: provider.isActive,
+            publishableKey: getSetting(provider.settings, "PublishableKey"),
+            secretKey: getSetting(provider.settings, "SecretKey"),
+            webhookSecret: getSetting(provider.settings, "WebhookSecret"),
+          };
+
+        default:
+          return {
+            paymentMethod: provider.paymentMethod,
+            isActive: provider.isActive,
+          };
+      }
+    });
+  };
   const mutation = useMutation({
     mutationFn: async (values: any) => {
       const formD = new FormData();
@@ -137,6 +190,34 @@ const StoreAction = () => {
       toast.error(t("An error occurred"));
     },
   });
+  const buildPaymentProviderSettings = (provider: any) => {
+    switch (provider.paymentMethod) {
+      case 5:
+        return [
+          { key: "BankName", value: provider.bankName },
+          { key: "AccountNumber", value: provider.accountNumber },
+          { key: "AccountHolder", value: provider.accountHolder },
+          { key: "BankCode", value: provider.bankCode ?? "" },
+        ];
+
+      case 8:
+        return [
+          { key: "ClientId", value: provider.clientId },
+          { key: "ClientSecret", value: provider.clientSecret },
+          { key: "IsSandbox", value: provider.isSandbox ?? false },
+        ];
+
+      case 9:
+        return [
+          { key: "PublishableKey", value: provider.publishableKey },
+          { key: "SecretKey", value: provider.secretKey },
+          { key: "WebhookSecret", value: provider.webhookSecret ?? "" },
+        ];
+
+      default:
+        return [];
+    }
+  };
   const onFinish = (values: any) => {
     const payload = {
       ...values,
@@ -145,6 +226,11 @@ const StoreAction = () => {
         values?.images?.filter(
           (item: any): item is File => item instanceof File,
         ) || [],
+      paymentProviders: values.paymentProviders.map((provider: any) => ({
+        paymentMethod: provider.paymentMethod,
+        isActive: provider.isActive,
+        settings: buildPaymentProviderSettings(provider),
+      })),
     };
     if (params.id) {
       payload.id = params.id;
@@ -632,7 +718,10 @@ const StoreAction = () => {
             </Col>
           </Row>
 
-          <Row gutter={32}>
+          {/* <Row gutter={32}>
+            <Col xs={24}>
+              <h5>Paypal</h5>
+            </Col>
             <Col xs={24} sm={24} md={11} lg={11}>
               <Form.Item
                 label="ClientId"
@@ -694,8 +783,14 @@ const StoreAction = () => {
                 <Switch checkedChildren="Yes" unCheckedChildren="No" />
               </Form.Item>
             </Col>
-          </Row>
+          </Row> */}
           <Typography.Title level={5} style={{ marginTop: 0 }}>
+            {t("Payment method")}
+          </Typography.Title>
+          <Form.Item name="paymentProviders">
+            <PaymentProviderForm />
+          </Form.Item>
+          <Typography.Title level={5} style={{ marginTop: 15 }}>
             {t("SocialNetwork")}
           </Typography.Title>
           <Form.List name="socialNetworks">
