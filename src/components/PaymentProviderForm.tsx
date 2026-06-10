@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Button,
   Card,
@@ -9,12 +8,8 @@ import {
   Row,
   Select,
   Switch,
-  Typography,
 } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-
-const { Text } = Typography;
-
 const paymentOptions = [
   {
     label: "🏦 Bank Transfer",
