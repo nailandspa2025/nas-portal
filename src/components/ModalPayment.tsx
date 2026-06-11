@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   Button,
   Col,
@@ -8,51 +8,20 @@ import {
   InputNumber,
   Modal,
   Row,
-  Select,
+  Card,
+  Divider,
+  Typography,
+  Radio,
+  Descriptions,
 } from "antd";
+import { CopyOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { validatePhoneNumber } from "../utils/common/validate";
 import { BankAccountApi } from "../apis/catalog/bank";
-import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
-import { QRCodeSVG } from "qrcode.react";
-
-const PaymentMethod = [
-  {
-    label: "Cash",
-    value: 1,
-  },
-  {
-    label: "BankTransfer",
-    value: 5,
-  },
-  // {
-  //   label: "CreditCard",
-  //   value: 2,
-  // },
-  // {
-  //   label: "Momo",
-  //   value: 3,
-  // },
-  // {
-  //   label: "Zalopay",
-  //   value: 4,
-  // },
-
-  // {
-  //   label: "MoMo",
-  //   value: 6,
-  // },
-  // {
-  //   label: "VNPay",
-  //   value: 7,
-  // },
-  {
-    label: "PayPal",
-    value: 8,
-  },
-];
-
+//import { QRCodeSVG } from "qrcode.react";
+import { toast } from "react-toastify";
+const { Text } = Typography;
 interface ModalPaymentProps {
   data?: any;
   title?: string;
@@ -73,7 +42,7 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const [selectedMethod, setSelectedMethod] = React.useState<number | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -89,11 +58,35 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
       setSelectedMethod(null);
     }
   }, [data, openModal]);
-  const { data: bankData } = useQuery({
-    queryKey: ["getBankByStore", { storeId: data.storeId }],
+  const serviceAmount = useMemo(() => {
+    if (!data?.technicians?.length) return 0;
+
+    return data.technicians.reduce(
+      (total: any, technician: { services: any[] }) => {
+        const serviceTotal = technician.services.reduce(
+          (sum: number, service: { priceTo: any }) =>
+            sum + Number(service.priceTo || 0),
+          0,
+        );
+        return total + serviceTotal;
+      },
+      0,
+    );
+  }, [data?.technicians]);
+  const discountAmount = Form.useWatch("discountAmount", form) || 0;
+  const surchargeAmount = Form.useWatch("surchargeAmount", form) || 0;
+  const customerPaid = Form.useWatch("customerPaid", form) || 0;
+  const finalAmount = Math.max(
+    serviceAmount - discountAmount + surchargeAmount,
+    0,
+  );
+  const changeAmount = Math.max(customerPaid - finalAmount, 0);
+  const amount = Math.max(finalAmount - customerPaid, 0);
+  const { data: paymentProviders } = useQuery({
+    queryKey: ["getPaymentProviders", { storeId: data.storeId }],
     queryFn: async () => {
-      const response: any = await BankAccountApi.getBankByStore(
-        queryString.stringify({ storeId: data.storeId })
+      const response: any = await BankAccountApi.getPaymentProviders(
+        data.storeId,
       );
       return response.data;
     },
@@ -103,6 +96,12 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
     const payload = {
       ...values,
       bookingId: data.id,
+      serviceAmount: serviceAmount,
+      discountAmount: discountAmount,
+      surchargeAmount: surchargeAmount,
+      customerPaid: customerPaid,
+      amount: amount,
+      method: selectedMethod,
     };
     onSubmit(payload);
   };
@@ -111,163 +110,279 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
       title={t(title)}
       open={openModal}
       onCancel={() => setOpenModal(false)}
-      footer={[
-        <Button
-          key="cancel"
-          type="primary"
-          danger
-          onClick={() => setOpenModal(false)}
-        >
-          {t("Cancel")}
-        </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          loading={loading}
-          onClick={() => form.submit()}
-        >
-          {t("Agree")}
-        </Button>,
-      ]}
+      footer={null}
+      width={900}
+      centered
+      destroyOnClose
     >
       <Form layout="vertical" form={form} onFinish={onFinish}>
-        <Row>
-          <Col span={24}>
-            <Form.Item
-              label={t("Amount")}
-              name={"amount"}
-              rules={[{ required: true, message: t("Please enter amount!") }]}
+        <Row gutter={12}>
+          <Col xs={24} lg={10}>
+            <Card
+              title="Tóm tắt thanh toán"
+              style={{
+                borderRadius: 16,
+              }}
             >
-              <InputNumber
-                placeholder={t("Enter amount")}
-                style={{ width: "100%" }}
-                min={0}
-                formatter={(value) =>
-                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
-              />
-            </Form.Item>
-            <Form.Item
-              label={t("Pament method")}
-              name={"method"}
-              rules={[{ required: true, message: t("Please choose method!") }]}
-            >
-              <Select
-                style={{ width: "100%" }}
-                showSearch
-                allowClear
-                placeholder={t("Choose method")}
-                options={PaymentMethod}
-                onChange={(value) => setSelectedMethod(value)}
-              ></Select>
-            </Form.Item>
-            {selectedMethod === 5 && bankData?.length > 0 && (
-              <div
+              <Row justify="space-between">
+                <Col>{t("Total Services")}</Col>
+
+                <Col>
+                  <Text strong>{serviceAmount?.toLocaleString()}</Text>
+                </Col>
+              </Row>
+              <Form.Item
+                label={t("Discount")}
+                name="discountAmount"
+                style={{ marginTop: 20 }}
+              >
+                <InputNumber
+                  placeholder={t("Enter discount")}
+                  style={{ width: "100%" }}
+                  min={0}
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                />
+              </Form.Item>
+              <Form.Item label={t("Surcharge")} name="surchargeAmount">
+                <InputNumber
+                  placeholder={t("Enter surcharge")}
+                  style={{ width: "100%" }}
+                  min={0}
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                />
+              </Form.Item>
+
+              <Divider />
+              <Row justify="space-between">
+                <Col>
+                  <Text strong>{t("Subtotal")}</Text>
+                </Col>
+
+                <Col>
+                  <Text strong>{finalAmount?.toLocaleString()}</Text>
+                </Col>
+              </Row>
+              <Form.Item
+                label={t("Customer Paid")}
+                name="customerPaid"
                 style={{
-                  border: "1px solid #e0e0e0",
-                  borderRadius: 12,
-                  backgroundColor: "#fafafa",
-                  padding: 16,
-                  marginTop: 12,
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                  marginTop: 20,
                 }}
               >
-                <h3
+                <InputNumber
+                  placeholder={t("Enter amount paid by customer")}
                   style={{
-                    textAlign: "center",
-                    marginBottom: 20,
-                    color: "#1890ff",
-                    fontSize: 18,
-                    fontWeight: 600,
+                    width: "100%",
+                  }}
+                  min={0}
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                />
+              </Form.Item>
+              <Row justify="space-between">
+                <Col>
+                  <Text strong>{t("Change")}</Text>
+                </Col>
+
+                <Col>
+                  <Text strong type="success">
+                    {changeAmount?.toLocaleString()}
+                  </Text>
+                </Col>
+              </Row>
+              <Divider />
+              <div
+                style={{
+                  textAlign: "center",
+                }}
+              >
+                <Text type="secondary">{t("Amount Due")}</Text>
+
+                <div
+                  style={{
+                    fontSize: 36,
+                    fontWeight: 700,
+                    color: "#ff4d4f",
+                    marginTop: 10,
                   }}
                 >
-                  {t("Bank Transfer Info")}
-                </h3>
-
-                {bankData.map((bank: any, index: number) => {
-                  const qrContent = `
-                    Bank: ${bank.bankName}
-                    Account Name: ${bank.accountName}
-                    Account Number: ${bank.accountNumber}
-                    Branch: ${bank.branchName}
-                  `.trim();
-
-                  return (
-                    <div
-                      key={index}
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: 16,
-                        borderRadius: 10,
-                        border: "1px solid #f0f0f0",
-                        marginBottom: 16,
-                        backgroundColor: "#fff",
-                      }}
-                    >
-                      <div style={{ flex: 1, paddingRight: 20 }}>
-                        <div style={{ marginBottom: 6 }}>
-                          <strong>{t("Bank")}:</strong> {bank.bankName}
-                        </div>
-                        <div style={{ marginBottom: 6 }}>
-                          <strong>{t("Account Name")}:</strong>{" "}
-                          {bank.accountName}
-                        </div>
-                        <div style={{ marginBottom: 6 }}>
-                          <strong>{t("Account Number")}:</strong>{" "}
-                          {bank.accountNumber}
-                        </div>
-                        <div>
-                          <strong>{t("Branch Name")}:</strong> {bank.branchName}
-                        </div>
-                      </div>
-
-                      <div style={{ textAlign: "center" }}>
-                        <QRCodeSVG value={qrContent} size={150} />
-                        <div
-                          style={{
-                            fontStyle: "italic",
-                            color: "#888",
-                            marginTop: 8,
-                            fontSize: 12,
-                          }}
-                        >
-                          {t("Scan QR code to pay")}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                  {amount?.toLocaleString()}
+                </div>
               </div>
-            )}
-            <Form.Item label={t("FullName")} name={"fullName"}>
-              <Input placeholder={t("Enter fullName")} />
-            </Form.Item>
-            <Form.Item
-              label={t("Email")}
-              name={"email"}
-              rules={[
-                {
-                  type: "email",
-                  message: t("Invalid email"),
-                },
-              ]}
+            </Card>
+          </Col>
+          <Col xs={24} lg={14}>
+            <Card
+              title={t("Payment Method")}
+              style={{
+                borderRadius: 16,
+              }}
             >
-              <Input placeholder={t("Enter email")} />
-            </Form.Item>
-            <Form.Item
-              label={t("Phone")}
-              name={"phone"}
-              rules={[
-                {
-                  validator: validatePhoneNumber,
-                },
-              ]}
+              <Form.Item
+                name="method"
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please select a payment method"),
+                  },
+                ]}
+              >
+                <Radio.Group
+                  style={{
+                    width: "100%",
+                  }}
+                  onChange={(e) => setSelectedMethod(e.target.value)}
+                >
+                  <Row gutter={[12, 12]}>
+                    <Col span={6}>
+                      <Radio value={1}>{t("Cash")}</Radio>
+                    </Col>
+
+                    {paymentProviders?.map((item: any) => (
+                      <Col span={6} key={item.paymentMethod}>
+                        <Radio value={item.paymentMethod}>
+                          {t(item.paymentMethodName)}
+                        </Radio>
+                      </Col>
+                    ))}
+                  </Row>
+                </Radio.Group>
+              </Form.Item>
+              {selectedMethod == 5 && (
+                <>
+                  <Card
+                    size="small"
+                    title={t("Cash Payment")}
+                    style={{
+                      marginTop: 16,
+                    }}
+                  >
+                    <Row gutter={24}>
+                      <Col xs={24} md={24}>
+                        <Descriptions bordered size="small" column={1}>
+                          <Descriptions.Item label="Bank Name">
+                            {
+                              paymentProviders
+                                ?.find(
+                                  (x: { paymentMethod: number }) =>
+                                    x.paymentMethod === 5,
+                                )
+                                ?.settings?.find(
+                                  (s: { key: string }) => s.key === "BankName",
+                                )?.value
+                            }
+                          </Descriptions.Item>
+                          <Descriptions.Item label={t("Account Holder")}>
+                            {
+                              paymentProviders
+                                ?.find(
+                                  (x: { paymentMethod: number }) =>
+                                    x.paymentMethod === 5,
+                                )
+                                ?.settings?.find(
+                                  (s: { key: string }) =>
+                                    s.key === "AccountHolder",
+                                )?.value
+                            }
+                          </Descriptions.Item>
+                          <Descriptions.Item label={t("Account Number")}>
+                            {
+                              paymentProviders
+                                ?.find(
+                                  (x: { paymentMethod: number }) =>
+                                    x.paymentMethod === 5,
+                                )
+                                ?.settings?.find(
+                                  (s: { key: string }) =>
+                                    s.key === "AccountNumber",
+                                )?.value
+                            }
+                            <Button
+                              size="small"
+                              type="link"
+                              icon={<CopyOutlined />}
+                              onClick={() => {
+                                const accountNumber = paymentProviders
+                                  ?.find(
+                                    (x: { paymentMethod: number }) =>
+                                      x.paymentMethod === 5,
+                                  )
+                                  ?.settings?.find(
+                                    (s: { key: string }) =>
+                                      s.key === "AccountNumber",
+                                  )?.value;
+                                navigator.clipboard.writeText(
+                                  accountNumber || "",
+                                );
+                                toast.success(
+                                  t("Account number copied to clipboard"),
+                                );
+                              }}
+                            >
+                              Copy
+                            </Button>
+                          </Descriptions.Item>
+                        </Descriptions>
+                      </Col>
+                    </Row>
+                  </Card>
+                </>
+              )}
+            </Card>
+            <Card
+              title={t("Customer Information")}
+              style={{
+                marginTop: 20,
+                borderRadius: 16,
+              }}
             >
-              <Input placeholder={t("Enter phone")} />
-            </Form.Item>
+              <Form.Item label={t("Full Name")} name="fullName">
+                <Input placeholder={t("Enter full name...")} />
+              </Form.Item>
+              <Form.Item label={t("Email")} name="email">
+                <Input placeholder={t("Enter email...")} />
+              </Form.Item>
+
+              <Form.Item
+                label={t("Phone Number")}
+                name="phone"
+                rules={[
+                  {
+                    validator: validatePhoneNumber,
+                  },
+                ]}
+              >
+                <Input placeholder={t("Enter phone number...")} />
+              </Form.Item>
+
+              <Form.Item label={t("Note")} name="note">
+                <Input.TextArea rows={3} placeholder={t("Enter note...")} />
+              </Form.Item>
+            </Card>
+          </Col>
+        </Row>
+        <Divider />
+        <Row justify="end" gutter={12}>
+          <Col>
+            <Button size="large" onClick={() => setOpenModal(false)}>
+              {t("Cancel")}
+            </Button>
+          </Col>
+
+          <Col>
+            <Button
+              type="primary"
+              size="large"
+              loading={loading}
+              onClick={() => form.submit()}
+            >
+              {t("Confirm Payment")}
+            </Button>
           </Col>
         </Row>
       </Form>

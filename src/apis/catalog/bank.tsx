@@ -27,4 +27,8 @@ export const BankAccountApi = {
     const endpoint = `/catalog/api/v1/bankaccounts/store?${payload}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
+  getPaymentProviders: async (storeId: string) => {
+    const endpoint = `/catalog/api/v1/stores/payment-providers/${storeId}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
 };
