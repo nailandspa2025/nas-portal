@@ -100,6 +100,7 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
       discountAmount: discountAmount,
       surchargeAmount: surchargeAmount,
       customerPaid: customerPaid,
+      changeAmount: changeAmount,
       amount: amount,
       method: selectedMethod,
     };
