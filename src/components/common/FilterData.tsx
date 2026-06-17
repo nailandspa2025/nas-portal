@@ -13,6 +13,7 @@ import {
   Row,
   Checkbox,
   Modal,
+  DatePicker,
 } from "antd";
 import {
   DownOutlined,
@@ -25,6 +26,9 @@ import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { debounce, intersection } from "lodash-es";
+import dayjs from "dayjs";
+const { RangePicker } = DatePicker;
+
 type FilterDataProps = {
   onFilterChange?: (filters: any) => void;
   onColumnChange?: (columns: any) => void;
@@ -55,10 +59,11 @@ const FilterData: React.FC<FilterDataProps> = ({
     { value: string; label: string }[]
   >([]);
   const [dialogFilterLabel, setDialogFilterLabel] = useState(
-    utils?.filters?.filter((f: any) => f.isActive && f.popup)
+    utils?.filters?.filter((f: any) => f.isActive && f.popup),
   );
   const [columnVisible, setColumnVisible] = useState<boolean>(false);
   const [currentColumns, setCurrentColumns] = useState<any>([]);
+  const [dateRange, setDateRange] = useState<any>(null);
   useEffect(() => {
     const stored = localStorage.getItem(storageKey);
     const parsed: Record<string, boolean> | null = stored
@@ -79,21 +84,41 @@ const FilterData: React.FC<FilterDataProps> = ({
 
   useEffect(() => {
     const hiddenMap = Object.fromEntries(
-      currentColumns?.map((col: any) => [col.key, col.hidden ?? false])
+      currentColumns?.map((col: any) => [col.key, col.hidden ?? false]),
     );
     localStorage.setItem(storageKey, JSON.stringify(hiddenMap));
   }, [currentColumns, storageKey]);
 
-  const addFilter = useCallback((f: any) => {
-    const params = f.reduce((acc: any, f: any) => {
-      if (f.field !== undefined) {
-        acc[f.field] = f.value;
-      }
-      return acc;
-    }, {} as Record<string, string>);
-    onFilterChange(params);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // const addFilter = useCallback((f: any) => {
+  //   const params = f.reduce(
+  //     (acc: any, f: any) => {
+  //       if (f.field !== undefined) {
+  //         acc[f.field] = f.value;
+  //       }
+  //       return acc;
+  //     },
+  //     {} as Record<string, string>,
+  //   );
+  //   onFilterChange(params);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
+  const addFilter = useCallback(
+    (f: any) => {
+      const params: any = {};
+      f.forEach((item: any) => {
+        if (item.field === "dateRange") {
+          if (item.value) {
+            params.fromDate = item.value.fromDate;
+            params.endDate = item.value.endDate;
+          }
+        } else if (item.field !== undefined) {
+          params[item.field] = item.value;
+        }
+      });
+      onFilterChange(params);
+    },
+    [onFilterChange],
+  );
   useEffect(() => {
     const getData = () => {
       const filterData: any = [];
@@ -123,7 +148,7 @@ const FilterData: React.FC<FilterDataProps> = ({
     if (f.actionName) {
       const data = await getDataForFilter(f.actionName);
       setDialogFilterOptions(
-        data.map((item: any) => ({ ...item, value: item.value.toString() }))
+        data.map((item: any) => ({ ...item, value: item.value.toString() })),
       );
     }
     setDialogFilterValue({
@@ -137,7 +162,7 @@ const FilterData: React.FC<FilterDataProps> = ({
   };
   const removeFilter = (filter: any) => {
     const updatedFilters = dialogFilterLabel.filter(
-      (f: any) => f.field !== filter.field
+      (f: any) => f.field !== filter.field,
     );
     setDialogFilterLabel(updatedFilters);
   };
@@ -146,7 +171,7 @@ const FilterData: React.FC<FilterDataProps> = ({
   };
   const handleSelectChange = (
     values: string | string[],
-    options?: { label: string } | { label: string }[]
+    options?: { label: string } | { label: string }[],
   ) => {
     const isMultiple = Array.isArray(values);
     const label = isMultiple
@@ -172,8 +197,8 @@ const FilterData: React.FC<FilterDataProps> = ({
           ? t("Active")
           : t("InActive")
         : e.target.value
-        ? t("Yes")
-        : t("No");
+          ? t("Yes")
+          : t("No");
     setDialogFilterValue((prev: any) => ({
       ...prev,
       actionName: dialogFilterSelected?.actionName,
@@ -184,12 +209,29 @@ const FilterData: React.FC<FilterDataProps> = ({
       selected: { label },
     }));
   };
+  const handleDateRangeChange = (dates: any) => {
+    setDateRange(dates);
+    setDialogFilterValue((prev: any) => ({
+      ...prev,
+      actionName: dialogFilterSelected?.actionName,
+      field: dialogFilterSelected?.field,
+      value: {
+        fromDate: dates[0].format("YYYY-MM-DD"),
+        endDate: dates[1].format("YYYY-MM-DD"),
+      },
+      name: dialogFilterSelected?.name,
+      type: dialogFilterSelected?.type,
+      selected: {
+        label: `${dates[0].format("DD/MM/YYYY")} - ${dates[1].format("DD/MM/YYYY")}`,
+      },
+    }));
+  };
   const applyFilter = () => {
     if (!dialogFilterSelected || !dialogFilterValue) return;
     setDialogFilterVisible(false);
     const updatedFilters: any = [
       ...dialogFilterLabel.filter(
-        (f: any) => f.field !== dialogFilterSelected?.field
+        (f: any) => f.field !== dialogFilterSelected?.field,
       ),
       dialogFilterValue,
     ];
@@ -198,11 +240,11 @@ const FilterData: React.FC<FilterDataProps> = ({
 
   const filerMenus = utils?.filters?.filter(
     (f: any) =>
-      f.popup && !dialogFilterLabel.some((df: any) => df.field === f.field)
+      f.popup && !dialogFilterLabel.some((df: any) => df.field === f.field),
   );
   const handleColumn = (key: string) => {
     const updatedColumns = currentColumns.map((col: any) =>
-      col.key === key ? { ...col, hidden: !col.hidden } : col
+      col.key === key ? { ...col, hidden: !col.hidden } : col,
     );
     setCurrentColumns(updatedColumns);
     if (onColumnChange) {
@@ -233,11 +275,11 @@ const FilterData: React.FC<FilterDataProps> = ({
       if (actionName) {
         const data = await getDataForFilter(actionName, value);
         setDialogFilterOptions(
-          data.map((item: any) => ({ ...item, value: item.value.toString() }))
+          data.map((item: any) => ({ ...item, value: item.value.toString() })),
         );
       }
     },
-    500
+    500,
   );
 
   return (
@@ -367,7 +409,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                                   if (
                                     intersection(
                                       accesses || [],
-                                      item.accessRight
+                                      item.accessRight,
                                     ).length > 0
                                   )
                                     handleAction(item.funcName);
@@ -383,7 +425,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                           ...(index < utils?.actions.length - 1
                             ? [{ type: "divider" }]
                             : []),
-                        ]
+                        ],
                       ),
                       selectable: true,
                     }}
@@ -415,7 +457,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                         ...(index < currentColumns.length - 1
                           ? [{ type: "divider" }]
                           : []),
-                      ]
+                      ],
                     ),
                   }}
                   trigger={["click"]}
@@ -530,7 +572,7 @@ const FilterData: React.FC<FilterDataProps> = ({
                 onSearch={(inputValue) =>
                   handleSearchFilterOption(
                     dialogFilterSelected.actionName,
-                    inputValue
+                    inputValue,
                   )
                 }
                 filterOption={false} // Tắt lọc client
@@ -574,115 +616,136 @@ const FilterData: React.FC<FilterDataProps> = ({
             )}
           </div>
         )}
-      </Modal>
-
-      {/* <Drawer
-        title="Bộ lọc"
-        placement="right"
-        onClose={() => setDialogFilterVisible(false)}
-        open={dialogFilterVisible}
-        width={450}
-      >
-        {dialogFilterSelected && (
-          <div style={{ marginBottom: 15 }}>
-            <label
-              style={{ fontWeight: 600, display: "block", marginBottom: 8 }}
-            >
-              {dialogFilterSelected.name}
-            </label>
-
-            {dialogFilterSelected.type === "select" && (
-              <Select
-                style={{ width: "100%" }}
-                placeholder={`Chọn ${dialogFilterSelected.name}`}
-                value={dialogFilterValue.value ?? dialogFilterSelected.value}
-                onChange={handleSelectChange}
-              >
-                {dialogFilterOptions?.map((item) => (
-                  <Select.Option
-                    key={item?.value}
-                    value={item.value}
-                    label={item.label}
-                  >
-                    {t(item.label)}
-                  </Select.Option>
-                ))}
-              </Select>
-            )}
-            {dialogFilterSelected.type === "multiSelect" && (
-              <Select
-                mode="multiple"
-                style={{ width: "100%" }}
-                placeholder={`Chọn ${dialogFilterSelected.name}`}
-                value={dialogFilterValue.value ?? dialogFilterSelected.value}
-                onChange={handleSelectChange}
-              >
-                {dialogFilterOptions?.map((item) => (
-                  <Select.Option
-                    key={item?.value}
-                    value={item.value}
-                    label={item.label}
-                  >
-                    {t(item.label)}
-                  </Select.Option>
-                ))}
-              </Select>
-            )}
-
-            {dialogFilterSelected.type === "radioActive" && (
-              <Radio.Group
-                onChange={handleRadioChange}
-                value={dialogFilterValue.value ?? dialogFilterSelected.value}
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  marginTop: 5,
-                  justifyContent: "center",
+        {dialogFilterSelected?.type === "dateRange" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <RangePicker
+              format="YYYY-MM-DD"
+              allowClear
+              style={{ width: "100%" }}
+              placeholder={[t("Start Date"), t("End Date")]}
+              value={dateRange}
+              onChange={handleDateRangeChange}
+            ></RangePicker>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {/* ✅ Today */}
+              <Button
+                size="small"
+                onClick={() => {
+                  const today = dayjs();
+                  //setDateRange([today, today]);
+                  handleDateRangeChange([today, today]);
                 }}
               >
-                <Radio value={true}>{t("Active")}</Radio>
-                <Radio value={false}>{t("InActive")}</Radio>
-              </Radio.Group>
-            )}
-            {dialogFilterSelected.type === "radioYesNo" && (
-              <Radio.Group
-                onChange={handleRadioChange}
-                value={dialogFilterValue.value ?? dialogFilterSelected.value}
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  marginTop: 5,
-                  justifyContent: "center",
+                Today
+              </Button>
+              {/* ✅ Yesterday */}
+              <Button
+                size="small"
+                onClick={() => {
+                  const today = dayjs();
+                  const yesterday = today.subtract(1, "day");
+                  handleDateRangeChange([yesterday, yesterday]);
                 }}
               >
-                <Radio value={true}>Yes</Radio>
-                <Radio value={false}>No</Radio>
-              </Radio.Group>
-            )}
+                Yesterday
+              </Button>
+              {/* ✅ This Week */}
+              <Button
+                size="small"
+                onClick={() => {
+                  const today = dayjs();
+                  const from = today.startOf("week");
+                  const to = today.endOf("week");
+                  handleDateRangeChange([from, to]);
+                }}
+              >
+                This Week
+              </Button>
+              {/* ✅ Last Week */}
+              <Button
+                size="small"
+                onClick={() => {
+                  const today = dayjs();
+                  const from = today.subtract(1, "week").startOf("week");
+                  const to = today.subtract(1, "week").endOf("week");
+                  handleDateRangeChange([from, to]);
+                }}
+              >
+                Last Week
+              </Button>
+              {/* ✅ This Month (đã có) */}
+              <Button
+                size="small"
+                onClick={() => {
+                  const today = dayjs();
+                  const from = today.startOf("month");
+                  const to = today.endOf("month");
+                  handleDateRangeChange([from, to]);
+                }}
+              >
+                This Month
+              </Button>
+              {/* ✅ Last Month */}
+              <Button
+                size="small"
+                onClick={() => {
+                  const today = dayjs();
+                  const from = today.subtract(1, "month").startOf("month");
+                  const to = today.subtract(1, "month").endOf("month");
+                  handleDateRangeChange([from, to]);
+                }}
+              >
+                Last Month
+              </Button>
+              {/* ✅ Last 7 Days */}
+              <Button
+                size="small"
+                onClick={() => {
+                  const today = dayjs();
+                  const from = today.subtract(7, "day");
+                  handleDateRangeChange([from, today]);
+                }}
+              >
+                Last 7 Days
+              </Button>
+              {/* ✅ Last 30 Days */}
+              <Button
+                size="small"
+                onClick={() => {
+                  const today = dayjs();
+                  const from = today.subtract(30, "day");
+                  handleDateRangeChange([from, today]);
+                }}
+              >
+                Last 30 Days
+              </Button>
+              {/* ✅ Last 90 Days */}
+              <Button
+                size="small"
+                onClick={() => {
+                  const today = dayjs();
+                  const from = today.subtract(90, "day");
+                  handleDateRangeChange([from, today]);
+                }}
+              >
+                Last 90 Days
+              </Button>
+              {/* ✅ This Year */}
+              <Button
+                size="small"
+                onClick={() => {
+                  const today = dayjs();
+                  const from = today.startOf("year");
+                  const to = today.endOf("year");
+                  handleDateRangeChange([from, to]);
+                }}
+              >
+                This Year
+              </Button>
+            </div>
           </div>
         )}
-        <Button
-          type="primary"
-          style={{
-            width: "100%",
-            borderRadius: 5,
-            height: 40,
-            marginBottom: 10,
-          }}
-          onClick={() => {
-            applyFilter();
-          }}
-        >
-          {t("Apply")}
-        </Button>
-        <Button
-          danger
-          onClick={() => setDialogFilterVisible(false)}
-          style={{ width: "100%", borderRadius: 5, height: 40 }}
-        >
-          {t("Cancel")}
-        </Button>
-      </Drawer> */}
+      </Modal>
     </>
   );
 };

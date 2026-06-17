@@ -50,6 +50,7 @@ import Bio from "../pages/bio/bio";
 import BioActions from "../pages/bio/action";
 import ConfigReminder from "../pages/config.reminder/config.reminder";
 import ConfigReminderAction from "../pages/config.reminder/action";
+import Commissions from "../pages/commission/commission";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -383,6 +384,11 @@ const routes: RouteType[] = [
     path: "/config-reminder/:id",
     name: "Update config reminder",
     element: <ConfigReminderAction />,
+  },
+  {
+    path: "/commission",
+    name: "Commissions",
+    element: <Commissions />,
   },
 ];
 

@@ -5,6 +5,7 @@ import {
   TagsOutlined,
   UsergroupAddOutlined,
   AppstoreOutlined,
+  DollarOutlined,
   // DatabaseOutlined,
   ShareAltOutlined,
   FormOutlined,
@@ -91,6 +92,12 @@ const _nav = [
     icon: <UserOutlined />,
     name: "Technician",
     route: "/technician",
+  },
+  {
+    id: "commission",
+    icon: <DollarOutlined />,
+    name: "Commission",
+    route: "/commission",
   },
   {
     id: "appaccount",

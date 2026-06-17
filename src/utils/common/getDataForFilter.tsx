@@ -36,7 +36,7 @@ export const getDataForFilter = async (actionName: string, searchText = "") => {
           page: 1,
           pageSize: 50,
           searchText: searchText,
-        })
+        }),
       );
       return (
         response?.data?.items?.map((item: any) => ({
@@ -44,7 +44,48 @@ export const getDataForFilter = async (actionName: string, searchText = "") => {
           label: item.name,
         })) || []
       );
-
+    case "technician":
+      const responseTechnician: any = await DropdownApi.getTechnicians(
+        queryString.stringify({
+          page: 1,
+          pageSize: 50,
+          searchText: searchText,
+        }),
+      );
+      return (
+        responseTechnician?.data?.items?.map((item: any) => ({
+          value: item.id,
+          label: item.technicianName,
+        })) || []
+      );
+    case "service":
+      const service: any = await DropdownApi.getServices(
+        queryString.stringify({
+          page: 1,
+          pageSize: 50,
+          searchText: searchText,
+        }),
+      );
+      return (
+        service?.data?.items?.map((item: any) => ({
+          value: item.id,
+          label: item.name,
+        })) || []
+      );
+    case "store":
+      const store: any = await DropdownApi.getStores(
+        queryString.stringify({
+          page: 1,
+          pageSize: 50,
+          searchText: searchText,
+        }),
+      );
+      return (
+        store?.data?.items?.map((item: any) => ({
+          value: item.id,
+          label: item.name,
+        })) || []
+      );
     default:
       return [];
   }
