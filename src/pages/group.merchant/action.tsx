@@ -57,6 +57,10 @@ const accessRights = [
     id: "messenger",
     name: "Messenger",
   },
+  {
+    id: "commission",
+    name: "Commission",
+  },
 ];
 const defaultRights = [
   {
@@ -159,7 +163,7 @@ const GroupMerchantActions = () => {
   };
   const onFinish = (values: any) => {
     const permissions = Object.keys(checkedPermissions).flatMap((key) =>
-      checkedPermissions[key].map((action) => `${key}.${action}`)
+      checkedPermissions[key].map((action) => `${key}.${action}`),
     );
     const paylpad = {
       ...values,
@@ -191,7 +195,7 @@ const GroupMerchantActions = () => {
             hasSubmitPermission={checkAccessRight(
               accesses,
               "update",
-              "groupmerchant"
+              "groupmerchant",
             )}
           />
         </Col>
@@ -320,7 +324,7 @@ const GroupMerchantActions = () => {
                                                   handleCheck(
                                                     child.id,
                                                     right.value,
-                                                    e.target.checked
+                                                    e.target.checked,
                                                   )
                                                 }
                                                 onClick={(e) =>
@@ -338,7 +342,7 @@ const GroupMerchantActions = () => {
                                       </Row>
                                     </Col>
                                   </Row>
-                                )
+                                ),
                               )}
                             </Row>
                           ) : (
@@ -391,7 +395,7 @@ const GroupMerchantActions = () => {
                                             handleCheck(
                                               nav.id,
                                               right.value,
-                                              e.target.checked
+                                              e.target.checked,
                                             )
                                           }
                                           onClick={(e) => e.stopPropagation()}
@@ -423,7 +427,7 @@ const GroupMerchantActions = () => {
         hasSubmitPermission={checkAccessRight(
           accesses,
           "update",
-          "groupmerchant"
+          "groupmerchant",
         )}
       />
     </>

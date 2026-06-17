@@ -87,7 +87,7 @@ const GroupActions = () => {
   };
   const onFinish = (values: any) => {
     const permissions = Object.keys(checkedPermissions).flatMap((key) =>
-      checkedPermissions[key].map((action) => `${key}.${action}`)
+      checkedPermissions[key].map((action) => `${key}.${action}`),
     );
     const paylpad = {
       ...values,
@@ -235,7 +235,7 @@ const GroupActions = () => {
                                                 handleCheck(
                                                   child.id,
                                                   right.value,
-                                                  e.target.checked
+                                                  e.target.checked,
                                                 )
                                               }
                                               onClick={(e) =>
@@ -305,7 +305,7 @@ const GroupActions = () => {
                                             handleCheck(
                                               nav.id,
                                               right.value,
-                                              e.target.checked
+                                              e.target.checked,
                                             )
                                           }
                                           onClick={(e) => e.stopPropagation()}
