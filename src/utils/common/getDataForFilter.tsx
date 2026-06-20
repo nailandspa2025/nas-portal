@@ -83,7 +83,7 @@ export const getDataForFilter = async (actionName: string, searchText = "") => {
       return (
         store?.data?.items?.map((item: any) => ({
           value: item.id,
-          label: item.name,
+          label: item.storeName,
         })) || []
       );
     default:
