@@ -48,7 +48,7 @@ const Services = () => {
     queryKey: ["serviceList", { pageNumber, pageSize, ...filters }],
     queryFn: async () => {
       const response: any = await ServiceApi.getWithPagination(
-        queryString.stringify({ pageNumber, pageSize, ...filters })
+        queryString.stringify({ pageNumber, pageSize, ...filters }),
       );
       return response.data;
     },

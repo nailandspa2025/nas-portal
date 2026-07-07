@@ -52,6 +52,7 @@ const ServiceActions = () => {
         workingTime: data.workingTime ? dayjs(data.workingTime, "HH:mm") : null,
         currency: data.currency || null,
         commission: data.commission || 0,
+        commissionType: data.commissionType || null,
       });
     }
   }, [data, form, params.id]);
@@ -87,6 +88,8 @@ const ServiceActions = () => {
   const handleSubmit = () => {
     form.submit();
   };
+  const commissionType = Form.useWatch("commissionType", form);
+
   return (
     <>
       <Row
@@ -159,14 +162,27 @@ const ServiceActions = () => {
               <Form.Item label={t("Description")} name="description">
                 <Input.TextArea rows={4} placeholder={t("Enter description")} />
               </Form.Item>
+              <Form.Item label={t("Commission Type")} name="commissionType">
+                <Select
+                  placeholder={t("Select commission type")}
+                  allowClear
+                  autoClearSearchValue
+                >
+                  <Select.Option value={1}>{t("Fixed Amount")}</Select.Option>
+                  <Select.Option value={2}>{t("Percentage")}</Select.Option>
+                </Select>
+              </Form.Item>
               <Form.Item label={t("Commission")} name="commission">
                 <InputNumber
                   placeholder={t("Enter commission")}
                   style={{ width: "100%" }}
                   min={0}
+                  max={commissionType === 2 ? 100 : undefined}
                   formatter={(value) =>
                     `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                   }
+                  disabled={!commissionType}
+                  addonAfter={commissionType === 2 ? "%" : "$"}
                 />
               </Form.Item>
               <Form.Item name="rating" label={t("Rating")}>

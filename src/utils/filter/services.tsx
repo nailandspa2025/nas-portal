@@ -67,13 +67,31 @@ export const columns = ({
       render: (price: number) => <span>{price?.toLocaleString()}</span>,
     },
     {
+      title: t("Commission Type"),
+      dataIndex: "commissionType",
+      key: "commissionType",
+      width: 180,
+      render: (commissionType: number) => (
+        <span>
+          {commissionType == null || commissionType === 0
+            ? "N/A"
+            : commissionType === 1
+              ? t("Fixed Amount")
+              : t("Percentage")}
+        </span>
+      ),
+    },
+    {
       title: t("Commission"),
       dataIndex: "commission",
       key: "commission",
       width: 180,
-      render: (commission: number) => (
-        <span>{commission?.toLocaleString()}</span>
-      ),
+      render: (commission: number, record: any) => {
+        if (commission == null) return <span>—</span>;
+        const isPercentage = record.commissionType === 2;
+        const formatted = commission.toLocaleString();
+        return <span>{isPercentage ? `${formatted}%` : `$${formatted}`}</span>;
+      },
     },
     {
       title: t("Rating"),
