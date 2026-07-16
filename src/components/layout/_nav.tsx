@@ -49,6 +49,13 @@ const _nav = [
         icon: "",
         route: "/loyalty-program",
       },
+      {
+        id: "voucher",
+        children: "group-loyalty",
+        name: "Voucher",
+        icon: "",
+        route: "/voucher",
+      },
     ],
   },
   {

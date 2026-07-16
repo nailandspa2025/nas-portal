@@ -51,6 +51,8 @@ import BioActions from "../pages/bio/action";
 import ConfigReminder from "../pages/config.reminder/config.reminder";
 import ConfigReminderAction from "../pages/config.reminder/action";
 import Commissions from "../pages/commission/commission";
+import Vouchers from "../pages/loyalty/voucher/voucher";
+import VoucherAction from "../pages/loyalty/voucher/action";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -389,6 +391,21 @@ const routes: RouteType[] = [
     path: "/commission",
     name: "Commissions",
     element: <Commissions />,
+  },
+  {
+    path: "/voucher",
+    name: "Vouchers",
+    element: <Vouchers />,
+  },
+  {
+    path: "/voucher/none",
+    name: "Update Voucher",
+    element: <VoucherAction />,
+  },
+  {
+    path: "/voucher/:id",
+    name: "Update Voucher",
+    element: <VoucherAction />,
   },
 ];
 
