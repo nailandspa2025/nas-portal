@@ -26,6 +26,7 @@
     "apexcharts": "^5.10.4",
     "axios": "^1.7.9",
     "firebase": "^11.4.0",
+    "html-to-image": "^1.11.13",
     "i18next": "^24.2.3",
     "i18next-browser-languagedetector": "^8.0.4",
     "i18next-http-backend": "^3.0.2",

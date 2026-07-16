@@ -58,20 +58,15 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
       : `${(discountValue ?? 0).toLocaleString("en-US")} USD OFF`;
 
   return (
-    <Card
-      //bordered={false}
-      variant="borderless"
-      styles={{
-        body: {
-          padding: 0,
-          overflow: "hidden",
-          borderRadius: 22,
-        },
-      }}
+    <div
       style={{
+        width: "100%",
         borderRadius: 22,
         overflow: "hidden",
         boxShadow: "0 15px 35px rgba(0,0,0,.18)",
+        background: "transparent",
+        lineHeight: 1.2,
+        display: "block",
       }}
     >
       <div
@@ -95,7 +90,7 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
           }}
         />
 
-        {/* Lỗ hai bên */}
+        {/* Left cut */}
         <div
           style={{
             position: "absolute",
@@ -110,6 +105,7 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
           }}
         />
 
+        {/* Right cut */}
         <div
           style={{
             position: "absolute",
@@ -129,33 +125,19 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
           style={{
             position: "relative",
             zIndex: 10,
-            padding: 24,
+            padding: "22px 24px",
             color: "#fff",
-            height: "100%",
+            boxSizing: "border-box",
           }}
         >
           <Flex justify="space-between" align="center">
-            {/* {discountType === 1 ? (
-              <PercentageOutlined
-                style={{
-                  fontSize: 34,
-                  color: "#fff",
-                }}
-              />
-            ) : (
-              <DollarCircleOutlined
-                style={{
-                  fontSize: 34,
-                  color: "#fff",
-                }}
-              />
-            )} */}
             <DollarCircleOutlined
               style={{
                 fontSize: 34,
                 color: "#fff",
               }}
             />
+
             <div
               style={{
                 padding: "4px 12px",
@@ -163,6 +145,7 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
                 background: "rgba(255,255,255,.2)",
                 backdropFilter: "blur(6px)",
                 fontWeight: 600,
+                lineHeight: 1.2,
               }}
             >
               Voucher
@@ -173,8 +156,7 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
             level={3}
             style={{
               color: "#fff",
-              marginTop: 20,
-              marginBottom: 20,
+              margin: "18px 0",
               fontWeight: 800,
               lineHeight: 1.2,
             }}
@@ -182,42 +164,52 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
             {title}
           </Title>
 
-          <Flex vertical gap={14}>
+          <Flex vertical gap={12}>
             <div>
-              <Text style={{ color: "rgba(255,255,255,.75)" }}>
+              <Text
+                style={{
+                  color: "rgba(255,255,255,.75)",
+                  lineHeight: 1.2,
+                }}
+              >
                 {t("Converted points")}
               </Text>
 
-              <br />
-
-              <Text
-                strong
-                style={{
-                  color: "#fff",
-                  fontSize: 17,
-                }}
-              >
-                {formatCurrency(minimumOrderAmount)}
-              </Text>
-            </div>
-
-            {discountType === 1 && (
               <div>
-                <Text style={{ color: "rgba(255,255,255,.75)" }}>
-                  {t("Maximum discount")}
-                </Text>
-
-                <br />
-
                 <Text
                   strong
                   style={{
                     color: "#fff",
                     fontSize: 17,
+                    lineHeight: 1.2,
                   }}
                 >
-                  {formatCurrency(maximumDiscountAmount)}
+                  {formatCurrency(minimumOrderAmount)}
                 </Text>
+              </div>
+            </div>
+
+            {discountType === 1 && (
+              <div>
+                <Text
+                  style={{
+                    color: "rgba(255,255,255,.75)",
+                  }}
+                >
+                  {t("Maximum discount")}
+                </Text>
+
+                <div>
+                  <Text
+                    strong
+                    style={{
+                      color: "#fff",
+                      fontSize: 17,
+                    }}
+                  >
+                    {formatCurrency(maximumDiscountAmount)}
+                  </Text>
+                </div>
               </div>
             )}
           </Flex>
@@ -225,33 +217,33 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
           <Divider
             style={{
               borderColor: "rgba(255,255,255,.25)",
-              margin: "24px 0 18px",
+              margin: "20px 0 16px",
             }}
           />
 
           <Flex justify="space-between" align="center">
             <div>
-              <Text
+              <div
                 style={{
                   color: "#fff",
                   fontSize: 18,
                   fontWeight: 700,
                   letterSpacing: 1,
+                  lineHeight: 1.2,
                 }}
               >
                 {code}
-              </Text>
+              </div>
 
-              <br />
-
-              <Text
+              <div
                 style={{
                   color: "rgba(255,255,255,.7)",
                   fontSize: 12,
+                  marginTop: 4,
                 }}
               >
                 Reward Voucher
-              </Text>
+              </div>
             </div>
 
             <QrcodeOutlined
@@ -263,7 +255,7 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
           </Flex>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 

@@ -33,6 +33,8 @@ import StoreSelect from "../../../components/StoreSelect";
 import ConditionConfig from "../../../components/ConditionConfig";
 import "./style.scss";
 import VoucherPreview from "./VoucherPreview";
+import CaptureElement from "../../../components/CaptureElement";
+
 const { TextArea } = Input;
 const VoucherAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
@@ -42,6 +44,7 @@ const VoucherAction = () => {
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isAvatar, setIsAvatar] = useState(false);
+  const [voucherImage, setVoucherImage] = useState<File | string>();
   const { data } = useQuery({
     queryKey: ["voucherDetail", params.id],
     queryFn: async () => {
@@ -52,34 +55,24 @@ const VoucherAction = () => {
   });
   useEffect(() => {
     if (!data || !params.id) return;
-
     setImageUrl(data.urlImg || null);
-
+    setVoucherImage(data.urlVoucher || null);
     form.setFieldsValue({
       name: data.name ?? "",
       code: data.code ?? "",
       description: data.description ?? "",
-
       storeId: data.storeId,
-
       validityDays: data.validityDays,
-
       requiredPoint: data.requiredPoint,
-
       totalQuantity: data.totalQuantity,
-
       discountType: data.discountType === "Percentage" ? 1 : 2,
-
       discountValue: data.discountValue,
-
       discountMaxAmount: data.discountMaxAmount,
-
       isActive: data.isActive,
-
       issuedAt: data.issuedAt ? dayjs(data.issuedAt) : null,
-
       // quan trọng
       condition: data.condition,
+      urlVoucher: data.urlVoucher, // URL backend
     });
   }, [data, params.id, form]);
   const mutation = useMutation({
@@ -93,7 +86,7 @@ const VoucherAction = () => {
     onSuccess: (res: any) => {
       if (res.succeeded) {
         toast.success(t("Save successfully"));
-        navigate("/service");
+        navigate("/voucher");
       } else toast.error(t(res.message));
     },
     onError: () => {
@@ -104,12 +97,14 @@ const VoucherAction = () => {
     const payload = {
       ...values,
       isActive: values.isActive ?? true,
+      code: generatedCode,
+      urlVoucher: voucherImage instanceof File ? voucherImage : null,
     };
     if (params.id) {
       payload.id = params.id;
       payload.isAvatar = isAvatar;
     }
-    console.log("valuse", payload);
+    //console.log("valuse", payload);
     mutation.mutate(payload);
   };
   const handleSubmit = () => {
@@ -336,7 +331,7 @@ const VoucherAction = () => {
                   </Col>
                 )}
               </Row>
-              <Row gutter={16}>
+              <Row gutter={[16, 16]}>
                 <Col xs={24} sm={24} md={12} lg={12}>
                   <Form.Item
                     label={t("Converted points")}
@@ -373,15 +368,31 @@ const VoucherAction = () => {
                 </Col>
               </Row>
             </Col>
-            <Col xs={24} sm={24} md={8} lg={8}>
-              <VoucherPreview
-                discountType={discountType}
-                discountValue={discountValue}
-                maximumDiscountAmount={discountMax}
-                minimumOrderAmount={point}
-                imageUrl={urlImg}
-                code={generatedCode}
-              />
+            <Col xs={24} sm={24} md={8} lg={8} style={{ marginBottom: 16 }}>
+              <CaptureElement
+                //enabled={needRecapture || !params.id}
+                deps={[
+                  generatedCode,
+                  discountType,
+                  discountValue,
+                  discountMax,
+                  point,
+                  urlImg,
+                ]}
+                //fileName={generatedCode}
+                onCapture={(file) => {
+                  setVoucherImage(file);
+                }}
+              >
+                <VoucherPreview
+                  code={generatedCode}
+                  discountType={discountType}
+                  discountValue={discountValue}
+                  maximumDiscountAmount={discountMax}
+                  minimumOrderAmount={point}
+                  imageUrl={urlImg}
+                />
+              </CaptureElement>
             </Col>
           </Row>
           <Row gutter={[16, 16]}>
@@ -400,6 +411,12 @@ const VoucherAction = () => {
           </Row>
         </Form>
       </Card>
+      <TopActionButtons
+        style={{ marginTop: 20, marginBottom: 20 }}
+        backUrl="/voucher"
+        onSubmit={handleSubmit}
+        hasSubmitPermission={checkAccessRight(accesses, "update", "voucher")}
+      />
     </>
   );
 };
