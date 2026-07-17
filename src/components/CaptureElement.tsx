@@ -56,7 +56,7 @@ const CaptureElement: React.FC<CaptureElementProps> = ({
           type: `image/${format}`,
           lastModified: Date.now(),
         });
-        console.log("CAPTURE FILE", file, URL.createObjectURL(file));
+        //console.log("CAPTURE FILE", file, URL.createObjectURL(file));
         onCapture?.(file);
       } catch (err) {
         console.error(err);

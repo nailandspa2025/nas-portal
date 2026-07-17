@@ -10,6 +10,7 @@ import {
   DatePicker,
   Switch,
   Space,
+  ColorPicker,
 } from "antd";
 import {
   CheckOutlined,
@@ -48,6 +49,8 @@ const VoucherAction = () => {
   const [voucherImage, setVoucherImage] = useState<File | string>();
   const initialPreview = useRef<any>(null);
   const [needRecapture, setNeedRecapture] = useState(!params.id);
+  const [color, setColor] = useState("#333333");
+
   const { data } = useQuery({
     queryKey: ["voucherDetail", params.id],
     queryFn: async () => {
@@ -67,6 +70,7 @@ const VoucherAction = () => {
     if (!data || !params.id) return;
     setImageUrl(data.urlImg || null);
     setVoucherImage(data.urlVoucher || null);
+    setColor(data.color || "#333333");
     form.setFieldsValue({
       name: data.name ?? "",
       code: data.code ?? "",
@@ -82,7 +86,8 @@ const VoucherAction = () => {
       issuedAt: data.issuedAt ? dayjs(data.issuedAt) : null,
       // quan trọng
       condition: data.condition,
-      urlVoucher: data.urlVoucher, // URL backend
+      urlVoucher: data.urlVoucher,
+      // URL backend
     });
     initialPreview.current = {
       name: data.name,
@@ -91,6 +96,7 @@ const VoucherAction = () => {
       discountMaxAmount: data.discountMaxAmount,
       requiredPoint: data.requiredPoint,
       urlImg: normalizeImage(data.urlImg),
+      color: color,
     };
     setNeedRecapture(false);
   }, [data, params.id, form]);
@@ -120,6 +126,7 @@ const VoucherAction = () => {
       code: generatedCode,
       urlVoucher:
         needRecapture && voucherImage instanceof File ? voucherImage : null,
+      color: color,
     };
     if (params.id) {
       payload.id = params.id;
@@ -148,6 +155,7 @@ const VoucherAction = () => {
     discountMaxAmount: discountMax,
     requiredPoint: point,
     urlImg: normalizeImage(urlImg),
+    color: color,
   };
   useEffect(() => {
     if (!params.id) {
@@ -164,10 +172,8 @@ const VoucherAction = () => {
     discountMax,
     urlImg,
     name,
+    color,
   ]);
-  console.log("canhlv", needRecapture);
-  console.log("initialPreview", initialPreview.current);
-  console.log("current", current);
   return (
     <>
       <Row
@@ -234,24 +240,6 @@ const VoucherAction = () => {
                   style={{ width: "100%" }}
                 />
               </Form.Item>
-              {/* <Form.Item
-                label={t("Type")}
-                name="type"
-                rules={[
-                  {
-                    required: true,
-                    message: t("Please enter voucher type!"),
-                  },
-                ]}
-              >
-                <Select
-                  allowClear
-                  placeholder={t("Please select voucher type")}
-                >
-                  <Select.Option value={1}>{t("Internal")}</Select.Option>
-                  <Select.Option value={2}>{t("External")}</Select.Option>
-                </Select>
-              </Form.Item> */}
               <Form.Item
                 label={t("Store")}
                 name="storeId"
@@ -438,8 +426,44 @@ const VoucherAction = () => {
                   maximumDiscountAmount={discountMax}
                   minimumOrderAmount={point}
                   imageUrl={urlImg}
+                  color={color}
                 />
               </CaptureElement>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  width: "100%",
+                  marginTop: 12,
+                }}
+              >
+                <Space
+                  align="center"
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    background: "#f8fafc",
+                    border: "1px solid #e2e8f0",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: "#475569",
+                    }}
+                  >
+                    Color
+                  </span>
+                  <ColorPicker
+                    showText
+                    value={color}
+                    onChange={(value) => {
+                      setColor(value.toHexString());
+                    }}
+                  />
+                </Space>
+              </div>
             </Col>
           </Row>
           <Row gutter={[16, 16]}>

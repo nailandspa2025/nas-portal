@@ -12,6 +12,7 @@ interface VoucherPreviewProps {
   discountValue?: number;
   minimumOrderAmount?: number;
   maximumDiscountAmount?: number;
+  color?: string;
 }
 
 const formatCurrency = (value?: number) => {
@@ -26,11 +27,11 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
   discountValue,
   minimumOrderAmount,
   maximumDiscountAmount,
+  color,
 }) => {
   const { t } = useTranslation();
 
   const [bgImage, setBgImage] = useState<string>();
-
   useEffect(() => {
     if (!imageUrl) {
       setBgImage(undefined);
@@ -63,7 +64,7 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
         width: "100%",
         borderRadius: 22,
         overflow: "hidden",
-        boxShadow: "0 15px 35px rgba(0,0,0,.18)",
+        // boxShadow: "0 15px 35px rgba(0,0,0,.18)",
         background: "transparent",
         lineHeight: 1.2,
         display: "block",
@@ -76,20 +77,19 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
           overflow: "hidden",
           background: bgImage
             ? `url(${bgImage}) center/cover no-repeat`
-            : "linear-gradient(135deg,#1976d2,#0d47a1)",
+            : color,
         }}
       >
         {/* Overlay */}
-        <div
+        {/* <div
           style={{
             position: "absolute",
             inset: 0,
             background: bgImage
               ? "linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.65))"
-              : "linear-gradient(rgba(255,255,255,.05),rgba(0,0,0,.18))",
+              : color,
           }}
-        />
-
+        /> */}
         {/* Left cut */}
         <div
           style={{
@@ -142,7 +142,7 @@ const VoucherPreview: React.FC<VoucherPreviewProps> = ({
               style={{
                 padding: "4px 12px",
                 borderRadius: 20,
-                background: "rgba(255,255,255,.2)",
+                //background: "rgba(255,255,255,.2)",
                 backdropFilter: "blur(6px)",
                 fontWeight: 600,
                 lineHeight: 1.2,
