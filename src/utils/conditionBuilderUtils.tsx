@@ -17,10 +17,10 @@ import {
   isConditionSchemaItem,
 } from "./conditionBuilderTypes";
 
-function getFieldType(fieldKey: string, schemaFields: SchemaField[]): string {
-  const f = schemaFields.find((s) => s.key === fieldKey);
-  return f?.type ?? "string";
-}
+// function getFieldType(fieldKey: string, schemaFields: SchemaField[]): string {
+//   const f = schemaFields.find((s) => s.key === fieldKey);
+//   return f?.type ?? "string";
+// }
 
 function formatValue(
   value: any,
