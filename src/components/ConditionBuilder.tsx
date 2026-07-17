@@ -118,7 +118,7 @@ export const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
     isUserChange.current = false;
 
     if (typeof value === "string") {
-      const deserialized = deserializeConditionGroup(value, schemaFields);
+      const deserialized = deserializeConditionGroup(value);
       setRootGroup(deserialized);
       lastValueKeyRef.current = nextKey;
       return;
