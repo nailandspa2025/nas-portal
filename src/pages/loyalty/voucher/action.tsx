@@ -26,7 +26,7 @@ import { buildFormData } from "../../../utils/common/buildFormData";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { VoucherApi } from "../../../apis/loyalty/voucher";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AvatarUploader from "../../../components/AvatarUploader";
 import dayjs from "dayjs";
 import StoreSelect from "../../../components/StoreSelect";
@@ -34,6 +34,7 @@ import ConditionConfig from "../../../components/ConditionConfig";
 import "./style.scss";
 import VoucherPreview from "./VoucherPreview";
 import CaptureElement from "../../../components/CaptureElement";
+import isEqual from "lodash/isEqual";
 
 const { TextArea } = Input;
 const VoucherAction = () => {
@@ -45,6 +46,8 @@ const VoucherAction = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isAvatar, setIsAvatar] = useState(false);
   const [voucherImage, setVoucherImage] = useState<File | string>();
+  const initialPreview = useRef<any>(null);
+  const [needRecapture, setNeedRecapture] = useState(!params.id);
   const { data } = useQuery({
     queryKey: ["voucherDetail", params.id],
     queryFn: async () => {
@@ -53,6 +56,13 @@ const VoucherAction = () => {
     },
     enabled: !!params.id,
   });
+  const normalizeImage = (value: any) => {
+    if (!value) return "";
+
+    if (typeof value === "string") return value;
+
+    return value.url || value.response?.url || "";
+  };
   useEffect(() => {
     if (!data || !params.id) return;
     setImageUrl(data.urlImg || null);
@@ -74,7 +84,17 @@ const VoucherAction = () => {
       condition: data.condition,
       urlVoucher: data.urlVoucher, // URL backend
     });
+    initialPreview.current = {
+      name: data.name,
+      discountType: data.discountType === "Percentage" ? 1 : 2,
+      discountValue: data.discountValue,
+      discountMaxAmount: data.discountMaxAmount,
+      requiredPoint: data.requiredPoint,
+      urlImg: normalizeImage(data.urlImg),
+    };
+    setNeedRecapture(false);
   }, [data, params.id, form]);
+
   const mutation = useMutation({
     mutationFn: async (values) => {
       const formD = new FormData();
@@ -98,13 +118,13 @@ const VoucherAction = () => {
       ...values,
       isActive: values.isActive ?? true,
       code: generatedCode,
-      urlVoucher: voucherImage instanceof File ? voucherImage : null,
+      urlVoucher:
+        needRecapture && voucherImage instanceof File ? voucherImage : null,
     };
     if (params.id) {
       payload.id = params.id;
       payload.isAvatar = isAvatar;
     }
-    //console.log("valuse", payload);
     mutation.mutate(payload);
   };
   const handleSubmit = () => {
@@ -121,6 +141,33 @@ const VoucherAction = () => {
     name && discountValue
       ? `${name}-${currentYear}-OFF${discountValue}`
       : `VOUCHER-TEMP-${currentYear}-OFF`;
+  const current = {
+    name: name,
+    discountType,
+    discountValue,
+    discountMaxAmount: discountMax,
+    requiredPoint: point,
+    urlImg: normalizeImage(urlImg),
+  };
+  useEffect(() => {
+    if (!params.id) {
+      setNeedRecapture(true);
+      return;
+    }
+    if (!initialPreview.current) return;
+    setNeedRecapture(!isEqual(initialPreview.current, current));
+  }, [
+    params.id,
+    discountType,
+    point,
+    discountValue,
+    discountMax,
+    urlImg,
+    name,
+  ]);
+  console.log("canhlv", needRecapture);
+  console.log("initialPreview", initialPreview.current);
+  console.log("current", current);
   return (
     <>
       <Row
@@ -370,7 +417,7 @@ const VoucherAction = () => {
             </Col>
             <Col xs={24} sm={24} md={8} lg={8} style={{ marginBottom: 16 }}>
               <CaptureElement
-                //enabled={needRecapture || !params.id}
+                enabled={needRecapture}
                 deps={[
                   generatedCode,
                   discountType,

@@ -69,12 +69,9 @@ const CaptureElement: React.FC<CaptureElementProps> = ({
     <div
       ref={ref}
       style={{
+        background: "transparent",
         display: "block",
         width: "100%",
-        height: "fit-content",
-        lineHeight: 0,
-        borderRadius: 22,
-        overflow: "hidden",
       }}
     >
       {children}
