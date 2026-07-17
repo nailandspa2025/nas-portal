@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { UserOutlined, FormOutlined, DeleteOutlined } from "@ant-design/icons";
+import { FormOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Image, Space, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";

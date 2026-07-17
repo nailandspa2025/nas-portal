@@ -249,7 +249,7 @@ export function hasAtLeastOneValidCondition(group: ConditionGroup): boolean {
  */
 export function deserializeConditionGroup(
   expression: string,
-  schemaFields: SchemaField[],
+  //schemaFields: SchemaField[],
 ): ConditionGroup {
   if (!expression?.trim()) return { operator: "AND", elements: [] };
 
