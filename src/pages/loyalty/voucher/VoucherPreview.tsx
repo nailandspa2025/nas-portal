@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Divider, Flex, Typography } from "antd";
+import { Divider, Flex, Typography } from "antd";
 import { DollarCircleOutlined, QrcodeOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
