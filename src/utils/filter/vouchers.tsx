@@ -19,9 +19,9 @@ export const columns = ({
 }) => {
   return [
     {
-      title: t("urlVoucher"),
+      title: t("Voucher"),
       key: "urlVoucher",
-      width: 80,
+      width: 100,
       render: (row: { urlVoucher?: string }) => (
         <Image
           alt="basic image"
