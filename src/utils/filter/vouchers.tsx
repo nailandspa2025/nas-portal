@@ -72,9 +72,9 @@ export const columns = ({
       dataIndex: "discountType",
       key: "discountType",
       width: 170,
-      render: (discountType: number) =>
-        ({ 1: "Percent", 2: "FixedAmount", 3: "Other" })[discountType] ||
-        "Unknown",
+      // render: (discountType: number) =>
+      //   ({ 1: "Percent", 2: "FixedAmount", 3: "Other" })[discountType] ||
+      //   "Unknown",
     },
     {
       title: t("Discount Value"),
