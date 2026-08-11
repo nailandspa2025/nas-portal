@@ -1,27 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Col,
   Form,
-  Input,
-  InputNumber,
   Modal,
   Row,
   Card,
   Divider,
-  Typography,
   Radio,
   Descriptions,
 } from "antd";
 import { CopyOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import { validatePhoneNumber } from "../utils/common/validate";
+// import { validatePhoneNumber } from "../utils/common/validate";
 import { BankAccountApi } from "../apis/catalog/bank";
 import { useQuery } from "@tanstack/react-query";
 //import { QRCodeSVG } from "qrcode.react";
 import { toast } from "react-toastify";
-const { Text } = Typography;
+import CustomerInformation from "./CustomerInformation";
+import TechnicianRevenue from "./TechnicianRevenue";
+import PaymentSummary from "./PaymentSummary";
 interface ModalPaymentProps {
   data?: any;
   title?: string;
@@ -44,7 +43,7 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
   const [selectedMethod, setSelectedMethod] = React.useState<number | null>(
     null,
   );
-
+  const [tipAllocations, setTipAllocations] = useState<any[]>([]);
   useEffect(() => {
     if (openModal) {
       form.setFieldsValue({
@@ -56,6 +55,7 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
     } else {
       form.resetFields();
       setSelectedMethod(null);
+      setTipAllocations([]);
     }
   }, [data, openModal]);
   const serviceAmount = useMemo(() => {
@@ -64,8 +64,8 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
     return data.technicians.reduce(
       (total: any, technician: { services: any[] }) => {
         const serviceTotal = technician.services.reduce(
-          (sum: number, service: { priceTo: any }) =>
-            sum + Number(service.priceTo || 0),
+          (sum: number, service: { priceFrom: any }) =>
+            sum + Number(service.priceFrom || 0),
           0,
         );
         return total + serviceTotal;
@@ -103,7 +103,11 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
       changeAmount: changeAmount,
       amount: amount,
       method: selectedMethod,
+      tipAllocations: tipAllocations,
+      tipType: values.tipType,
+      tipAmount: values.tipAmount,
     };
+    //console.log("canhlv", payload);
     onSubmit(payload);
   };
   return (
@@ -112,112 +116,14 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
       open={openModal}
       onCancel={() => setOpenModal(false)}
       footer={null}
-      width={900}
+      width={1200}
       centered
       destroyOnClose
     >
       <Form layout="vertical" form={form} onFinish={onFinish}>
         <Row gutter={12}>
-          <Col xs={24} lg={10}>
-            <Card
-              title="Tóm tắt thanh toán"
-              style={{
-                borderRadius: 16,
-              }}
-            >
-              <Row justify="space-between">
-                <Col>{t("Total Services")}</Col>
-
-                <Col>
-                  <Text strong>{serviceAmount?.toLocaleString()}</Text>
-                </Col>
-              </Row>
-              <Form.Item
-                label={t("Discount")}
-                name="discountAmount"
-                style={{ marginTop: 20 }}
-              >
-                <InputNumber
-                  placeholder={t("Enter discount")}
-                  style={{ width: "100%" }}
-                  min={0}
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                />
-              </Form.Item>
-              <Form.Item label={t("Surcharge")} name="surchargeAmount">
-                <InputNumber
-                  placeholder={t("Enter surcharge")}
-                  style={{ width: "100%" }}
-                  min={0}
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                />
-              </Form.Item>
-
-              <Divider />
-              <Row justify="space-between">
-                <Col>
-                  <Text strong>{t("Subtotal")}</Text>
-                </Col>
-
-                <Col>
-                  <Text strong>{finalAmount?.toLocaleString()}</Text>
-                </Col>
-              </Row>
-              <Form.Item
-                label={t("Customer Paid")}
-                name="customerPaid"
-                style={{
-                  marginTop: 20,
-                }}
-              >
-                <InputNumber
-                  placeholder={t("Enter amount paid by customer")}
-                  style={{
-                    width: "100%",
-                  }}
-                  min={0}
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                />
-              </Form.Item>
-              <Row justify="space-between">
-                <Col>
-                  <Text strong>{t("Change")}</Text>
-                </Col>
-
-                <Col>
-                  <Text strong type="success">
-                    {changeAmount?.toLocaleString()}
-                  </Text>
-                </Col>
-              </Row>
-              <Divider />
-              <div
-                style={{
-                  textAlign: "center",
-                }}
-              >
-                <Text type="secondary">{t("Amount Due")}</Text>
-
-                <div
-                  style={{
-                    fontSize: 36,
-                    fontWeight: 700,
-                    color: "#ff4d4f",
-                    marginTop: 10,
-                  }}
-                >
-                  {amount?.toLocaleString()}
-                </div>
-              </div>
-            </Card>
-          </Col>
-          <Col xs={24} lg={14}>
+          <Col xs={24} lg={13}>
+            <TechnicianRevenue technicians={data?.technicians} />
             <Card
               title={t("Payment Method")}
               style={{
@@ -335,36 +241,17 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
                 </>
               )}
             </Card>
-            <Card
-              title={t("Customer Information")}
-              style={{
-                marginTop: 20,
-                borderRadius: 16,
+            <CustomerInformation />
+          </Col>
+          <Col xs={24} lg={11}>
+            <PaymentSummary
+              form={form}
+              serviceAmount={serviceAmount}
+              technicians={data?.technicians ?? []}
+              onTipAllocationsChange={(allocations) => {
+                setTipAllocations(allocations);
               }}
-            >
-              <Form.Item label={t("Full Name")} name="fullName">
-                <Input placeholder={t("Enter full name...")} />
-              </Form.Item>
-              <Form.Item label={t("Email")} name="email">
-                <Input placeholder={t("Enter email...")} />
-              </Form.Item>
-
-              <Form.Item
-                label={t("Phone Number")}
-                name="phone"
-                rules={[
-                  {
-                    validator: validatePhoneNumber,
-                  },
-                ]}
-              >
-                <Input placeholder={t("Enter phone number...")} />
-              </Form.Item>
-
-              <Form.Item label={t("Note")} name="note">
-                <Input.TextArea rows={3} placeholder={t("Enter note...")} />
-              </Form.Item>
-            </Card>
+            />
           </Col>
         </Row>
         <Divider />
