@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeleteOutlined, FormOutlined, UserOutlined } from "@ant-design/icons";
+import { TIMEZONES } from "../../utils/constants/timezones";
+
 import { Avatar, Tooltip, Space } from "antd";
 import { Link } from "react-router-dom";
 export const columns = ({
@@ -78,6 +80,9 @@ export const columns = ({
       dataIndex: "timeZone",
       key: "timeZone",
       width: 120,
+      render: (value: string) =>
+        TIMEZONES.find((item: { value: string }) => item.value === value)
+          ?.label ?? value,
     },
     {
       title: t("Revenue Accumulation"),

@@ -50,6 +50,8 @@ import BankSelect from "../../components/BankSelect";
 import { DeeplinkApi } from "../../apis/catalog/deeplink";
 import queryString from "query-string";
 import PaymentProviderForm from "../../components/PaymentProviderForm";
+import { TIMEZONES } from "../../utils/constants/timezones";
+
 const StoreAction = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
   const { t } = useTranslation();
@@ -292,15 +294,6 @@ const StoreAction = () => {
     { label: t("Saturday"), value: 6 },
     { label: t("Sunday"), value: 0 },
   ];
-  const timezones = [
-    { label: "New York", value: "America/New_York " },
-    { label: "Los Angeles", value: "America/Los_Angeles " },
-    { label: "Ho Chi Minh", value: "Asia/Ho_Chi_Minh" },
-    { label: "Tokyo", value: "Asia/Tokyo" },
-    { label: "Singapore", value: "Asia/Singapore" },
-    { label: "London", value: "Europe/London " },
-    { label: "Paris", value: "Europe/Paris " },
-  ];
   return (
     <>
       <Row
@@ -392,7 +385,7 @@ const StoreAction = () => {
                       .includes(input.toLowerCase())
                   }
                   placeholder={t("Choose time zone")}
-                  options={timezones.map((item) => ({
+                  options={TIMEZONES.map((item) => ({
                     label: item.label,
                     value: item.value,
                   }))}
