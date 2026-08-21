@@ -74,6 +74,26 @@ export const columns = ({
       width: 120,
     },
     {
+      title: t("Time Zone"),
+      dataIndex: "timeZone",
+      key: "timeZone",
+      width: 120,
+    },
+    {
+      title: t("Revenue Accumulation"),
+      dataIndex: "isRevenue",
+      key: "isRevenue",
+      width: 100,
+      render: (isRevenue: boolean) => (isRevenue ? t("Yes") : t("No")),
+    },
+    {
+      title: t("Commission Calculation"),
+      dataIndex: "isCommission",
+      key: "isCommission",
+      width: 100,
+      render: (isCommission: boolean) => (isCommission ? t("Yes") : t("No")),
+    },
+    {
       align: "center",
       fixed: "right",
       title: t("Action"),

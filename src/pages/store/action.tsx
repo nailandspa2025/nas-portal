@@ -12,6 +12,7 @@ import {
   Typography,
   Space,
   InputNumber,
+  Switch,
 } from "antd";
 import {
   PlusOutlined,
@@ -117,6 +118,9 @@ const StoreAction = () => {
             }))
           : [],
         paymentProviders: mapPaymentProviders(data.paymentProviders),
+        isCommission: data.isCommission ?? false,
+        isRevenue: data.isRevenue ?? false,
+        timeZone: data.timeZone || "",
       });
     }
   }, [data, form, params.id]);
@@ -230,6 +234,8 @@ const StoreAction = () => {
         isActive: provider.isActive,
         settings: buildPaymentProviderSettings(provider),
       })),
+      isCommission: values.isCommission ?? false,
+      isRevenue: values.isRevenue ?? false,
     };
     if (params.id) {
       payload.id = params.id;
@@ -286,7 +292,15 @@ const StoreAction = () => {
     { label: t("Saturday"), value: 6 },
     { label: t("Sunday"), value: 0 },
   ];
-
+  const timezones = [
+    { label: "New York", value: "America/New_York " },
+    { label: "Los Angeles", value: "America/Los_Angeles " },
+    { label: "Ho Chi Minh", value: "Asia/Ho_Chi_Minh" },
+    { label: "Tokyo", value: "Asia/Tokyo" },
+    { label: "Singapore", value: "Asia/Singapore" },
+    { label: "London", value: "Europe/London " },
+    { label: "Paris", value: "Europe/Paris " },
+  ];
   return (
     <>
       <Row
@@ -358,6 +372,61 @@ const StoreAction = () => {
               >
                 <Input placeholder={t("Enter store name")} />
               </Form.Item>
+              <Form.Item
+                label={t("Time Zone")}
+                name="timeZone"
+                rules={[
+                  {
+                    required: true,
+                    message: t("Please choose time zone!"),
+                  },
+                ]}
+              >
+                <Select
+                  allowClear
+                  showSearch
+                  optionFilterProp="label"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  placeholder={t("Choose time zone")}
+                  options={timezones.map((item) => ({
+                    label: item.label,
+                    value: item.value,
+                  }))}
+                />
+              </Form.Item>
+              <Row gutter={15}>
+                <Col span={12}>
+                  <Form.Item
+                    label={t("Enable Revenue Accumulation")}
+                    name="isRevenue"
+                    valuePropName="checked"
+                    initialValue={false}
+                  >
+                    <Switch
+                      checkedChildren={t("Yes")}
+                      unCheckedChildren={t("No")}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={t("Enable Commission Calculation")}
+                    name="isCommission"
+                    valuePropName="checked"
+                    initialValue={false}
+                  >
+                    <Switch
+                      checkedChildren={t("Yes")}
+                      unCheckedChildren={t("No")}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+
               <Form.Item
                 label={t("Hotline")}
                 name="hotline"
@@ -630,9 +699,6 @@ const StoreAction = () => {
                   placeholder={t("Please choose bank")}
                 />
               </Form.Item>
-              <Form.Item label={t("Description")} name={"description"}>
-                <Input.TextArea rows={5} placeholder={t("Enter description")} />
-              </Form.Item>
               <Form.Item label={t("Sort order")} name="order">
                 <InputNumber
                   style={{ width: "100%" }}
@@ -713,6 +779,9 @@ const StoreAction = () => {
                     form.setFieldsValue({ images: e });
                   }}
                 />
+              </Form.Item>
+              <Form.Item label={t("Description")} name={"description"}>
+                <Input.TextArea rows={5} placeholder={t("Enter description")} />
               </Form.Item>
             </Col>
           </Row>
