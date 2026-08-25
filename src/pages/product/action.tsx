@@ -36,6 +36,7 @@ const ProdutActions = () => {
   });
   useEffect(() => {
     if (params.id && data) {
+      setImageLink(data.urlImage || null);
       setDescription(data.description ?? "");
       form.setFieldsValue({
         productName: data.productName || "",
