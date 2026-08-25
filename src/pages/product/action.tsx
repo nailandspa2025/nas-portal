@@ -13,6 +13,7 @@ import StoreSelect from "../../components/StoreSelect";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { checkAccessRight } from "../../utils/common/accessUtils";
+import AvatarUploader from "../../components/AvatarUploader";
 
 const ProdutActions = () => {
   const accesses = useSelector((state: any) => state.auth.user?.accesses);
@@ -22,6 +23,8 @@ const ProdutActions = () => {
   const params = useParams();
   const [description, setDescription] = useState("");
   const [imageList, setImageList] = useState<File[]>([]);
+  const [imageLink, setImageLink] = useState<string | null>(null);
+  const [isImage, setIsImage] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["productDetail", params.id],
@@ -66,7 +69,10 @@ const ProdutActions = () => {
       ...values,
       description: updatedDescription,
     };
-    if (params.id) payload.id = params.id;
+    if (params.id) {
+      payload.id = params.id;
+      payload.isImage = isImage;
+    }
 
     mutation.mutate(payload);
   };
@@ -93,7 +99,7 @@ const ProdutActions = () => {
             hasSubmitPermission={checkAccessRight(
               accesses,
               "update",
-              "product"
+              "product",
             )}
           />
         </Col>
@@ -102,7 +108,7 @@ const ProdutActions = () => {
       <Card>
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Row gutter={32}>
-            <Col span={24}>
+            <Col xs={24} sm={24} md={12} lg={12}>
               <Form.Item
                 label={t("Product name")}
                 name="productName"
@@ -137,6 +143,19 @@ const ProdutActions = () => {
               <Form.Item label={t("Store")} name="storeId">
                 <StoreSelect placeholder={t("Choose store")} />
               </Form.Item>
+            </Col>
+            <Col xs={24} sm={24} md={12} lg={12}>
+              <Form.Item label={t("Image")} name="imageUrl">
+                <AvatarUploader
+                  data={imageLink || undefined}
+                  placeholder="Choose image"
+                  onChange={() => {
+                    setIsImage(true);
+                  }}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
               <Form.Item label={t("Description")} name="description">
                 <UseEditor
                   content={description}
