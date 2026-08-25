@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from "react-router-dom";
-import { Space, Tooltip } from "antd";
-import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
+import { Avatar, Space, Tooltip } from "antd";
+import { DeleteOutlined, FormOutlined, UserOutlined } from "@ant-design/icons";
 
 export const columns = ({
   hasEditPermission,
@@ -17,6 +17,18 @@ export const columns = ({
   handleDelete: (record: any) => void;
 }) => {
   return [
+    {
+      title: t("Iamge"),
+      key: "urlImage",
+      width: 80,
+      render: (row: { urlImage?: string }) => (
+        <Avatar
+          size={50}
+          icon={!row?.urlImage ? <UserOutlined /> : undefined}
+          src={row?.urlImage || undefined}
+        />
+      ),
+    },
     {
       title: t("Product name"),
       dataIndex: "productName",
@@ -50,7 +62,7 @@ export const columns = ({
           dangerouslySetInnerHTML={{
             __html: text.replace(
               /<img /g,
-              '<img style="max-width: 40px; height: 40px;; display: block; margin: -10px 0;" '
+              '<img style="max-width: 40px; height: 40px;; display: block; margin: -10px 0;" ',
             ),
           }}
         />
