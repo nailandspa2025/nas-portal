@@ -115,7 +115,11 @@ const Bookings = () => {
       technicianName: "Unassigned",
     };
 
-    return [unassigned, ...techResources];
+    const hasUnassigned = bookingsData.items.some(
+      (booking: any) => !booking.technicianIds?.length,
+    );
+
+    return hasUnassigned ? [unassigned, ...techResources] : techResources;
   }, [bookingsData?.items]);
 
   // Chuyển TimeSpan "HH:mm:ss" sang milliseconds

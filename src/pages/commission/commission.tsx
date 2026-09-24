@@ -9,7 +9,7 @@ import queryString from "query-string";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { CommissionApi } from "../../apis/order/commission";
-const Users = () => {
+const Commissions = () => {
   const { t } = useTranslation();
   const divRef = useRef<HTMLDivElement>(null);
   const heightElement = useElementHeight(divRef);
@@ -67,4 +67,4 @@ const Users = () => {
   );
 };
 
-export default Users;
+export default Commissions;
