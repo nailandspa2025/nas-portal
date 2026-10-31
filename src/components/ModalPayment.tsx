@@ -76,12 +76,18 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
   const discountAmount = Form.useWatch("discountAmount", form) || 0;
   const surchargeAmount = Form.useWatch("surchargeAmount", form) || 0;
   const customerPaid = Form.useWatch("customerPaid", form) || 0;
+  const tipAmount = Form.useWatch("tipAmount", form) || 0;
+  // Giống PaymentSummary: tổng = dịch vụ - giảm giá + phụ thu + tip
   const finalAmount = Math.max(
-    serviceAmount - discountAmount + surchargeAmount,
+    Number(serviceAmount) -
+      Number(discountAmount) +
+      Number(surchargeAmount) +
+      Number(tipAmount),
     0,
   );
-  const changeAmount = Math.max(customerPaid - finalAmount, 0);
-  const amount = Math.max(finalAmount - customerPaid, 0);
+  const changeAmount = Math.max(Number(customerPaid) - finalAmount, 0);
+  // Số tiền còn phải thu qua phương thức đã chọn (vd Poynt) = tổng - tiền khách đưa
+  const amount = Math.max(finalAmount - Number(customerPaid), 0);
   const { data: paymentProviders } = useQuery({
     queryKey: ["getPaymentProviders", { storeId: data.storeId }],
     queryFn: async () => {

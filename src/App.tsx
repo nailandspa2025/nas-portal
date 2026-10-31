@@ -15,6 +15,7 @@ import ForgotPassword from "./pages/auth/forgotpassword";
 import ResetPassword from "./pages/auth/resetpassword";
 import PaymentSuccess from "./pages/payment/success";
 import PaymentFail from "./pages/payment/failed";
+import PoyntPayment from "./pages/payment/poynt";
 //import { listenForMessages } from "./firebase/firebaseConfig";
 function App() {
   const collapsed = useSelector((state: RootState) => state.global.status);
@@ -45,6 +46,7 @@ function App() {
 
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/failed" element={<PaymentFail />} />
+        <Route path="/pay/:id" element={<PoyntPayment />} />
       </Routes>
     </BrowserRouter>
   );
