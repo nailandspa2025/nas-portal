@@ -169,6 +169,16 @@ const StoreAction = () => {
             webhookSecret: getSetting(provider.settings, "WebhookSecret"),
           };
 
+        // Poynt
+        case 10:
+          return {
+            paymentMethod: 10,
+            isActive: provider.isActive,
+            businessId: getSetting(provider.settings, "BusinessId"),
+            storeId: getSetting(provider.settings, "StoreId"),
+            deviceId: getSetting(provider.settings, "DeviceId"),
+          };
+
         default:
           return {
             paymentMethod: provider.paymentMethod,
@@ -217,6 +227,13 @@ const StoreAction = () => {
           { key: "PublishableKey", value: provider.publishableKey },
           { key: "SecretKey", value: provider.secretKey },
           { key: "WebhookSecret", value: provider.webhookSecret ?? "" },
+        ];
+
+      case 10:
+        return [
+          { key: "BusinessId", value: provider.businessId },
+          { key: "StoreId", value: provider.storeId ?? "" },
+          { key: "DeviceId", value: provider.deviceId ?? "" },
         ];
 
       default:

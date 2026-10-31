@@ -23,6 +23,10 @@ const paymentOptions = [
     label: "💳 Stripe",
     value: 9,
   },
+  {
+    label: "🟧 Poynt",
+    value: 10,
+  },
 ];
 
 const PaymentProviderForm = () => {
@@ -254,6 +258,51 @@ const PaymentProviderForm = () => {
                               name={[name, "webhookSecret"]}
                             >
                               <Input.Password />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      </>
+                    );
+                  }
+
+                  if (method === 10) {
+                    return (
+                      <>
+                        <Divider orientation="center">
+                          Poynt Configuration
+                        </Divider>
+
+                        <Row gutter={16}>
+                          <Col xs={24} md={8}>
+                            <Form.Item
+                              label="Business ID"
+                              name={[name, "businessId"]}
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Business ID is required",
+                                },
+                              ]}
+                            >
+                              <Input />
+                            </Form.Item>
+                          </Col>
+
+                          <Col xs={24} md={8}>
+                            <Form.Item
+                              label="Store ID"
+                              name={[name, "storeId"]}
+                            >
+                              <Input />
+                            </Form.Item>
+                          </Col>
+
+                          <Col xs={24} md={8}>
+                            <Form.Item
+                              label="Device ID"
+                              name={[name, "deviceId"]}
+                            >
+                              <Input />
                             </Form.Item>
                           </Col>
                         </Row>
