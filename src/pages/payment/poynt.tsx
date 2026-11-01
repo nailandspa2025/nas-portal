@@ -5,13 +5,14 @@
  * portal chỉ nhận nonce.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { CheckOutlined, CopyOutlined } from "@ant-design/icons";
+import { STORAGE_KEY } from "../../constants/application.constant";
 import { PaylinkApi } from "../../apis/godaddy/paylink";
 import {
   Alert,
   Button,
   Card,
-  Descriptions,
   Divider,
   Result,
   Skeleton,
@@ -101,6 +102,16 @@ const FONT = 'Inter, -apple-system, "Segoe UI", Roboto, sans-serif';
 
 const PoyntPayment = () => {
   const { id = "" } = useParams();
+  const navigate = useNavigate();
+  // Nhân viên đang đăng nhập (mở link từ modal booking) mới thấy nút quay lại booking; khách quét QR thì không
+  const isStaff = (() => {
+    try {
+      return !!localStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
+    } catch {
+      return false;
+    }
+  })();
+  const [copied, setCopied] = useState(false);
   const [link, setLink] = useState<PaylinkInfo | null>(null);
   const [view, setView] = useState<View>({ kind: "loading" });
   const [ready, setReady] = useState(false);
@@ -287,28 +298,111 @@ const PoyntPayment = () => {
     collectRef.current.getNonce({}).catch((e: any) => collectError(e));
   };
 
-  const receipt = (data: PaidInfo) => (
-    <Descriptions bordered size="small" column={1} style={{ marginTop: 8 }}>
-      <Descriptions.Item label="Amount">{money}</Descriptions.Item>
-      <Descriptions.Item label="Description">
-        {link?.description || "Payment"}
-      </Descriptions.Item>
-      {data.card?.last4 && (
-        <Descriptions.Item label="Card">
-          {`${data.card.type || "Card"} •••• ${data.card.last4}`}
-        </Descriptions.Item>
+  const copyTxn = (txn: string) => {
+    navigator.clipboard?.writeText(txn).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
+
+  const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: 16,
+        padding: "12px 0",
+        borderBottom: "1px dashed #e8e8e8",
+      }}
+    >
+      <Text type="secondary" style={{ flexShrink: 0 }}>
+        {label}
+      </Text>
+      <div style={{ textAlign: "right", minWidth: 0, wordBreak: "break-all" }}>{children}</div>
+    </div>
+  );
+
+  const paidView = (data: PaidInfo) => (
+    <div>
+      <div
+        style={{
+          margin: -24,
+          marginBottom: 0,
+          padding: "36px 24px 28px",
+          textAlign: "center",
+          background: "linear-gradient(160deg, #22c55e 0%, #16a34a 100%)",
+          borderRadius: "16px 16px 0 0",
+          color: "#fff",
+        }}
+      >
+        <div
+          style={{
+            width: 64,
+            height: 64,
+            margin: "0 auto 16px",
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.2)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CheckOutlined style={{ fontSize: 30, color: "#fff" }} />
+        </div>
+        <div style={{ fontSize: 15, opacity: 0.9 }}>Payment successful</div>
+        <div style={{ fontSize: 36, fontWeight: 700, lineHeight: 1.2, margin: "4px 0" }}>{money}</div>
+        <div style={{ fontSize: 14, opacity: 0.9 }}>Paid to {merchant}</div>
+      </div>
+
+      <div style={{ paddingTop: 16 }}>
+        <Row label="Description">
+          <Text strong>{link?.description || "Payment"}</Text>
+        </Row>
+        {data.card?.last4 && (
+          <Row label="Card">
+            <Text strong>{`${data.card.type || "Card"} •••• ${data.card.last4}`}</Text>
+          </Row>
+        )}
+        {data.paidAt && (
+          <Row label="Paid at">
+            <Text strong>{fmtDate(data.paidAt)}</Text>
+          </Row>
+        )}
+        {data.transactionId && (
+          <Row label="Transaction ID">
+            <Text style={{ fontFamily: "monospace", fontSize: 12 }}>{data.transactionId}</Text>
+            <Button
+              type="link"
+              size="small"
+              icon={copied ? <CheckOutlined /> : <CopyOutlined />}
+              onClick={() => copyTxn(data.transactionId!)}
+              style={{ padding: 0, marginLeft: 6, height: "auto" }}
+            >
+              {copied ? "Copied" : "Copy"}
+            </Button>
+          </Row>
+        )}
+      </div>
+
+      <div style={{ textAlign: "center", margin: "20px 0 4px" }}>
+        <Text type="secondary" style={{ fontSize: 13 }}>
+          Thank you! A receipt has been sent if you entered your email.
+        </Text>
+      </div>
+
+      {isStaff && (
+        <Button
+          type="primary"
+          size="large"
+          block
+          style={{ marginTop: 16 }}
+          onClick={() => navigate("/booking")}
+        >
+          Back to bookings
+        </Button>
       )}
-      {data.paidAt && (
-        <Descriptions.Item label="Paid at">
-          {fmtDate(data.paidAt)}
-        </Descriptions.Item>
-      )}
-      {data.transactionId && (
-        <Descriptions.Item label="Transaction ID">
-          <Text code>{data.transactionId}</Text>
-        </Descriptions.Item>
-      )}
-    </Descriptions>
+    </div>
   );
 
   return (
@@ -321,21 +415,16 @@ const PoyntPayment = () => {
         padding: "24px 16px",
       }}
     >
-      <Card style={{ width: "100%", maxWidth: 480, borderRadius: 16 }}>
+      <Card
+        style={{ width: "100%", maxWidth: 480, borderRadius: 16, overflow: "hidden", alignSelf: "flex-start" }}
+      >
         {view.kind === "loading" && <Skeleton active paragraph={{ rows: 6 }} />}
 
         {view.kind === "closed" && (
           <Result status="warning" title={view.title} subTitle={view.text} />
         )}
 
-        {view.kind === "paid" && (
-          <Result
-            status="success"
-            title="Payment successful"
-            subTitle={`Thank you! ${merchant} has received ${money}.`}
-            extra={receipt(view.data)}
-          />
-        )}
+        {view.kind === "paid" && paidView(view.data)}
 
         {view.kind === "form" && link && (
           <>
