@@ -421,7 +421,18 @@ const PoyntPayment = () => {
         {view.kind === "loading" && <Skeleton active paragraph={{ rows: 6 }} />}
 
         {view.kind === "closed" && (
-          <Result status="warning" title={view.title} subTitle={view.text} />
+          <Result
+            status="warning"
+            title={view.title}
+            subTitle={view.text}
+            extra={
+              isStaff && (
+                <Button type="primary" onClick={() => navigate("/booking")}>
+                  Back to bookings
+                </Button>
+              )
+            }
+          />
         )}
 
         {view.kind === "paid" && paidView(view.data)}
@@ -462,6 +473,17 @@ const PoyntPayment = () => {
             >
               {paying ? "Processing…" : `Pay ${money}`}
             </Button>
+            {isStaff && (
+              <Button
+                size="large"
+                block
+                style={{ marginTop: 8 }}
+                disabled={paying}
+                onClick={() => navigate("/booking")}
+              >
+                Cancel
+              </Button>
+            )}
             <div style={{ textAlign: "center", marginTop: 12 }}>
               <Text type="secondary" style={{ fontSize: 12 }}>
                 Your card details are encrypted and processed by GoDaddy Payments (Poynt).
