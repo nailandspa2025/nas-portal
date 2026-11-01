@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Trang thanh toán Poynt public (khách quét QR từ modal thanh toán booking).
- * Dữ liệu và charge đi qua nas-paylink (VITE_PAYLINK_URL); số thẻ nhập trong iframe Poynt Collect,
+ * Dữ liệu và charge đi qua nas-godaddy-connector-service ({VITE_API_URL}/godaddy, xem PaylinkApi); số thẻ nhập trong iframe Poynt Collect,
  * portal chỉ nhận nonce.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import { PaylinkApi } from "../../apis/godaddy/paylink";
 import {
   Alert,
   Button,
@@ -19,10 +19,6 @@ import {
 } from "antd";
 
 const { Title, Text } = Typography;
-
-const PAYLINK_URL = (
-  (import.meta.env.VITE_PAYLINK_URL as string | undefined) || ""
-).replace(/\/$/, "");
 
 type PaylinkInfo = {
   id: string;
@@ -149,23 +145,27 @@ const PoyntPayment = () => {
       const nonce = event?.nonce || event?.data?.nonce;
       const email = event?.emailAddress || event?.data?.emailAddress;
       try {
-        const res = await axios.post(
-          `${PAYLINK_URL}/api/pay/${encodeURIComponent(id)}/pay`,
-          { nonce, email },
-          { validateStatus: () => true },
-        );
-        if (res.status === 200 && res.data?.approved) {
-          setView({ kind: "paid", data: res.data });
+        const data = await PaylinkApi.pay(id, { nonce, email });
+        if (data?.approved) {
+          setView({ kind: "paid", data });
         } else {
           setPaying(false);
           setError(
-            res.data?.error ||
+            data?.error ||
               "Your payment was declined. Please check your card or use a different card.",
           );
         }
-      } catch {
+      } catch (e: any) {
         setPaying(false);
-        setError("Connection lost. Please try again.");
+        // apiCall ném response.data khi server trả lỗi (vd thẻ bị từ chối), ném AxiosError khi mất kết nối
+        if (e?.isAxiosError) {
+          setError("Connection lost. Please try again.");
+        } else {
+          setError(
+            e?.error ||
+              "Your payment was declined. Please check your card or use a different card.",
+          );
+        }
       }
     },
     [id],
@@ -173,18 +173,9 @@ const PoyntPayment = () => {
 
   // 1. Lấy thông tin paylink
   useEffect(() => {
-    if (!PAYLINK_URL) {
-      setView({
-        kind: "closed",
-        title: "Not configured",
-        text: "VITE_PAYLINK_URL is missing for the payment page.",
-      });
-      return;
-    }
     let cancelled = false;
-    axios
-      .get<PaylinkInfo>(`${PAYLINK_URL}/api/pay/${encodeURIComponent(id)}`)
-      .then(({ data }) => {
+    PaylinkApi.getById(id)
+      .then((data: PaylinkInfo) => {
         if (cancelled) return;
         setLink(data);
         if (data.status === "PAID") {
