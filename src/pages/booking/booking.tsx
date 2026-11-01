@@ -320,7 +320,11 @@ const Bookings = () => {
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
-        const approveUrl = res.data?.approveUrl;
+        // Poynt: trang thanh toán nằm ngay trong portal → {portal}/pay/{paylinkId}
+        const paylinkId = res.data?.paylinkId;
+        const approveUrl = paylinkId
+          ? `${window.location.origin}/pay/${encodeURIComponent(paylinkId)}`
+          : res.data?.approveUrl;
         if (approveUrl) {
           setApproveUrl(approveUrl);
           setQrModal(true);
