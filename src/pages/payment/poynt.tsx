@@ -305,7 +305,13 @@ const PoyntPayment = () => {
     });
   };
 
-  const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  const Row = ({
+    label,
+    children,
+  }: {
+    label: string;
+    children: React.ReactNode;
+  }) => (
     <div
       style={{
         display: "flex",
@@ -319,7 +325,9 @@ const PoyntPayment = () => {
       <Text type="secondary" style={{ flexShrink: 0 }}>
         {label}
       </Text>
-      <div style={{ textAlign: "right", minWidth: 0, wordBreak: "break-all" }}>{children}</div>
+      <div style={{ textAlign: "right", minWidth: 0, wordBreak: "break-all" }}>
+        {children}
+      </div>
     </div>
   );
 
@@ -351,7 +359,16 @@ const PoyntPayment = () => {
           <CheckOutlined style={{ fontSize: 30, color: "#fff" }} />
         </div>
         <div style={{ fontSize: 15, opacity: 0.9 }}>Payment successful</div>
-        <div style={{ fontSize: 36, fontWeight: 700, lineHeight: 1.2, margin: "4px 0" }}>{money}</div>
+        <div
+          style={{
+            fontSize: 36,
+            fontWeight: 700,
+            lineHeight: 1.2,
+            margin: "4px 0",
+          }}
+        >
+          {money}
+        </div>
         <div style={{ fontSize: 14, opacity: 0.9 }}>Paid to {merchant}</div>
       </div>
 
@@ -361,7 +378,9 @@ const PoyntPayment = () => {
         </Row>
         {data.card?.last4 && (
           <Row label="Card">
-            <Text strong>{`${data.card.type || "Card"} •••• ${data.card.last4}`}</Text>
+            <Text
+              strong
+            >{`${data.card.type || "Card"} •••• ${data.card.last4}`}</Text>
           </Row>
         )}
         {data.paidAt && (
@@ -371,7 +390,9 @@ const PoyntPayment = () => {
         )}
         {data.transactionId && (
           <Row label="Transaction ID">
-            <Text style={{ fontFamily: "monospace", fontSize: 12 }}>{data.transactionId}</Text>
+            <Text style={{ fontFamily: "monospace", fontSize: 12 }}>
+              {data.transactionId}
+            </Text>
             <Button
               type="link"
               size="small"
@@ -416,7 +437,13 @@ const PoyntPayment = () => {
       }}
     >
       <Card
-        style={{ width: "100%", maxWidth: 480, borderRadius: 16, overflow: "hidden", alignSelf: "flex-start" }}
+        style={{
+          width: "100%",
+          maxWidth: 480,
+          borderRadius: 16,
+          overflow: "hidden",
+          alignSelf: "flex-start",
+        }}
       >
         {view.kind === "loading" && <Skeleton active paragraph={{ rows: 6 }} />}
 
@@ -477,8 +504,13 @@ const PoyntPayment = () => {
               <Button
                 size="large"
                 block
-                style={{ marginTop: 8 }}
                 disabled={paying}
+                style={{
+                  marginTop: 8,
+                  backgroundColor: "#f0f0f0",
+                  borderColor: "#d9d9d9",
+                  color: "black",
+                }}
                 onClick={() => navigate("/booking")}
               >
                 Cancel
@@ -486,7 +518,8 @@ const PoyntPayment = () => {
             )}
             <div style={{ textAlign: "center", marginTop: 12 }}>
               <Text type="secondary" style={{ fontSize: 12 }}>
-                Your card details are encrypted and processed by GoDaddy Payments (Poynt).
+                Your card details are encrypted and processed by GoDaddy
+                Payments (Poynt).
               </Text>
             </div>
           </>
