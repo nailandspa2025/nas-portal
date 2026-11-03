@@ -93,12 +93,11 @@ const Bookings = () => {
 
     bookingsData.items.forEach((booking: any) => {
       booking.technicians?.forEach((tech: any) => {
-        if (!techniciansMap.has(tech.id)) {
-          techniciansMap.set(tech.id, {
-            id: tech?.technician?.id?.toString(),
-            title:
-              tech.technician?.technicianName ||
-              `Staff ${tech?.technician?.id}`,
+        const techId = tech?.technicianId ?? tech?.technician?.id;
+        if (techId != null && !techniciansMap.has(techId)) {
+          techniciansMap.set(techId, {
+            id: techId.toString(),
+            title: tech.technician?.technicianName || `Staff ${techId}`,
             technicianName: tech.technician?.technicianName,
             phone: tech.technician?.phone,
             address: tech.technician?.technicianAddress,
