@@ -7,6 +7,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import resourceTimeGridPlugin from "@fullcalendar/resource-timegrid";
 import resourceDayGridPlugin from "@fullcalendar/resource-daygrid";
 import { useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button, Col, Row, Space, DatePicker } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { useTranslation } from "react-i18next";
@@ -16,6 +17,7 @@ import {
   LeftOutlined,
   RightOutlined,
   PlusOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 
 // Calendar constants
@@ -90,6 +92,32 @@ const useCalendarHeight = (
   return calendarHeight;
 };
 
+// Bảng màu cho header cột nhân viên (tránh trùng màu trạng thái event)
+const RESOURCE_COLORS = [
+  { main: "#4F46E5", soft: "#EEF2FF" },
+  { main: "#0891B2", soft: "#ECFEFF" },
+  { main: "#DB2777", soft: "#FDF2F8" },
+  { main: "#7C3AED", soft: "#F5F3FF" },
+  { main: "#0D9488", soft: "#F0FDFA" },
+  { main: "#EA580C", soft: "#FFF7ED" },
+  { main: "#2563EB", soft: "#EFF6FF" },
+  { main: "#9333EA", soft: "#FAF5FF" },
+];
+
+const getResourceColor = (id: string) => {
+  if (id === "unassigned") return { main: "#8C8C8C", soft: "#F5F5F5" };
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  return RESOURCE_COLORS[Math.abs(hash) % RESOURCE_COLORS.length];
+};
+
+const getInitials = (name: string = "") => {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "?";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+};
+
 export default function CalendarMain({
   events,
   resources = [],
@@ -107,6 +135,22 @@ export default function CalendarMain({
   const calendarRef = useRef<FullCalendar | null>(null);
   const calendarWrapperRef = useRef<HTMLDivElement>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  // Ô góc trên cùng của cột thời gian (FullCalendar render, mình portal nội dung vào)
+  const [axisHeaderEl, setAxisHeaderEl] = useState<HTMLElement | null>(null);
+
+  // Chạy sau mỗi lần render để bắt lại ô khi đổi view; chỉ setState khi ô thay đổi nên không lặp vô hạn
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const el =
+      calendarWrapperRef.current?.querySelector<HTMLElement>(
+        ".fc-col-header .fc-timegrid-axis .fc-timegrid-axis-frame",
+      ) ?? null;
+    if (el !== axisHeaderEl) setAxisHeaderEl(el);
+  });
+
+  const totalBookings = new Set(
+    events.map((e: any) => e.extendedProps?.originalId ?? e.id),
+  ).size;
 
   const calendarHeight = useCalendarHeight(calendarWrapperRef);
   useEffect(() => {
@@ -296,6 +340,14 @@ export default function CalendarMain({
         {/* Right - Empty for balance */}
         <Col flex="auto"></Col>
         <Col span={24} ref={calendarWrapperRef}>
+          {axisHeaderEl &&
+            createPortal(
+              <div className="axis-header" title={`${totalBookings} booking`}>
+                <ClockCircleOutlined className="axis-header__icon" />
+                <span className="axis-header__badge">{totalBookings}</span>
+              </div>,
+              axisHeaderEl,
+            )}
           <FullCalendar
             ref={calendarRef}
             plugins={[
@@ -374,11 +426,28 @@ export default function CalendarMain({
                 ),
               );
               const bookingCount = uniqueBookingIds.size;
+              const color = getResourceColor(resource.id);
               return (
-                <div style={{ padding: "8px" }}>
-                  <div style={{ fontWeight: 600 }}>{resource.title}</div>
-                  <div style={{ fontSize: "12px", color: "#666" }}>
-                    ({bookingCount})
+                <div
+                  className="resource-header"
+                  style={{ borderTopColor: color.main }}
+                >
+                  <div
+                    className="resource-header__avatar"
+                    style={{ background: color.main }}
+                  >
+                    {getInitials(resource.title)}
+                  </div>
+                  <div className="resource-header__info">
+                    <div className="resource-header__name" title={resource.title}>
+                      {resource.title}
+                    </div>
+                    <span
+                      className="resource-header__count"
+                      style={{ background: color.soft, color: color.main }}
+                    >
+                      {bookingCount} booking
+                    </span>
                   </div>
                 </div>
               );

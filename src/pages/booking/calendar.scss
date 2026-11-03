@@ -74,3 +74,117 @@
 .ant-compatible-warning {
   display: none !important;
 }
+
+/* ===== Header cột nhân viên ===== */
+.fc .fc-col-header-cell.fc-resource {
+  background: #fafbfc;
+  vertical-align: middle;
+}
+
+.fc .fc-col-header-cell.fc-resource .fc-scrollgrid-sync-inner {
+  padding: 0;
+}
+
+.resource-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-top: 3px solid transparent;
+  min-width: 0;
+
+  &__avatar {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__count {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 999px;
+  }
+}
+
+/* ===== Ô góc trên cột thời gian ===== */
+.fc .fc-col-header .fc-timegrid-axis {
+  background: #e4eeef; /* cùng màu với header ngày */
+  vertical-align: middle;
+}
+
+/* View theo nhân viên: header nền nhạt hơn, ô góc dùng cùng màu */
+.fc .fc-col-header tr:has(.fc-resource) .fc-timegrid-axis {
+  background: #fafbfc;
+}
+
+.fc .fc-col-header .fc-timegrid-axis-frame:has(.axis-header) {
+  justify-content: center;
+  align-items: center;
+}
+
+/* Cột giờ rộng hơn một chút cho cân với header */
+.fc .fc-timegrid-slot-label-cushion,
+.axis-header {
+  min-width: 64px;
+}
+
+.fc .fc-timegrid-slot-label-cushion {
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.axis-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 4px;
+
+  &__icon {
+    font-size: 16px;
+    color: #4b5563;
+  }
+
+  &__badge {
+    min-width: 22px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #1677ff;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    text-align: center;
+  }
+}
