@@ -159,7 +159,9 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
                     {paymentProviders?.map((item: any) => (
                       <Col span={6} key={item.paymentMethod}>
                         <Radio value={item.paymentMethod}>
-                          {t(item.paymentMethodName)}
+                          {item.paymentMethod === 11
+                            ? t("POS Payment")
+                            : t(item.paymentMethodName)}
                         </Radio>
                       </Col>
                     ))}

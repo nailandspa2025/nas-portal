@@ -169,10 +169,11 @@ const StoreAction = () => {
             webhookSecret: getSetting(provider.settings, "WebhookSecret"),
           };
 
-        // Poynt
+        // Poynt + POS Payment (cùng bộ setting)
         case 10:
+        case 11:
           return {
-            paymentMethod: 10,
+            paymentMethod: provider.paymentMethod,
             isActive: provider.isActive,
             businessId: getSetting(provider.settings, "BusinessId"),
             storeId: getSetting(provider.settings, "StoreId"),
@@ -230,6 +231,7 @@ const StoreAction = () => {
         ];
 
       case 10:
+      case 11:
         return [
           { key: "BusinessId", value: provider.businessId },
           { key: "StoreId", value: provider.storeId ?? "" },

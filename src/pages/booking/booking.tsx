@@ -328,7 +328,14 @@ const Bookings = () => {
           setApproveUrl(approveUrl);
           setQrModal(true);
         }
-        toast.success(t("Payment processed successfully!"));
+        if (res.data?.terminalPaymentId) {
+          // POS Payment: giao dịch đã gửi xuống máy POS, kết quả cập nhật sau khi khách quẹt/chạm thẻ
+          toast.info(
+            t("Payment sent to the POS. Ask the customer to tap or insert the card."),
+          );
+        } else {
+          toast.success(t("Payment processed successfully!"));
+        }
         refetchBookings();
         setOpenModalPayment(false);
       } else {

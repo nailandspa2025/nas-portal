@@ -24,8 +24,12 @@ const paymentOptions = [
     value: 9,
   },
   {
-    label: "🟧 Poynt",
+    label: "🟧 Paylink",
     value: 10,
+  },
+  {
+    label: "🖥️ POS Payment",
+    value: 11,
   },
 ];
 
@@ -265,11 +269,16 @@ const PaymentProviderForm = () => {
                     );
                   }
 
-                  if (method === 10) {
+                  // Poynt (paylink) và POS Payment (gửi giao dịch xuống máy POS) dùng cùng bộ field,
+                  // nhưng POS Payment bắt buộc Store ID + Device ID để biết máy nào nhận giao dịch
+                  if (method === 10 || method === 11) {
+                    const isPos = method === 11;
                     return (
                       <>
                         <Divider orientation="center">
-                          Poynt Configuration
+                          {isPos
+                            ? "POS Payment Configuration"
+                            : "Poynt Configuration"}
                         </Divider>
 
                         <Row gutter={16}>
@@ -292,6 +301,12 @@ const PaymentProviderForm = () => {
                             <Form.Item
                               label="Store ID"
                               name={[name, "storeId"]}
+                              rules={[
+                                {
+                                  required: isPos,
+                                  message: "Store ID is required",
+                                },
+                              ]}
                             >
                               <Input />
                             </Form.Item>
@@ -301,8 +316,21 @@ const PaymentProviderForm = () => {
                             <Form.Item
                               label="Device ID"
                               name={[name, "deviceId"]}
+                              tooltip={
+                                isPos
+                                  ? "Mã máy POS nhận giao dịch, dạng urn:tid:..."
+                                  : undefined
+                              }
+                              rules={[
+                                {
+                                  required: isPos,
+                                  message: "Device ID is required",
+                                },
+                              ]}
                             >
-                              <Input />
+                              <Input
+                                placeholder={isPos ? "urn:tid:..." : undefined}
+                              />
                             </Form.Item>
                           </Col>
                         </Row>
