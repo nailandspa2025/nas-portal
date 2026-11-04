@@ -63,6 +63,14 @@ export const ReportApi = {
       endpoint,
     );
   },
+  customerByDay: async (params: DateRangeParams) => {
+    const qs = queryString.stringify(params);
+    const endpoint = `/report/api/v1/report/customer-by-day?${qs}`;
+    return await apiCall<ReportApiEnvelope<BookingByUserItem[]>>(
+      API_METHOD.GET,
+      endpoint,
+    );
+  },
   revenueByTime: async (params: RevenueByTimeParams) => {
     const qs = queryString.stringify({
       GroupBy: params?.GroupBy ?? 1,

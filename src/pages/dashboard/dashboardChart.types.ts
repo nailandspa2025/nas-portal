@@ -46,6 +46,8 @@ export type DashboardBookingsWeekdayChartProps = {
 };
 
 export type DashboardBookingsByUserChartProps = {
+  /** "bookings" = số lượt đặt (mặc định), "customers" = số khách khác nhau */
+  metric?: "bookings" | "customers";
   seriesName?: string;
   title?: ReactNode;
   height?: number;

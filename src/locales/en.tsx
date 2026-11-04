@@ -13,6 +13,8 @@ export default {
 
   "Booking status": "Booking status",
   "Bookings by user": "Bookings by user",
+  Customers: "Customers",
+  "Customers by day": "Customers by day",
   "Revenue by method": "Revenue by method",
   Method: "Method",
   "From date": "From date",

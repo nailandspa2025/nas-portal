@@ -9,6 +9,7 @@ import type { DashboardBookingsByUserChartProps } from "../dashboardChart.types"
 import { type BookingByUserItem, ReportApi } from "../../../apis/report/report";
 
 const DashboardBookingsByUserChart: FC<DashboardBookingsByUserChartProps> = ({
+  metric = "bookings",
   seriesName,
   title,
   height = 300,
@@ -24,8 +25,11 @@ const DashboardBookingsByUserChart: FC<DashboardBookingsByUserChartProps> = ({
   const endDate = dateRange[1].format("YYYY-MM-DD");
 
   const { data: bookingByUserResponse } = useQuery({
-    queryKey: ["dashboardBookingByUser", fromDate, endDate],
-    queryFn: () => ReportApi.bookingByUser({ fromDate, endDate }),
+    queryKey: ["dashboardBookingByUser", metric, fromDate, endDate],
+    queryFn: () =>
+      metric === "customers"
+        ? ReportApi.customerByDay({ fromDate, endDate })
+        : ReportApi.bookingByUser({ fromDate, endDate }),
     // select: (response) => response.data.items ?? [],
     select: (response) => response.data,
   });
@@ -48,8 +52,14 @@ const DashboardBookingsByUserChart: FC<DashboardBookingsByUserChartProps> = ({
   );
 
   const series = useMemo(
-    () => [{ name: seriesName ?? t("Bookings"), data }],
-    [data, seriesName, t],
+    () => [
+      {
+        name:
+          seriesName ?? t(metric === "customers" ? "Customers" : "Bookings"),
+        data,
+      },
+    ],
+    [data, metric, seriesName, t],
   );
 
   const maxBookingCount = useMemo(
@@ -128,7 +138,7 @@ const DashboardBookingsByUserChart: FC<DashboardBookingsByUserChartProps> = ({
 
   return (
     <CommonChart
-      title={`${title ?? t("Bookings by user")} (Total: ${totalBookings})`}
+      title={`${title ?? t(metric === "customers" ? "Customers by day" : "Bookings by user")} (${t("Total")}: ${totalBookings})`}
       extra={extra}
       chartType="bar"
       categories={categories}

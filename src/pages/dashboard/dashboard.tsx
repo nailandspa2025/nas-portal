@@ -14,6 +14,9 @@ const Dashboard: FC = () => {
         <DashboardBookingsByUserChart />
       </Col>
       <Col xs={24} lg={24}>
+        <DashboardBookingsByUserChart metric="customers" />
+      </Col>
+      <Col xs={24} lg={24}>
         <DashboardRevenueChart />
       </Col>
       <Col xs={24} lg={12}>

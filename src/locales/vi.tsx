@@ -9,6 +9,8 @@ export default {
 
   "Booking status": "Trạng thái đặt lịch",
   "Bookings by user": "Lượt đặt theo người dùng",
+  Customers: "Khách hàng",
+  "Customers by day": "Số khách theo ngày",
   "Revenue by method": "Doanh thu theo phương thức",
   Method: "Phương thức",
   "From date": "Từ ngày",
