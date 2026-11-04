@@ -29,6 +29,7 @@ import {
 } from "../../components/booking/bookingCustomers";
 import { BookingApi } from "../../apis/order/booking";
 import { useQuery } from "@tanstack/react-query";
+import { canCancelBooking, canPayBooking, isBookingLocked } from "../../utils/common/bookingStatus";
 
 const SECTION_TITLE_STYLE = {
   fontSize: 12,
@@ -143,7 +144,7 @@ const EventModal: React.FC<EventModalProps> = ({
         >
           {t("Cancel")}
         </Button>,
-        eventData?.status != 2 && eventData?.status != 3 && (
+        !isBookingLocked(eventData?.status) && (
           <Button
             key="submit"
             type="primary"
@@ -165,25 +166,25 @@ const EventModal: React.FC<EventModalProps> = ({
             gap: "4px",
           }}
         >
-          {eventData?.status === 1 && (
-            <>
-              <Button
-                icon={<BankOutlined />}
-                type="text"
-                style={{ color: "#1890ff" }}
-                onClick={() => {
-                  handlePayment(eventData);
-                }}
-              />
-              <Button
-                icon={<CloseCircleOutlined />}
-                type="text"
-                style={{ color: "red" }}
-                onClick={() => {
-                  handleCancel(eventData);
-                }}
-              />
-            </>
+          {canPayBooking(eventData?.status) && (
+            <Button
+              icon={<BankOutlined />}
+              type="text"
+              style={{ color: "#1890ff" }}
+              onClick={() => {
+                handlePayment(eventData);
+              }}
+            />
+          )}
+          {canCancelBooking(eventData?.status) && (
+            <Button
+              icon={<CloseCircleOutlined />}
+              type="text"
+              style={{ color: "red" }}
+              onClick={() => {
+                handleCancel(eventData);
+              }}
+            />
           )}
           {eventData?.status === 3 && (
             <Button
@@ -307,7 +308,7 @@ const EventModal: React.FC<EventModalProps> = ({
             <Form.Item name="technicians" rules={[bookingCustomersRule(t)]}>
               <BookingCustomersEditor
                 storeId={storeId}
-                disabled={eventData?.status == 2 || eventData?.status == 3}
+                disabled={isBookingLocked(eventData?.status)}
               />
             </Form.Item>
           </Col>

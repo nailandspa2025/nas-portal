@@ -136,6 +136,7 @@ const Bookings = () => {
       1: "#faad14", // Pending
       2: "#52c41a", // Completed
       3: "#ff4d4f", // Cancelled
+      6: "#8c8c8c", // Close
     };
 
     const allEvents: any[] = [];

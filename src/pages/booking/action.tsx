@@ -31,6 +31,7 @@ import {
   toFormCustomers,
 } from "../../components/booking/bookingCustomers";
 import { validatePhoneNumber } from "../../utils/common/validate";
+import { isBookingLocked } from "../../utils/common/bookingStatus";
 
 const SECTION_TITLE_STYLE = {
   fontSize: 12,
@@ -126,7 +127,7 @@ const BookingActions = () => {
               "update",
               "booking"
             )}
-            disabled={data?.status == 2 || data?.status == 3}
+            disabled={isBookingLocked(data?.status)}
           />
         </Col>
       </Row>
@@ -290,7 +291,7 @@ const BookingActions = () => {
               >
                 <BookingCustomersEditor
                   storeId={storeId}
-                  disabled={data?.status == 2 || data?.status == 3}
+                  disabled={isBookingLocked(data?.status)}
                 />
               </Form.Item>
             </Col>
@@ -305,7 +306,7 @@ const BookingActions = () => {
         backUrl="/booking"
         onSubmit={handleSubmit}
         hasSubmitPermission={checkAccessRight(accesses, "update", "booking")}
-        disabled={data?.status == 2 || data?.status == 3}
+        disabled={isBookingLocked(data?.status)}
       />
     </>
   );

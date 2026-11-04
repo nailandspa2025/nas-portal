@@ -10,7 +10,7 @@ import {
   ReportApi,
 } from "../../../apis/report/report";
 
-const BOOKING_STATUS_DONUT_COLORS = ["#faad14", "#33b79b", "#f54266"];
+const BOOKING_STATUS_DONUT_COLORS = ["#faad14", "#33b79b", "#f54266", "#8c8c8c"];
 
 const DashboardBookingStatusChart: FC<DashboardBookingStatusChartProps> = ({
   title,
@@ -38,21 +38,23 @@ const DashboardBookingStatusChart: FC<DashboardBookingStatusChartProps> = ({
   }, [bookingByStatusResponse]);
 
   const labels = useMemo(() => {
-    return [t("Pending"), t("Completed"), t("Cancelled")];
+    return [t("Pending"), t("Completed"), t("Cancelled"), t("Close")];
   }, [t]);
 
   const statusCounts = useMemo(() => {
     let pending = 0;
     let completed = 0;
     let cancelled = 0;
+    let closed = 0;
     (rows as BookingByStatusItem[]).forEach((row) => {
       const label = (row.label ?? "").toLowerCase();
       const count = row.value ?? 0;
       if (label === "pending") pending = count;
       if (label === "completed") completed = count;
       if (label === "cancelled" || label === "canceled") cancelled = count;
+      if (label === "close" || label === "closed") closed = count;
     });
-    return [pending, completed, cancelled];
+    return [pending, completed, cancelled, closed];
   }, [rows]);
 
   const total = useMemo(

@@ -36,4 +36,5 @@ export default {
   "Booking information": "Thông tin booking",
   "Booker": "Người đặt",
   "Please choose store first": "Vui lòng chọn store trước",
+  Close: "Đã đóng",
 };

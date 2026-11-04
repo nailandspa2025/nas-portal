@@ -9,6 +9,7 @@ import {
 import { Button, Space, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
+import { canPayBooking } from "../common/bookingStatus";
 export const filters = [
   {
     name: "Enter name, email, phone ...",
@@ -76,6 +77,7 @@ export const columns = ({
           1: { color: "orange", text: t("Pending") },
           2: { color: "green", text: t("Completed") },
           3: { color: "red", text: t("Cancelled") },
+          6: { color: "gray", text: t("Close") },
         };
 
         const { color, text } = statusMap[status as keyof typeof statusMap] || {
@@ -143,7 +145,7 @@ export const columns = ({
             <Tooltip title={t("Payment")}>
               <Button
                 className="button-none-style "
-                disabled={record.status == 2 || record.status == 3}
+                disabled={!canPayBooking(record.status)}
                 onClick={() => handlePayment(record)}
                 style={{ color: "#1890ff" }}
               >
