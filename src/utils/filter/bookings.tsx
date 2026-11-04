@@ -77,6 +77,8 @@ export const columns = ({
           1: { color: "orange", text: t("Pending") },
           2: { color: "green", text: t("Completed") },
           3: { color: "red", text: t("Cancelled") },
+          4: { color: "#1677ff", text: t("In progress") },
+          5: { color: "#722ed1", text: t("Check-in") },
           6: { color: "gray", text: t("Close") },
         };
 

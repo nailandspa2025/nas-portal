@@ -10,7 +10,14 @@ import {
   ReportApi,
 } from "../../../apis/report/report";
 
-const BOOKING_STATUS_DONUT_COLORS = ["#faad14", "#33b79b", "#f54266", "#8c8c8c"];
+const BOOKING_STATUS_DONUT_COLORS = [
+  "#faad14", // Pending
+  "#722ed1", // Check-in
+  "#1677ff", // In progress
+  "#33b79b", // Completed
+  "#f54266", // Cancelled
+  "#8c8c8c", // Close
+];
 
 const DashboardBookingStatusChart: FC<DashboardBookingStatusChartProps> = ({
   title,
@@ -38,7 +45,14 @@ const DashboardBookingStatusChart: FC<DashboardBookingStatusChartProps> = ({
   }, [bookingByStatusResponse]);
 
   const labels = useMemo(() => {
-    return [t("Pending"), t("Completed"), t("Cancelled"), t("Close")];
+    return [
+      t("Pending"),
+      t("Check-in"),
+      t("In progress"),
+      t("Completed"),
+      t("Cancelled"),
+      t("Close"),
+    ];
   }, [t]);
 
   const statusCounts = useMemo(() => {
@@ -46,6 +60,8 @@ const DashboardBookingStatusChart: FC<DashboardBookingStatusChartProps> = ({
     let completed = 0;
     let cancelled = 0;
     let closed = 0;
+    let checkIn = 0;
+    let inProgress = 0;
     (rows as BookingByStatusItem[]).forEach((row) => {
       const label = (row.label ?? "").toLowerCase();
       const count = row.value ?? 0;
@@ -53,8 +69,10 @@ const DashboardBookingStatusChart: FC<DashboardBookingStatusChartProps> = ({
       if (label === "completed") completed = count;
       if (label === "cancelled" || label === "canceled") cancelled = count;
       if (label === "close" || label === "closed") closed = count;
+      if (label === "checkin") checkIn = count;
+      if (label === "inprogress") inProgress = count;
     });
-    return [pending, completed, cancelled, closed];
+    return [pending, checkIn, inProgress, completed, cancelled, closed];
   }, [rows]);
 
   const total = useMemo(

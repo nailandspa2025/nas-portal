@@ -8,16 +8,19 @@ export const BookingStatus = {
   Close: 6,
 } as const;
 
-// Booking đã kết thúc: không sửa, không thanh toán.
+// Booking đã kết thúc: không thanh toán.
 const FINISHED: number[] = [
   BookingStatus.Completed,
   BookingStatus.Cancelled,
   BookingStatus.Close,
 ];
 
-/** Completed / Cancelled / Close: không cho sửa. */
+// Được sửa: khớp backend UpdateBooking (Pending / InProgress).
+const EDITABLE: number[] = [BookingStatus.Pending, BookingStatus.InProgress];
+
+/** Không cho sửa: CheckIn / Completed / Cancelled / Close. */
 export const isBookingLocked = (status?: number | null) =>
-  FINISHED.includes(Number(status));
+  status != null && !EDITABLE.includes(Number(status));
 
 /** Chỉ thanh toán booking còn mở: Pending / CheckIn / InProgress. */
 export const canPayBooking = (status?: number | null) =>
