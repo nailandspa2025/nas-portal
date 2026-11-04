@@ -19,6 +19,9 @@ interface RemoteSelectProps {
   pageSize?: number;
   params?: Record<string, any>;
   disabled?: boolean;
+  autoFocus?: boolean;
+  defaultOpen?: boolean;
+  onBlur?: () => void;
 }
 
 const RemoteSelect: React.FC<RemoteSelectProps> = ({
@@ -34,6 +37,9 @@ const RemoteSelect: React.FC<RemoteSelectProps> = ({
   pageSize = 20,
   params = {},
   disabled = false,
+  autoFocus,
+  defaultOpen,
+  onBlur,
 }) => {
   const [searchText, setSearchText] = useState("");
 
@@ -120,6 +126,9 @@ const RemoteSelect: React.FC<RemoteSelectProps> = ({
       showSearch
       allowClear
       disabled={disabled}
+      autoFocus={autoFocus}
+      defaultOpen={defaultOpen}
+      onBlur={onBlur}
       placeholder={placeholder}
       value={value || null}
       loading={isLoading}

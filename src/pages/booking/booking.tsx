@@ -231,9 +231,8 @@ const Bookings = () => {
   // Mutations
   const createBookingMutation = useMutation({
     mutationFn: async (values: any) => {
-      const formD = new FormData();
-      buildFormData(formD, values);
-      return BookingApi.create(formD);
+      // POST /bookings nhận JSON ([FromBody]) ở nas-order-api
+      return BookingApi.create(values);
     },
     onSuccess: (res: any) => {
       if (res.succeeded) {
