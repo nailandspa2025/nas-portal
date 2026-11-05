@@ -132,7 +132,15 @@ const BookingActions = () => {
         </Col>
       </Row>
       <Card>
-        <Form layout="vertical" form={form} onFinish={onFinish}>
+        <Form
+          layout="vertical"
+          form={form}
+          onFinish={onFinish}
+          onValuesChange={(changed) => {
+            // Đổi store: thợ & dịch vụ của store cũ không còn hợp lệ
+            if ("storeId" in changed) form.setFieldValue("technicians", []);
+          }}
+        >
           <Row gutter={24}>
             <Col xs={24} lg={12}>
               <div style={SECTION_TITLE_STYLE}>{t("Booking information")}</div>

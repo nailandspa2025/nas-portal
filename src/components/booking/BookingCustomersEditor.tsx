@@ -63,6 +63,8 @@ const BookingCustomersEditor: FC<Props> = ({
   const { t } = useTranslation();
   const customers = useMemo(() => value ?? [], [value]);
   const update = (next: BookingCustomerLine[]) => onChange?.(next);
+  // Phải chọn Store trước thì mới chọn được thợ / dịch vụ (thợ, dịch vụ lọc theo store)
+  const noStore = !storeId;
   // Thẻ khách đang mở ô chọn dịch vụ (sau khi bấm "Add Service")
   const [addingIndex, setAddingIndex] = useState<number | null>(null);
 
@@ -187,8 +189,10 @@ const BookingCustomersEditor: FC<Props> = ({
           labelKey={technicianLabel}
           valueKey="id"
           params={storeId ? { storeId } : {}}
-          placeholder={t("Choose technician")}
-          disabled={disabled}
+          placeholder={
+            noStore ? t("Please choose store first") : t("Choose technician")
+          }
+          disabled={disabled || noStore}
         />
       </div>
 
@@ -233,7 +237,7 @@ const BookingCustomersEditor: FC<Props> = ({
                     labelKey="technicianName"
                     valueKey="id"
                     params={storeId ? { storeId } : {}}
-                    disabled={disabled}
+                    disabled={disabled || noStore}
                   />
                 </Col>
                 <Col flex="none">
@@ -360,10 +364,8 @@ const BookingCustomersEditor: FC<Props> = ({
                     shape="round"
                     size="large"
                     icon={<PlusCircleOutlined />}
-                    disabled={disabled || !storeId}
-                    title={
-                      !storeId ? t("Please choose store first") : undefined
-                    }
+                    disabled={disabled || noStore}
+                    title={noStore ? t("Please choose store first") : undefined}
                     onClick={() => setAddingIndex(index)}
                     style={{
                       borderRadius: 999,
