@@ -5,6 +5,7 @@ import {
   Divider,
   Form,
   Input,
+  InputNumber,
   Row,
   Select,
   Switch,
@@ -334,6 +335,26 @@ const PaymentProviderForm = () => {
                             </Form.Item>
                           </Col>
                         </Row>
+
+                        {isPos && (
+                          <Row gutter={16}>
+                            <Col xs={24} md={8}>
+                              <Form.Item
+                                label="Timeout (seconds)"
+                                name={[name, "timeoutSeconds"]}
+                                tooltip="Quá thời gian này mà khách chưa thanh toán thì giao dịch tự huỷ, máy POS nhận được giao dịch mới. Để trống = 60 giây."
+                              >
+                                <InputNumber
+                                  min={10}
+                                  max={86400}
+                                  precision={0}
+                                  placeholder="60"
+                                  style={{ width: "100%" }}
+                                />
+                              </Form.Item>
+                            </Col>
+                          </Row>
+                        )}
                       </>
                     );
                   }

@@ -178,6 +178,9 @@ const StoreAction = () => {
             businessId: getSetting(provider.settings, "BusinessId"),
             storeId: getSetting(provider.settings, "StoreId"),
             deviceId: getSetting(provider.settings, "DeviceId"),
+            timeoutSeconds:
+              Number(getSetting(provider.settings, "TimeoutSeconds")) ||
+              undefined,
           };
 
         default:
@@ -236,6 +239,17 @@ const StoreAction = () => {
           { key: "BusinessId", value: provider.businessId },
           { key: "StoreId", value: provider.storeId ?? "" },
           { key: "DeviceId", value: provider.deviceId ?? "" },
+          ...(provider.paymentMethod === 11
+            ? [
+                {
+                  key: "TimeoutSeconds",
+                  value:
+                    provider.timeoutSeconds != null
+                      ? String(provider.timeoutSeconds)
+                      : "",
+                },
+              ]
+            : []),
         ];
 
       default:
