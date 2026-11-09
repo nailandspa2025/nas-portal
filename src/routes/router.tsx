@@ -53,6 +53,7 @@ import ConfigReminderAction from "../pages/config.reminder/action";
 import Commissions from "../pages/commission/commission";
 import Vouchers from "../pages/loyalty/voucher/voucher";
 import VoucherAction from "../pages/loyalty/voucher/action";
+import AppVersions from "../pages/app.version/app.version";
 interface RouteType {
   path: string;
   element: ReactElement;
@@ -406,6 +407,11 @@ const routes: RouteType[] = [
     path: "/voucher/:id",
     name: "Update Voucher",
     element: <VoucherAction />,
+  },
+  {
+    path: "/app-version",
+    name: "App Version",
+    element: <AppVersions />,
   },
 ];
 
