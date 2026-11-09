@@ -218,6 +218,13 @@ const _nav = [
         icon: "",
         route: "/config-reminder",
       },
+      {
+        id: "app-version",
+        children: "config",
+        name: "App version",
+        icon: "",
+        route: "/app-version",
+      },
     ],
   },
 ];
