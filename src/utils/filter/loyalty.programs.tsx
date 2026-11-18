@@ -149,6 +149,6 @@ export const buttons = [
     label: "Create",
     funcName: "createNew",
     color: "primary",
-    accessRight: ["loyalty-point.create", "loyalty-point.admin", "admin"],
+    accessRight: ["loyalty-program.create", "loyalty-program.admin", "admin"],
   },
 ];

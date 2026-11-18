@@ -88,11 +88,11 @@ const UpgradeGeneral = ({ programId }: { programId: any }) => {
   };
   const columns = useMemo(() => {
     return utils.columns({
-      hasEditPermission: checkAccessRight(accesses, "update", "loyalty-point"),
+      hasEditPermission: checkAccessRight(accesses, "update", "loyalty-program"),
       hasDeletePermission: checkAccessRight(
         accesses,
         "delete",
-        "loyalty-point"
+        "loyalty-program"
       ),
       t,
       handleEdit: handleItemTable.handleEdit,
