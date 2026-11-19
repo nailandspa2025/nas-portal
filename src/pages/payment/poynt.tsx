@@ -2,7 +2,8 @@
 /**
  * Trang thanh toán Poynt public (khách quét QR từ modal thanh toán booking).
  * Dữ liệu và charge đi qua nas-godaddy-connector-service ({VITE_API_URL}/godaddy, xem PaylinkApi); số thẻ nhập trong iframe Poynt Collect,
- * portal chỉ nhận nonce.
+ * portal chỉ nhận nonce. Luồng (SE-Poynt mục 10–11): nonce → /fees (server tokenize → cardToken, kiểm tra
+ * eligible-fees) → khách đồng ý phụ phí nếu có → /pay (server charge cardToken kèm transactionFees).
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -49,7 +50,6 @@ type PaidInfo = {
 
 // Thẻ credit có phụ phí: chờ khách đồng ý trước khi charge
 type SurchargeConfirm = {
-  nonce: string;
   email?: string;
   surchargeAmount: number; // cents
   total: number; // cents
@@ -178,19 +178,12 @@ const PoyntPayment = () => {
   };
 
   const doPay = useCallback(
-    async (
-      nonce: string,
-      email: string | undefined,
-      acceptedSurcharge: number,
-    ) => {
+    async (email: string | undefined, acceptedSurcharge: number) => {
       setPaying(true);
       setError(null);
       try {
-        const data = await PaylinkApi.pay(id, {
-          nonce,
-          email,
-          acceptedSurcharge,
-        });
+        // Server charge bằng cardToken đã lưu ở bước /fees
+        const data = await PaylinkApi.pay(id, { email, acceptedSurcharge });
         if (data?.approved) {
           setConfirm(null);
           setView({ kind: "paid", data });
@@ -202,7 +195,6 @@ const PoyntPayment = () => {
         if (e?.code === "SURCHARGE_CHANGED") {
           setPaying(false);
           setConfirm({
-            nonce,
             email,
             surchargeAmount: e.surchargeAmount,
             total: e.total,
@@ -221,15 +213,15 @@ const PoyntPayment = () => {
       const nonce = event?.nonce || event?.data?.nonce;
       const email = event?.emailAddress || event?.data?.emailAddress;
       try {
-        // Hỏi GoDaddy phụ phí cho thẻ này (chỉ thẻ credit, merchant có bật surcharge)
+        // Server đổi nonce lấy payment token rồi hỏi GoDaddy phụ phí (chỉ thẻ credit, merchant có bật surcharge)
         const fee = await PaylinkApi.fees(id, { nonce });
         const surchargeAmount = Number(fee?.surchargeAmount || 0);
         if (surchargeAmount > 0) {
           setPaying(false);
-          setConfirm({ nonce, email, surchargeAmount, total: fee.total });
+          setConfirm({ email, surchargeAmount, total: fee.total });
           return;
         }
-        await doPay(nonce, email, 0);
+        await doPay(email, 0);
       } catch (e: any) {
         declined(e);
       }
@@ -587,9 +579,7 @@ const PoyntPayment = () => {
                   size="large"
                   block
                   loading={paying}
-                  onClick={() =>
-                    doPay(confirm.nonce, confirm.email, confirm.surchargeAmount)
-                  }
+                  onClick={() => doPay(confirm.email, confirm.surchargeAmount)}
                 >
                   {paying ? "Processing…" : `Pay ${fmtMoney(confirm.total)}`}
                 </Button>

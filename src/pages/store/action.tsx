@@ -273,7 +273,7 @@ const StoreAction = () => {
       paymentProviders: values.paymentProviders.map((provider: any) => ({
         paymentMethod: provider.paymentMethod,
         isActive: provider.isActive,
-        // Poynt / POS Payment: phụ phí do GoDaddy tính, không lưu cấu hình NAS
+        // Poynt: phụ phí do GoDaddy tính, không lưu cấu hình NAS
         surchargePercent: GODADDY_SURCHARGE_METHODS.includes(
           provider.paymentMethod,
         )

@@ -21,7 +21,11 @@ import { toast } from "react-toastify";
 import CustomerInformation from "./CustomerInformation";
 import TechnicianRevenue from "./TechnicianRevenue";
 import PaymentSummary from "./PaymentSummary";
-import { GODADDY_SURCHARGE_METHODS } from "../utils/paymentSurcharge";
+import {
+  CREDIT_ONLY_SURCHARGE_METHODS,
+  GODADDY_SURCHARGE_METHODS,
+  PosCardType,
+} from "../utils/paymentSurcharge";
 interface ModalPaymentProps {
   data?: any;
   title?: string;
@@ -78,6 +82,11 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
   const surchargeAmount = Form.useWatch("surchargeAmount", form) || 0;
   const customerPaid = Form.useWatch("customerPaid", form) || 0;
   const tipAmount = Form.useWatch("tipAmount", form) || 0;
+  // POS Payment: nhân viên hỏi khách trả thẻ credit hay debit (chỉ credit mới bị cộng phụ phí)
+  const posCardType: PosCardType | undefined = Form.useWatch(
+    "posCardType",
+    form,
+  );
   // Giống PaymentSummary: tổng = dịch vụ - giảm giá + phụ thu + tip
   const finalAmount = Math.max(
     Number(serviceAmount) -
@@ -113,8 +122,14 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
       autoSurchargeRef.current = null;
       return;
     }
-    // Poynt / POS Payment: GoDaddy tự tính phụ phí thẻ credit lúc charge, không cộng phí NAS (tránh thu 2 lần)
-    const provider = GODADDY_SURCHARGE_METHODS.includes(selectedMethod ?? 0)
+    // Poynt: GoDaddy tự tính phụ phí thẻ credit lúc charge, không cộng phí NAS (tránh thu 2 lần).
+    // POS Payment: chỉ cộng phí NAS khi nhân viên chọn thẻ credit.
+    const method = selectedMethod ?? 0;
+    const noNasSurcharge =
+      GODADDY_SURCHARGE_METHODS.includes(method) ||
+      (CREDIT_ONLY_SURCHARGE_METHODS.includes(method) &&
+        posCardType !== "credit");
+    const provider = noNasSurcharge
       ? undefined
       : paymentProviders?.find(
           (x: { paymentMethod: number }) => x.paymentMethod === selectedMethod,
@@ -147,6 +162,7 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
   }, [
     openModal,
     selectedMethod,
+    posCardType,
     paymentProviders,
     serviceAmount,
     discountAmount,
@@ -223,6 +239,27 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
                   </Row>
                 </Radio.Group>
               </Form.Item>
+              {CREDIT_ONLY_SURCHARGE_METHODS.includes(selectedMethod ?? 0) && (
+                <Form.Item
+                  name="posCardType"
+                  label={t("Card type")}
+                  tooltip={t(
+                    "Ask the customer before sending to the terminal. Credit cards include the card surcharge; debit cards are never surcharged.",
+                  )}
+                  rules={[
+                    {
+                      required: true,
+                      message: t("Please select credit or debit card"),
+                    },
+                  ]}
+                  style={{ marginTop: 8 }}
+                >
+                  <Radio.Group>
+                    <Radio value="credit">{t("Credit card")}</Radio>
+                    <Radio value="debit">{t("Debit card")}</Radio>
+                  </Radio.Group>
+                </Form.Item>
+              )}
               {selectedMethod == 5 && (
                 <>
                   <Card

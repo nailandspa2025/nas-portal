@@ -12,7 +12,10 @@ import {
   Switch,
 } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { GODADDY_SURCHARGE_METHODS } from "../utils/paymentSurcharge";
+import {
+  CREDIT_ONLY_SURCHARGE_METHODS,
+  GODADDY_SURCHARGE_METHODS,
+} from "../utils/paymentSurcharge";
 const paymentOptions = [
   {
     label: "🏦 Bank Transfer",
@@ -366,7 +369,8 @@ const PaymentProviderForm = () => {
               </Form.Item>
 
               {/* Phí cà thẻ NAS: cộng vào Surcharge khi khách thanh toán bằng phương thức này.
-                  Poynt (10) / POS Payment (11) dùng surcharge của GoDaddy nên không cấu hình ở đây. */}
+                  Poynt (10) dùng surcharge của GoDaddy nên không cấu hình ở đây.
+                  POS Payment (11) chỉ cộng khi nhân viên chọn thẻ credit lúc thanh toán. */}
               <Form.Item
                 noStyle
                 shouldUpdate={(prev, cur) =>
@@ -393,6 +397,14 @@ const PaymentProviderForm = () => {
                   return (
                     <>
                       <Divider orientation="center">Card Surcharge</Divider>
+                      {CREDIT_ONLY_SURCHARGE_METHODS.includes(method) && (
+                        <Alert
+                          type="info"
+                          showIcon
+                          style={{ marginBottom: 16 }}
+                          message="Only applied when staff selects Credit card at checkout. Debit cards are never surcharged. Keep Surcharging OFF for the terminal in GoDaddy to avoid charging twice."
+                        />
+                      )}
                       <Row gutter={16}>
                         <Col xs={24} md={12}>
                           <Form.Item
