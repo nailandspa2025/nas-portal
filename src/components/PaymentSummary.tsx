@@ -100,6 +100,14 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
     return Math.max(service - discount + surcharge, 0);
   }, [serviceAmount, discountAmount, surchargeAmount]);
 
+  // Tip tính trên tiền dịch vụ sau giảm giá, không tính trên phụ phí (surcharge)
+  const tipBase = useMemo(() => {
+    return Math.max(
+      Number(serviceAmount || 0) - Number(discountAmount || 0),
+      0,
+    );
+  }, [serviceAmount, discountAmount]);
+
   // =========================================================
   // TOTAL
   // =========================================================
@@ -133,14 +141,14 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
       return;
     }
 
-    const newTip = Math.round((subtotalBeforeTip * selectedTipPercent) / 100);
+    const newTip = Math.round((tipBase * selectedTipPercent) / 100);
 
     const currentTip = Number(form.getFieldValue("tipAmount") || 0);
 
     if (currentTip !== newTip) {
       form.setFieldValue("tipAmount", newTip);
     }
-  }, [subtotalBeforeTip, selectedTipPercent, tipInputMode, form]);
+  }, [tipBase, selectedTipPercent, tipInputMode, form]);
 
   // =========================================================
   // DEFAULT TIP ALLOCATION
@@ -255,7 +263,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
 
     setSelectedTipAmount(null);
 
-    const newTip = Math.round((subtotalBeforeTip * percent) / 100);
+    const newTip = Math.round((tipBase * percent) / 100);
 
     form.setFieldValue("tipAmount", newTip);
   };
@@ -567,12 +575,10 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
                 {selectedTipPercent !== null ? (
                   <>
                     Suggestion: {selectedTipPercent}% of the bill{" "}
-                    {formatMoney(subtotalBeforeTip)} →{" "}
+                    {formatMoney(tipBase)} →{" "}
                     <Text strong>
                       {formatMoney(
-                        Math.round(
-                          (subtotalBeforeTip * selectedTipPercent) / 100,
-                        ),
+                        Math.round((tipBase * selectedTipPercent) / 100),
                       )}
                       đ
                     </Text>

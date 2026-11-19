@@ -30,6 +30,7 @@ type PaylinkInfo = {
   merchantName?: string;
   status: "ACTIVE" | "PAID" | "CANCELLED" | "EXPIRED";
   paidAt?: string;
+  surchargeAmount?: number; // cents, chỉ có khi PAID
   transactionId?: string;
   collect: {
     sdkUrl: string;
@@ -42,7 +43,16 @@ type PaylinkInfo = {
 type PaidInfo = {
   transactionId?: string;
   paidAt?: string;
+  surchargeAmount?: number; // cents
   card?: { type?: string; last4?: string };
+};
+
+// Thẻ credit có phụ phí: chờ khách đồng ý trước khi charge
+type SurchargeConfirm = {
+  nonce: string;
+  email?: string;
+  surchargeAmount: number; // cents
+  total: number; // cents
 };
 
 type View =
@@ -117,15 +127,18 @@ const PoyntPayment = () => {
   const [ready, setReady] = useState(false);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<SurchargeConfirm | null>(null);
   const collectRef = useRef<any>(null);
   const detailShownRef = useRef(false);
 
-  const money = link
-    ? new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: link.currency,
-      }).format(link.amount / 100)
-    : "";
+  const fmtMoney = (cents: number) =>
+    link
+      ? new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: link.currency,
+        }).format(cents / 100)
+      : "";
+  const money = link ? fmtMoney(link.amount) : "";
   const merchant = link?.merchantName || "the store";
 
   const collectError = useCallback((e: any) => {
@@ -151,35 +164,77 @@ const PoyntPayment = () => {
     );
   }, []);
 
+  const declined = (e?: any) => {
+    setPaying(false);
+    // apiCall ném response.data khi server trả lỗi (vd thẻ bị từ chối), ném AxiosError khi mất kết nối
+    if (e?.isAxiosError) {
+      setError("Connection lost. Please try again.");
+    } else {
+      setError(
+        e?.error ||
+          "Your payment was declined. Please check your card or use a different card.",
+      );
+    }
+  };
+
+  const doPay = useCallback(
+    async (
+      nonce: string,
+      email: string | undefined,
+      acceptedSurcharge: number,
+    ) => {
+      setPaying(true);
+      setError(null);
+      try {
+        const data = await PaylinkApi.pay(id, {
+          nonce,
+          email,
+          acceptedSurcharge,
+        });
+        if (data?.approved) {
+          setConfirm(null);
+          setView({ kind: "paid", data });
+        } else {
+          declined(data);
+        }
+      } catch (e: any) {
+        // Phụ phí đổi so với lúc khách đồng ý: hiện lại số mới để khách xác nhận
+        if (e?.code === "SURCHARGE_CHANGED") {
+          setPaying(false);
+          setConfirm({
+            nonce,
+            email,
+            surchargeAmount: e.surchargeAmount,
+            total: e.total,
+          });
+          setError(e.error);
+          return;
+        }
+        declined(e);
+      }
+    },
+    [id],
+  );
+
   const onNonce = useCallback(
     async (event: any) => {
       const nonce = event?.nonce || event?.data?.nonce;
       const email = event?.emailAddress || event?.data?.emailAddress;
       try {
-        const data = await PaylinkApi.pay(id, { nonce, email });
-        if (data?.approved) {
-          setView({ kind: "paid", data });
-        } else {
+        // Hỏi GoDaddy phụ phí cho thẻ này (chỉ thẻ credit, merchant có bật surcharge)
+        const fee = await PaylinkApi.fees(id, { nonce });
+        const surchargeAmount = Number(fee?.surchargeAmount || 0);
+        if (surchargeAmount > 0) {
           setPaying(false);
-          setError(
-            data?.error ||
-              "Your payment was declined. Please check your card or use a different card.",
-          );
+          setConfirm({ nonce, email, surchargeAmount, total: fee.total });
+          return;
         }
+        await doPay(nonce, email, 0);
       } catch (e: any) {
-        setPaying(false);
-        // apiCall ném response.data khi server trả lỗi (vd thẻ bị từ chối), ném AxiosError khi mất kết nối
-        if (e?.isAxiosError) {
-          setError("Connection lost. Please try again.");
-        } else {
-          setError(
-            e?.error ||
-              "Your payment was declined. Please check your card or use a different card.",
-          );
-        }
+        declined(e);
       }
     },
-    [id],
+    [id, doPay],
   );
 
   // 1. Lấy thông tin paylink
@@ -331,100 +386,110 @@ const PoyntPayment = () => {
     </div>
   );
 
-  const paidView = (data: PaidInfo) => (
-    <div>
-      <div
-        style={{
-          margin: -24,
-          marginBottom: 0,
-          padding: "36px 24px 28px",
-          textAlign: "center",
-          background: "linear-gradient(160deg, #22c55e 0%, #16a34a 100%)",
-          borderRadius: "16px 16px 0 0",
-          color: "#fff",
-        }}
-      >
+  const paidView = (data: PaidInfo) => {
+    const surcharge = Number(
+      data.surchargeAmount ?? link?.surchargeAmount ?? 0,
+    );
+    return (
+      <div>
         <div
           style={{
-            width: 64,
-            height: 64,
-            margin: "0 auto 16px",
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            margin: -24,
+            marginBottom: 0,
+            padding: "36px 24px 28px",
+            textAlign: "center",
+            background: "linear-gradient(160deg, #22c55e 0%, #16a34a 100%)",
+            borderRadius: "16px 16px 0 0",
+            color: "#fff",
           }}
         >
-          <CheckOutlined style={{ fontSize: 30, color: "#fff" }} />
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              margin: "0 auto 16px",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <CheckOutlined style={{ fontSize: 30, color: "#fff" }} />
+          </div>
+          <div style={{ fontSize: 15, opacity: 0.9 }}>Payment successful</div>
+          <div
+            style={{
+              fontSize: 36,
+              fontWeight: 700,
+              lineHeight: 1.2,
+              margin: "4px 0",
+            }}
+          >
+            {link ? fmtMoney(link.amount + surcharge) : money}
+          </div>
+          <div style={{ fontSize: 14, opacity: 0.9 }}>Paid to {merchant}</div>
         </div>
-        <div style={{ fontSize: 15, opacity: 0.9 }}>Payment successful</div>
-        <div
-          style={{
-            fontSize: 36,
-            fontWeight: 700,
-            lineHeight: 1.2,
-            margin: "4px 0",
-          }}
-        >
-          {money}
+
+        <div style={{ paddingTop: 16 }}>
+          <Row label="Description">
+            <Text strong>{link?.description || "Payment"}</Text>
+          </Row>
+          {surcharge > 0 && (
+            <Row label="Credit card surcharge">
+              <Text strong>{fmtMoney(surcharge)}</Text>
+            </Row>
+          )}
+          {data.card?.last4 && (
+            <Row label="Card">
+              <Text
+                strong
+              >{`${data.card.type || "Card"} •••• ${data.card.last4}`}</Text>
+            </Row>
+          )}
+          {data.paidAt && (
+            <Row label="Paid at">
+              <Text strong>{fmtDate(data.paidAt)}</Text>
+            </Row>
+          )}
+          {data.transactionId && (
+            <Row label="Transaction ID">
+              <Text style={{ fontFamily: "monospace", fontSize: 12 }}>
+                {data.transactionId}
+              </Text>
+              <Button
+                type="link"
+                size="small"
+                icon={copied ? <CheckOutlined /> : <CopyOutlined />}
+                onClick={() => copyTxn(data.transactionId!)}
+                style={{ padding: 0, marginLeft: 6, height: "auto" }}
+              >
+                {copied ? "Copied" : "Copy"}
+              </Button>
+            </Row>
+          )}
         </div>
-        <div style={{ fontSize: 14, opacity: 0.9 }}>Paid to {merchant}</div>
-      </div>
 
-      <div style={{ paddingTop: 16 }}>
-        <Row label="Description">
-          <Text strong>{link?.description || "Payment"}</Text>
-        </Row>
-        {data.card?.last4 && (
-          <Row label="Card">
-            <Text
-              strong
-            >{`${data.card.type || "Card"} •••• ${data.card.last4}`}</Text>
-          </Row>
-        )}
-        {data.paidAt && (
-          <Row label="Paid at">
-            <Text strong>{fmtDate(data.paidAt)}</Text>
-          </Row>
-        )}
-        {data.transactionId && (
-          <Row label="Transaction ID">
-            <Text style={{ fontFamily: "monospace", fontSize: 12 }}>
-              {data.transactionId}
-            </Text>
-            <Button
-              type="link"
-              size="small"
-              icon={copied ? <CheckOutlined /> : <CopyOutlined />}
-              onClick={() => copyTxn(data.transactionId!)}
-              style={{ padding: 0, marginLeft: 6, height: "auto" }}
-            >
-              {copied ? "Copied" : "Copy"}
-            </Button>
-          </Row>
+        <div style={{ textAlign: "center", margin: "20px 0 4px" }}>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Thank you! A receipt has been sent if you entered your email.
+          </Text>
+        </div>
+
+        {isStaff && (
+          <Button
+            type="primary"
+            size="large"
+            block
+            style={{ marginTop: 16 }}
+            onClick={() => navigate("/booking")}
+          >
+            Back to bookings
+          </Button>
         )}
       </div>
-
-      <div style={{ textAlign: "center", margin: "20px 0 4px" }}>
-        <Text type="secondary" style={{ fontSize: 13 }}>
-          Thank you! A receipt has been sent if you entered your email.
-        </Text>
-      </div>
-
-      {isStaff && (
-        <Button
-          type="primary"
-          size="large"
-          block
-          style={{ marginTop: 16 }}
-          onClick={() => navigate("/booking")}
-        >
-          Back to bookings
-        </Button>
-      )}
-    </div>
-  );
+    );
+  };
 
   return (
     <div
@@ -490,16 +555,69 @@ const PoyntPayment = () => {
                 style={{ marginBottom: 12 }}
               />
             )}
-            <Button
-              type="primary"
-              size="large"
-              block
-              loading={paying}
-              disabled={!ready}
-              onClick={handlePay}
-            >
-              {paying ? "Processing…" : `Pay ${money}`}
-            </Button>
+            {confirm ? (
+              <div
+                style={{
+                  border: "1px solid #ffd591",
+                  background: "#fff7e6",
+                  borderRadius: 12,
+                  padding: "8px 16px 16px",
+                }}
+              >
+                <Row label="Amount">
+                  <Text strong>{money}</Text>
+                </Row>
+                <Row label="Credit card surcharge">
+                  <Text strong>{fmtMoney(confirm.surchargeAmount)}</Text>
+                </Row>
+                <Row label="Total">
+                  <Text strong style={{ fontSize: 18 }}>
+                    {fmtMoney(confirm.total)}
+                  </Text>
+                </Row>
+                <Text
+                  type="secondary"
+                  style={{ display: "block", fontSize: 12, margin: "10px 0" }}
+                >
+                  A surcharge applies to credit cards. Use a debit card to avoid
+                  it.
+                </Text>
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  loading={paying}
+                  onClick={() =>
+                    doPay(confirm.nonce, confirm.email, confirm.surchargeAmount)
+                  }
+                >
+                  {paying ? "Processing…" : `Pay ${fmtMoney(confirm.total)}`}
+                </Button>
+                <Button
+                  size="large"
+                  block
+                  disabled={paying}
+                  style={{ marginTop: 8 }}
+                  onClick={() => {
+                    setConfirm(null);
+                    setError(null);
+                  }}
+                >
+                  Use a different card
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="primary"
+                size="large"
+                block
+                loading={paying}
+                disabled={!ready}
+                onClick={handlePay}
+              >
+                {paying ? "Processing…" : `Pay ${money}`}
+              </Button>
+            )}
             {isStaff && (
               <Button
                 size="large"
@@ -519,7 +637,8 @@ const PoyntPayment = () => {
             <div style={{ textAlign: "center", marginTop: 12 }}>
               <Text type="secondary" style={{ fontSize: 12 }}>
                 Your card details are encrypted and processed by GoDaddy
-                Payments (Poynt).
+                Payments (Poynt). Credit cards may be subject to a surcharge,
+                shown before you pay.
               </Text>
             </div>
           </>

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Button,
   Col,
@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import CustomerInformation from "./CustomerInformation";
 import TechnicianRevenue from "./TechnicianRevenue";
 import PaymentSummary from "./PaymentSummary";
+import { GODADDY_SURCHARGE_METHODS } from "../utils/paymentSurcharge";
 interface ModalPaymentProps {
   data?: any;
   title?: string;
@@ -98,6 +99,60 @@ const ModalPayment: React.FC<ModalPaymentProps> = ({
     },
     enabled: !!data.storeId,
   });
+  // =========================================================
+  // PHÍ CÀ THẺ (SURCHARGE) THEO CẤU HÌNH CỦA STORE
+  // =========================================================
+  // Mỗi payment provider của store có thể cấu hình surchargePercent / surchargeFixedAmount.
+  // Chỉ tính trên phần trả bằng thẻ (phần tiền mặt khách đưa không bị tính phí):
+  // surcharge = (tiền dịch vụ - giảm giá - tiền mặt) * % / 100 + phí cố định, tự điền vào ô Surcharge.
+  // Nếu phương thức không có cấu hình thì chỉ xoá giá trị do chính mình điền trước đó,
+  // không đụng tới số nhân viên tự nhập tay.
+  const autoSurchargeRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!openModal) {
+      autoSurchargeRef.current = null;
+      return;
+    }
+    // Poynt / POS Payment: GoDaddy tự tính phụ phí thẻ credit lúc charge, không cộng phí NAS (tránh thu 2 lần)
+    const provider = GODADDY_SURCHARGE_METHODS.includes(selectedMethod ?? 0)
+      ? undefined
+      : paymentProviders?.find(
+          (x: { paymentMethod: number }) => x.paymentMethod === selectedMethod,
+        );
+    const percent = Number(provider?.surchargePercent || 0);
+    const fixed = Number(provider?.surchargeFixedAmount || 0);
+    const current = Number(form.getFieldValue("surchargeAmount") || 0);
+
+    if (percent <= 0 && fixed <= 0) {
+      if (
+        autoSurchargeRef.current !== null &&
+        current === autoSurchargeRef.current
+      ) {
+        form.setFieldValue("surchargeAmount", 0);
+      }
+      autoSurchargeRef.current = null;
+      return;
+    }
+
+    const base = Math.max(
+      Number(serviceAmount) - Number(discountAmount) - Number(customerPaid),
+      0,
+    );
+    const surcharge =
+      Math.round(((base * percent) / 100) * 100 + fixed * 100) / 100;
+    autoSurchargeRef.current = surcharge;
+    if (current !== surcharge) {
+      form.setFieldValue("surchargeAmount", surcharge);
+    }
+  }, [
+    openModal,
+    selectedMethod,
+    paymentProviders,
+    serviceAmount,
+    discountAmount,
+    customerPaid,
+    form,
+  ]);
   const onFinish = (values: any) => {
     const payload = {
       ...values,

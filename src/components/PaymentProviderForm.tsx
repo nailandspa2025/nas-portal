@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Card,
   Col,
@@ -11,6 +12,7 @@ import {
   Switch,
 } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { GODADDY_SURCHARGE_METHODS } from "../utils/paymentSurcharge";
 const paymentOptions = [
   {
     label: "🏦 Bank Transfer",
@@ -360,6 +362,70 @@ const PaymentProviderForm = () => {
                   }
 
                   return null;
+                }}
+              </Form.Item>
+
+              {/* Phí cà thẻ NAS: cộng vào Surcharge khi khách thanh toán bằng phương thức này.
+                  Poynt (10) / POS Payment (11) dùng surcharge của GoDaddy nên không cấu hình ở đây. */}
+              <Form.Item
+                noStyle
+                shouldUpdate={(prev, cur) =>
+                  prev.paymentProviders?.[name]?.paymentMethod !==
+                  cur.paymentProviders?.[name]?.paymentMethod
+                }
+              >
+                {({ getFieldValue }) => {
+                  const method = getFieldValue([
+                    "paymentProviders",
+                    name,
+                    "paymentMethod",
+                  ]);
+                  if (!method) return null;
+                  if (GODADDY_SURCHARGE_METHODS.includes(method)) {
+                    return (
+                      <Alert
+                        type="info"
+                        showIcon
+                        message="Card surcharge is applied by GoDaddy Payments (credit cards only). Enable it in the GoDaddy account of this store."
+                      />
+                    );
+                  }
+                  return (
+                    <>
+                      <Divider orientation="center">Card Surcharge</Divider>
+                      <Row gutter={16}>
+                        <Col xs={24} md={12}>
+                          <Form.Item
+                            label="Surcharge (%)"
+                            name={[name, "surchargePercent"]}
+                            tooltip="Tính trên phần trả bằng thẻ: tiền dịch vụ - giảm giá - tiền mặt khách đưa (không tính trên tip). Để trống = không thu."
+                          >
+                            <InputNumber
+                              min={0}
+                              max={100}
+                              step={0.1}
+                              placeholder="0"
+                              addonAfter="%"
+                              style={{ width: "100%" }}
+                            />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} md={12}>
+                          <Form.Item
+                            label="Fixed surcharge"
+                            name={[name, "surchargeFixedAmount"]}
+                            tooltip="Số tiền cố định cộng thêm mỗi giao dịch. Để trống = không thu."
+                          >
+                            <InputNumber
+                              min={0}
+                              placeholder="0"
+                              style={{ width: "100%" }}
+                            />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </>
+                  );
                 }}
               </Form.Item>
             </Card>

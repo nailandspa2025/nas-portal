@@ -50,6 +50,7 @@ import BankSelect from "../../components/BankSelect";
 import { DeeplinkApi } from "../../apis/catalog/deeplink";
 import queryString from "query-string";
 import PaymentProviderForm from "../../components/PaymentProviderForm";
+import { GODADDY_SURCHARGE_METHODS } from "../../utils/paymentSurcharge";
 import { TIMEZONES } from "../../utils/constants/timezones";
 
 const StoreAction = () => {
@@ -127,6 +128,13 @@ const StoreAction = () => {
     }
   }, [data, form, params.id]);
   const mapPaymentProviders = (providers: any[] = []) => {
+    return providers.map((provider: any) => ({
+      surchargePercent: provider.surchargePercent || undefined,
+      surchargeFixedAmount: provider.surchargeFixedAmount || undefined,
+      ...mapProviderSettings(provider),
+    }));
+  };
+  const mapProviderSettings = (provider: any) => {
     const getSetting = (
       settings: any[],
       key: string,
@@ -135,61 +143,59 @@ const StoreAction = () => {
       return settings?.find((x) => x.key === key)?.value ?? defaultValue;
     };
 
-    return providers.map((provider: any) => {
-      switch (provider.paymentMethod) {
-        // BankTransfer
-        case 5:
-          return {
-            paymentMethod: 5,
-            isActive: provider.isActive,
-            bankName: getSetting(provider.settings, "BankName"),
-            accountNumber: getSetting(provider.settings, "AccountNumber"),
-            accountHolder: getSetting(provider.settings, "AccountHolder"),
-            bankCode: getSetting(provider.settings, "bankCode"),
-          };
+    switch (provider.paymentMethod) {
+      // BankTransfer
+      case 5:
+        return {
+          paymentMethod: 5,
+          isActive: provider.isActive,
+          bankName: getSetting(provider.settings, "BankName"),
+          accountNumber: getSetting(provider.settings, "AccountNumber"),
+          accountHolder: getSetting(provider.settings, "AccountHolder"),
+          bankCode: getSetting(provider.settings, "bankCode"),
+        };
 
-        // Paypal
-        case 8:
-          return {
-            paymentMethod: 8,
-            isActive: provider.isActive,
-            clientId: getSetting(provider.settings, "ClientId"),
-            clientSecret: getSetting(provider.settings, "ClientSecret"),
-            isSandbox:
-              getSetting(provider.settings, "IsSandbox", "false") === "true",
-          };
+      // Paypal
+      case 8:
+        return {
+          paymentMethod: 8,
+          isActive: provider.isActive,
+          clientId: getSetting(provider.settings, "ClientId"),
+          clientSecret: getSetting(provider.settings, "ClientSecret"),
+          isSandbox:
+            getSetting(provider.settings, "IsSandbox", "false") === "true",
+        };
 
-        // Stripe
-        case 9:
-          return {
-            paymentMethod: 9,
-            isActive: provider.isActive,
-            publishableKey: getSetting(provider.settings, "PublishableKey"),
-            secretKey: getSetting(provider.settings, "SecretKey"),
-            webhookSecret: getSetting(provider.settings, "WebhookSecret"),
-          };
+      // Stripe
+      case 9:
+        return {
+          paymentMethod: 9,
+          isActive: provider.isActive,
+          publishableKey: getSetting(provider.settings, "PublishableKey"),
+          secretKey: getSetting(provider.settings, "SecretKey"),
+          webhookSecret: getSetting(provider.settings, "WebhookSecret"),
+        };
 
-        // Poynt + POS Payment (cùng bộ setting)
-        case 10:
-        case 11:
-          return {
-            paymentMethod: provider.paymentMethod,
-            isActive: provider.isActive,
-            businessId: getSetting(provider.settings, "BusinessId"),
-            storeId: getSetting(provider.settings, "StoreId"),
-            deviceId: getSetting(provider.settings, "DeviceId"),
-            timeoutSeconds:
-              Number(getSetting(provider.settings, "TimeoutSeconds")) ||
-              undefined,
-          };
+      // Poynt + POS Payment (cùng bộ setting)
+      case 10:
+      case 11:
+        return {
+          paymentMethod: provider.paymentMethod,
+          isActive: provider.isActive,
+          businessId: getSetting(provider.settings, "BusinessId"),
+          storeId: getSetting(provider.settings, "StoreId"),
+          deviceId: getSetting(provider.settings, "DeviceId"),
+          timeoutSeconds:
+            Number(getSetting(provider.settings, "TimeoutSeconds")) ||
+            undefined,
+        };
 
-        default:
-          return {
-            paymentMethod: provider.paymentMethod,
-            isActive: provider.isActive,
-          };
-      }
-    });
+      default:
+        return {
+          paymentMethod: provider.paymentMethod,
+          isActive: provider.isActive,
+        };
+    }
   };
   const mutation = useMutation({
     mutationFn: async (values: any) => {
@@ -267,6 +273,17 @@ const StoreAction = () => {
       paymentProviders: values.paymentProviders.map((provider: any) => ({
         paymentMethod: provider.paymentMethod,
         isActive: provider.isActive,
+        // Poynt / POS Payment: phụ phí do GoDaddy tính, không lưu cấu hình NAS
+        surchargePercent: GODADDY_SURCHARGE_METHODS.includes(
+          provider.paymentMethod,
+        )
+          ? 0
+          : (provider.surchargePercent ?? 0),
+        surchargeFixedAmount: GODADDY_SURCHARGE_METHODS.includes(
+          provider.paymentMethod,
+        )
+          ? 0
+          : (provider.surchargeFixedAmount ?? 0),
         settings: buildPaymentProviderSettings(provider),
       })),
       isCommission: values.isCommission ?? false,
