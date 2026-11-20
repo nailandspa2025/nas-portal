@@ -15,7 +15,6 @@ import {
   CalendarOutlined,
   CheckCircleOutlined,
   DollarOutlined,
-  GiftOutlined,
 } from "@ant-design/icons";
 
 const cardStyle = {
@@ -128,7 +127,7 @@ const BookingHistory = () => {
                 title={t("Tip")}
                 value={summary?.tipAmount ?? 0}
                 precision={2}
-                prefix={<GiftOutlined />}
+                prefix={<DollarOutlined />}
                 loading={loadingSummary}
                 valueStyle={{ ...valueStyle, color: "#d48806" }}
               />
