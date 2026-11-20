@@ -1,4 +1,13 @@
 export default {
+  "Last month": "Tháng trước",
+  "This month": "Tháng này",
+  "This week": "Tuần này",
+  "Today": "Hôm nay",
+  "Tip": "Tiền tip",
+  "Total booking": "Tổng booking",
+  "View": "Xem",
+  "Created at": "Ngày tạo",
+  "Service": "Dịch vụ",
   Pending: "Chờ xử lý",
   Completed: "Hoàn thành",
   Cancelled: "Đã hủy",
@@ -8,6 +17,7 @@ export default {
   Bookings: "Lượt đặt lịch",
 
   "Booking status": "Trạng thái đặt lịch",
+  "Booking history": "Lịch sử booking",
   "Bookings by user": "Lượt đặt theo người dùng",
   "Revenue by method": "Doanh thu theo phương thức",
   Method: "Phương thức",

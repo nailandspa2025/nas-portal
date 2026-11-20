@@ -15,6 +15,7 @@ import {
   ShopOutlined,
   AppstoreAddOutlined,
   ProfileOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 const _nav = [
   {
@@ -117,6 +118,13 @@ const _nav = [
     icon: <FormOutlined />,
     name: "Booking",
     route: "/booking",
+  },
+  {
+    id: "booking-history",
+    permission: "booking", // dùng chung quyền xem booking
+    icon: <HistoryOutlined />,
+    name: "Booking history",
+    route: "/booking-history",
   },
   {
     id: "post",

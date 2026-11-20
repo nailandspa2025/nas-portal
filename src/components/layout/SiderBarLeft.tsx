@@ -26,7 +26,7 @@ const SiderBarLeft = () => {
           checkAccessRight(accesses, "view", child.id)
         );
       }
-      return checkAccessRight(accesses, "view", item.id);
+      return checkAccessRight(accesses, "view", (item as any).permission ?? item.id);
     })
     .map((item) => {
       if (item.children) {

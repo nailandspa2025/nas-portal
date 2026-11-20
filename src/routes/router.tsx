@@ -13,6 +13,7 @@ import Appaccounts from "../pages/appaccount/appaccount";
 import AppaccountAction from "../pages/appaccount/action";
 import Bookings from "../pages/booking/booking";
 import BookingActions from "../pages/booking/action";
+import BookingHistory from "../pages/booking/booking.history";
 import Posts from "../pages/post/post";
 import PostActions from "../pages/post/action";
 import Profile from "../pages/auth/profile";
@@ -123,6 +124,11 @@ const routes: RouteType[] = [
     path: "/booking",
     name: "Booking",
     element: <Bookings />,
+  },
+  {
+    path: "/booking-history",
+    name: "Booking history",
+    element: <BookingHistory />,
   },
   {
     path: "/booking/none",

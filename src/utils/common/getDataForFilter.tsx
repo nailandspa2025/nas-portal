@@ -2,8 +2,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import queryString from "query-string";
 import { DropdownApi } from "../../apis/dropdown/dropdown";
+import { BOOKING_STATUS_OPTIONS } from "../filter/bookingHistory";
 export const getDataForFilter = async (actionName: string, searchText = "") => {
   switch (actionName) {
+    case "bookingStatus":
+      return BOOKING_STATUS_OPTIONS;
     case "userType":
       return [
         {

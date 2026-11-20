@@ -7,6 +7,11 @@ export const BookingApi = {
     const endpoint = `/order/api/v1/bookings/pagingation?${queryString}`;
     return await apiCall(API_METHOD.GET, endpoint);
   },
+  // Tổng booking + doanh thu theo cùng bộ lọc với danh sách (trang lịch sử booking)
+  summary: async (queryString: any) => {
+    const endpoint = `/order/api/v1/bookings/summary?${queryString}`;
+    return await apiCall(API_METHOD.GET, endpoint);
+  },
   getById: async (id: number) => {
     const endpoint = `/order/api/v1/bookings/${id}`;
     return await apiCall(API_METHOD.GET, endpoint);
