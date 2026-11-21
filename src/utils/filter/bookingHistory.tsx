@@ -37,7 +37,17 @@ export const filters = [
     field: "dateRange",
     type: "dateRange",
     popup: true,
-    isActive: false,
+    // Mặc định lọc tháng này
+    isActive: true,
+    value: {
+      fromDate: dayjs().startOf("month").format("YYYY-MM-DD"),
+      endDate: dayjs().endOf("month").format("YYYY-MM-DD"),
+    },
+    selected: {
+      label: `${dayjs().startOf("month").format(DATE_FORMAT)} - ${dayjs()
+        .endOf("month")
+        .format(DATE_FORMAT)}`,
+    },
   },
   {
     key: "status",
